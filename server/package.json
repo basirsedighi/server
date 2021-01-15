@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bachelor2021/server.git"
+  },
+  "author": "ole",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bachelor2021/server/issues"
+  },
+  "homepage": "https://github.com/Bachelor2021/server#readme"
+}
