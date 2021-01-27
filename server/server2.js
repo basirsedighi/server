@@ -12,10 +12,11 @@ const port = 3000;
 io.on('connection', socket => {
   console.log('client connected');
 
-  socket.on('test', (todo) => {
-    console.log(todo)
+  socket.on('test', (message) => {
+    console.log(message)
+    let date = new Date()
 
-    io.sockets.emit('test', "hello from server");
+    io.sockets.emit('test', {connectionStatus:true,timeStamp:date.toLocaleTimeString()});
     
   });
 
