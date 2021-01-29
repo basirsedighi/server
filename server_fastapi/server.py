@@ -58,10 +58,8 @@ async def eventHandler(websocket, path):
         async for message in websocket:
             data = json.loads(message)
             if data["action"] == "start":
+                print("hei")
 
-                await asyncio.gather(
-                    asyncio.(sleepmethod(5)),
-                    asyncio.sleep(1))
             elif data["action"] == "stop":
 
                 await notify_state()
