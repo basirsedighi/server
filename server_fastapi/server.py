@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import websockets
+import time
 
 logging.basicConfig()
 
@@ -28,6 +29,11 @@ async def notify_state():
         await asyncio.wait([user.send(message) for user in USERS])
 
 
+async def sleepmethod(time):
+    await asyncio.sleep(time)
+    print("hei")
+
+
 async def notify_users():
     if USERS:  # asyncio.wait doesn't accept an empty list
         message = users_event()
@@ -44,19 +50,20 @@ async def unregister(websocket):
     await notify_users()
 
 
-async def counter(websocket, path):
-    # register(websocket) sends user_event() to websocket
+async def eventHandler(websocket, path):
+
     await register(websocket)
     try:
         await websocket.send(state_event())
         async for message in websocket:
             data = json.loads(message)
-            print(data)
-            if data["action"] == "minus":
-                STATE["value"] -= 1
-                await notify_state()
-            elif data["action"] == "plus":
-                STATE["value"] += 1
+            if data["action"] == "start":
+
+                await asyncio.gather(
+                    asyncio.(sleepmethod(5)),
+                    asyncio.sleep(1))
+            elif data["action"] == "stop":
+
                 await notify_state()
             else:
                 logging.error("unsupported event: {}", data)
@@ -64,7 +71,7 @@ async def counter(websocket, path):
         await unregister(websocket)
 
 
-start_server = websockets.serve(counter, "localhost", 8000)
+start_server = websockets.serve(eventHandler, "localhost", 8000)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
