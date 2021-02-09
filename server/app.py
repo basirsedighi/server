@@ -1,20 +1,28 @@
+import numpy as np
 from typing import List
-
+import cv2
 from fastapi import FastAPI
 from starlette.responses import HTMLResponse, StreamingResponse
 from starlette.websockets import WebSocket, WebSocketDisconnect
 import json
+import serial
 import queue
 from core.gps import Gps
+from core.camera import Camera
 import time
+import pynmea2
+import cvb
 from time import time
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
-gpsQueue = queue.Queue()
+
+camera = Camera()
+camera.start_stream()
 
 # gps = Gps(gpsQueue)
 # gps.start()
+serial = serial.Serial('COM8', 9600, timeout=0)
 
 
 origins = [
@@ -41,6 +49,7 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
+        print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
@@ -63,13 +72,29 @@ async def root():
 
 @app.get('/gps')
 async def getData():
-    return {"data": "jeeeeo"}
+
+    while(True):
+        msg = []
+
+        for i in range(10):
+            line = serial.readline()
+            line = pynmea2.parse(
+                serial.readline().decode('ascii', errors='replace'))
+            msg.append(line)
+
+        return msg
 
 
-@app.route('/')
-def datagdgd():
+@app.get('/stop')
+async def stop():
+    print("starter bildetaking")
+    # stopp bildetaking
 
-    return {"data": "message"}
+
+@app.get('/start')
+async def start():
+    print("stanser bildetaking")
+    # start bildetaking
 
 
 @app.get('/storage/')
@@ -79,9 +104,15 @@ async def getData():
 
 def gen():
     while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        frame, status = camera.get_image()
+        if status == cvb.WaitStatus.Ok:
+            frame = np.array(frame)
+            _, frame = cv2.imencode('.jpg', frame)
+
+            image = frame.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
 @app.get('/video_feed')
@@ -94,26 +125,22 @@ async def websocket_endpoint(websocket: WebSocket, socket: str):
     global gpsQueue
 
     await manager.connect(websocket)
+    await websocket.send_text(json.dumps({"connection": "connected"}))
 
     try:
 
         while True:
-            try:
 
-                data = await websocket.receive_text()
-                #data = gpsQueue.get_nowait()
-                #data = json.dumps(data)
-                # print(data)
-                # await websocket.send_text(data)
-
-            except queue.Empty as e:
-
-                pass
-            finally:
-
-                manager.disconnect(websocket)
+            data = await websocket.receive_text()
+            print(data)
+            # data = gpsQueue.get_nowait()
+            # data = json.dumps(data)
+            # print(data)
+            # await websocket.send_text(data)
 
     except (WebSocketDisconnect) as e:
+
+        manager.disconnect(websocket)
 
         pass
 

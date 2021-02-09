@@ -24,3 +24,6 @@ class Gps(threading.Thread):
                     self.serial.readline().decode('ascii', errors='replace'))
             time.sleep(2)
             self.queue.put(line)
+
+    def getData():
+        return data
