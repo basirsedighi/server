@@ -8,7 +8,7 @@ class Camera:
         self.port = port
         self.image = None
         self.device = cvb.DeviceFactory.open(os.path.join(
-            cvb.install_path(), "drivers", "CVMock.vin"), port=self.port)
+            cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
         self.stream = None
 
     def start_stream(self):

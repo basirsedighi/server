@@ -4,6 +4,10 @@ import cv2
 from fastapi import FastAPI
 from starlette.responses import HTMLResponse, StreamingResponse
 from starlette.websockets import WebSocket, WebSocketDisconnect
+from starlette.concurrency import run_until_first_complete
+from starlette.routing import WebSocketRoute
+
+
 import json
 import serial
 import queue
@@ -14,11 +18,15 @@ import pynmea2
 import cvb
 from time import time
 from fastapi.middleware.cors import CORSMiddleware
+from manager import ConnectionManager
+
+
+manager = ConnectionManager()
 app = FastAPI()
 
+gps_connect = 0
+started = False
 
-camera = Camera()
-camera.start_stream()
 
 # gps = Gps(gpsQueue)
 # gps.start()
@@ -42,47 +50,35 @@ app.add_middleware(
 )
 
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-        print(self.active_connections)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-
-manager = ConnectionManager()
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.get('gpsStatus')
+async def gpsStatus():
+    global gps_connect
+
+    return gps_connect
 
 
 @app.get('/gps')
 async def getData():
 
     while(True):
-        msg = []
+        try:
 
-        for i in range(10):
-            line = serial.readline()
+            for i in range(10):
+                line = serial.readline()
+
             line = pynmea2.parse(
                 serial.readline().decode('ascii', errors='replace'))
-            msg.append(line)
 
-        return msg
+            msg = line
+
+            return msg
+        except pynmea2.nmea.ParseError as e:
+            print(e)
 
 
 @app.get('/stop')
@@ -94,6 +90,8 @@ async def stop():
 @app.get('/start')
 async def start():
     print("stanser bildetaking")
+
+    return "starting"
     # start bildetaking
 
 
@@ -120,35 +118,41 @@ def video_feed():
     return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
-@app.websocket("/ws/{socket}")
-async def websocket_endpoint(websocket: WebSocket, socket: str):
-    global gpsQueue
-
+@app.websocket("/stream/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    global started
     await manager.connect(websocket)
-    await websocket.send_text(json.dumps({"connection": "connected"}))
-
     try:
-
         while True:
-
             data = await websocket.receive_text()
-            print(data)
-            # data = gpsQueue.get_nowait()
+            data = json.loads(data)
+            event = data['event']
+            print(event)
+
+            if(event == 'onConnection'):
+                await manager.broadcast(json.dumps({"event": "connected"}))
+                if(started):
+                    await manager.broadcast(json.dumps({"event": "starting"}))
+
+            elif(event == 'start'):
+                started = True
+                await manager.broadcast(json.dumps({"event": "starting"}))
+
+            elif(event == 'stop'):
+                started = False
+                await manager.broadcast(json.dumps({"event": "stopping"}))
+
             # data = json.dumps(data)
-            # print(data)
             # await websocket.send_text(data)
 
-    except (WebSocketDisconnect) as e:
-
+    except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-        pass
+        await manager.broadcast(json.dumps({"event": "disconnect{client_id}"}))
 
 
 @app.on_event("startup")
 async def startup():
 
-    # Prime the push notification generator
     print("startup")
 
 

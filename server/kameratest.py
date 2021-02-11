@@ -11,8 +11,8 @@ from core.camera import Camera
 import cv2
 import numpy as np
 
-camera1 = Camera(0)
-camera2 = Camera(1)
+camera = Camera(0)
+#camera2 = Camera(1)
 
 camera.start_stream()
 
