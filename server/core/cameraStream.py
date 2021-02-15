@@ -64,11 +64,12 @@ class CameraStream(Thread):
                 else:
                     raise RuntimeError("timeout during wait"
                                        if status == cvb.WaitStatus.Timeout else"aquisistion aborted")
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
-            finally:
-                self.camera.abortStream()
+        self.camera.abortStream()
+
+        return "stopped"
 
     def terminate(self):
         self.running = False
