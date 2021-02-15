@@ -3,8 +3,8 @@ import os
 
 class Camera:
 
-    def __init__(self,port=0):
-        self.port = 0
+    def __init__(self, port = 0):
+        self.port = port
         self.image = None
         self.device = cvb.DeviceFactory.open(os.path.join(cvb.install_path(), "drivers", "GenICam.vin"),port=self.port)
         self.stream = None
