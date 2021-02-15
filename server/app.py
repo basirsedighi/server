@@ -6,8 +6,9 @@ from starlette.responses import HTMLResponse, StreamingResponse
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_until_first_complete
 from starlette.routing import WebSocketRoute
+from core.cameraStream import CameraStream
 
-
+import shutil
 import json
 import serial
 import queue
@@ -15,14 +16,20 @@ from core.gps import Gps
 from core.camera import Camera
 import time
 import pynmea2
+import math
 import cvb
+from core.models import models
 from time import time
 from fastapi.middleware.cors import CORSMiddleware
 from manager import ConnectionManager
 
-
+# camera = Camera()
+# camera.start_stream()
 manager = ConnectionManager()
+image_freq = 10
 app = FastAPI()
+camera_1 = Camera(0)
+camera_2 = Camera(1)
 
 gps_connect = 0
 started = False
@@ -61,6 +68,8 @@ async def gpsStatus():
 
     return gps_connect
 
+# {"status":1,}
+
 
 @app.get('/gps')
 async def getData():
@@ -95,16 +104,67 @@ async def start():
     # start bildetaking
 
 
-@app.get('/storage/')
-async def getData():
-    return "datas"
+@app.get('imagefreq')
+async def getfreq():
+    global image_freq
+    return image_freq
+# change imagefreq from Gui
+
+
+@app.post('/changeimagefreq/')
+async def change_image_freq(freq: models.freq):
+    global image_freq
+
+    image_freq = freq.freq
+
+    return image_freq
+
+
+@app.get('/storage')
+async def getStorage():
+
+    # Path
+    path = "C:/Users/norby"
+
+    # Get the disk usage statistics
+    # about the given path
+    stat = shutil.disk_usage(path)
+
+    a, b, c = stat
+
+    # byte to  Gigabyte
+    total = math.floor(a*(10 ** -6))
+    used = math.floor(b *
+                      (10 ** -6))
+
+    free = math.floor(c*(10 ** -6))
+
+    storage = {"total": total, "used": used, "free": free}
+
+    estimateStorageTime(storage)
+    return storage
+
+# estimate how
+
+
+def estimateStorageTime(storage):
+    # 20 bilder/sek
+    # 1 bilde 5Mb
+
+    bilder_pr_sek = 20
+    bilde_size = 5  # mb
+
+    free = storage["free"]
+    seconds_left = free/(bilder_pr_sek*bilde_size)
 
 
 def gen():
+    global camera
     while True:
         frame, status = camera.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
+            frame = cv2.resize(frame, (640, 480))
             _, frame = cv2.imencode('.jpg', frame)
 
             image = frame.tobytes()
@@ -113,7 +173,23 @@ def gen():
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
+async def startStream():
+    global camera_1, camera_2
+
+    camera_stream = CameraStream(camera_1)
+    cameraStatus = camera_stream.init()
+    await manager.broadcast(json.dumps({"event": "cameraStatus", "data": cameraStatus}))
+
+    cameraStatus = camera_stream.startStream()
+    await manager.broadcast(json.dumps({"event": "cameraStatus", "data": cameraStatus}))
+
+
 @app.get('/video_feed')
+def video_feed():
+    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.get('/video_feed2')
 def video_feed():
     return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
@@ -127,7 +203,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             data = json.loads(data)
             event = data['event']
-            print(event)
 
             if(event == 'onConnection'):
                 await manager.broadcast(json.dumps({"event": "connected"}))
@@ -136,7 +211,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
             elif(event == 'start'):
                 started = True
+
                 await manager.broadcast(json.dumps({"event": "starting"}))
+                await startStream()
 
             elif(event == 'stop'):
                 started = False

@@ -1,0 +1,7 @@
+
+fastapi==0.63.0
+numpy==1.20.1
+opencv-python==4.5.1.48
+pydantic==1.7.3
+pynmea2==1.15.0
+pyserial==3.5
