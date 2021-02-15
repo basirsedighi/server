@@ -22,5 +22,5 @@ class Camera:
         image, status = self.stream.wait()
         return image, status
 
-    def abortStream():
+    def abortStream(self):
         self.stream.try_abort()

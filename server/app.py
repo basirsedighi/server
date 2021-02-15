@@ -7,7 +7,8 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_until_first_complete
 from starlette.routing import WebSocketRoute
 from core.cameraStream import CameraStream
-
+import asyncio
+from concurrent.futures.process import ProcessPoolExecutor
 import shutil
 import json
 import serial
@@ -30,6 +31,8 @@ image_freq = 10
 app = FastAPI()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
+camera_stream_1 = None
+camera_stream_2 = None
 
 gps_connect = 0
 started = False
@@ -92,13 +95,40 @@ async def getData():
 
 @app.get('/stop')
 async def stop():
-    print("starter bildetaking")
+    print("stanser bildetaking")
     # stopp bildetaking
 
 
 @app.get('/start')
-async def start():
-    print("stanser bildetaking")
+def start():
+    global camera_1, camera_stream_1, camera_2, camera_stream_2
+
+    print("starter bildetaking")
+
+    camera_stream_1 = CameraStream(camera_1)
+    cameraStatus = camera_stream_1.init()
+
+    cameraStatus = camera_stream_1.startStream()
+    camera_stream_1.setDaemon(True)
+
+    camera_stream_2 = CameraStream(camera_2)
+    cameraStatus = camera_stream_2.init()
+    cameraStatus = camera_stream_2.startStream()
+    camera_stream_2.setDaemon(True)
+
+    if cameraStatus == "stream ok":
+
+        camera_stream_1.start()
+        camera_stream_2.start()
+
+        camera_stream_1.join()
+        camera_stream_2.join()
+
+        # with app.state.executor as pool:
+        #     # wait result
+
+        #     result = pool.map(camera_stream_1.run())
+        #     print(result)
 
     return "starting"
     # start bildetaking
@@ -173,15 +203,39 @@ def gen():
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
-async def startStream():
-    global camera_1, camera_2
+def startStream1():
 
-    camera_stream = CameraStream(camera_1)
-    cameraStatus = camera_stream.init()
-    await manager.broadcast(json.dumps({"event": "cameraStatus", "data": cameraStatus}))
+    global camera_1, camera_stream_1
 
-    cameraStatus = camera_stream.startStream()
-    await manager.broadcast(json.dumps({"event": "cameraStatus", "data": cameraStatus}))
+    camera_stream_1 = CameraStream(camera_1)
+    cameraStatus = camera_stream_1.init()
+
+    cameraStatus = camera_stream_1.startStream()
+
+    if cameraStatus == "stream ok":
+        camera_stream_1.run()
+
+
+async def startStream2():
+    global camera_2, camera_stream_2
+
+    camera_stream_2 = CameraStream(camera_2)
+    cameraStatus = camera_stream_2.init()
+    await manager.broadcast(json.dumps({"event": "cameraStatus2", "data": cameraStatus}))
+
+    cameraStatus = camera_stream_2.startStream()
+    await manager.broadcast(json.dumps({"event": "cameraStatus2", "data": cameraStatus}))
+
+    if cameraStatus == "stream ok":
+
+        camera_stream_2.run()
+
+
+async def stopStream():
+    global camera_stream_1, camera_stream_2
+
+    camera_stream_1.terminate()
+    camera_stream_2.terminate()
 
 
 @app.get('/video_feed')
@@ -210,13 +264,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                     await manager.broadcast(json.dumps({"event": "starting"}))
 
             elif(event == 'start'):
-                started = True
+                start = True
 
                 await manager.broadcast(json.dumps({"event": "starting"}))
-                await startStream()
 
             elif(event == 'stop'):
                 started = False
+                await stopStream()
+
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
             # data = json.dumps(data)
@@ -229,6 +284,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
+    app.state.executor = ProcessPoolExecutor()
 
     print("startup")
 
