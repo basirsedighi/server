@@ -4,7 +4,7 @@ import os
 
 class Camera:
 
-    def __init__(self, port=1):
+    def __init__(self, port = 0):
         self.port = port
         self.image = None
         self.device = None
