@@ -2,6 +2,7 @@
 from threading import Thread
 import cvb
 import uuid
+from core.timer import Timer
 
 
 class CameraStream(Thread):
@@ -40,11 +41,12 @@ class CameraStream(Thread):
 
     def run(self):
         i = 0
+        timer = Timer()
         # Generer ny mappe for lagring
         path = "storage/{tripId}"
         while self.running:
             try:
-
+                timer.start()
                 # get image from camera stream
                 image, status = self.camera.get_image()
 
@@ -60,6 +62,7 @@ class CameraStream(Thread):
                         i = 0
 
                     i = i+1
+                    timer.stop()
 
                 else:
                     raise RuntimeError("timeout during wait"
