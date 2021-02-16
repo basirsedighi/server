@@ -12,8 +12,6 @@ from concurrent.futures.process import ProcessPoolExecutor
 import shutil
 import json
 import serial
-import queue
-from core.gps import Gps
 from core.camera import Camera
 import time
 import pynmea2
@@ -34,9 +32,9 @@ camera_2 = Camera(1)
 camera_stream_1 = None
 camera_stream_2 = None
 
-gps_connect = 0
-started = False
 
+camera = Camera()
+camera.start_stream()
 
 # gps = Gps(gpsQueue)
 # gps.start()
@@ -60,16 +58,32 @@ app.add_middleware(
 )
 
 
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+        print(self.active_connections)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
+
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
-
-
-@app.get('gpsStatus')
-async def gpsStatus():
-    global gps_connect
-
-    return gps_connect
 
 # {"status":1,}
 
@@ -78,19 +92,15 @@ async def gpsStatus():
 async def getData():
 
     while(True):
-        try:
+        msg = []
 
-            for i in range(10):
-                line = serial.readline()
-
+        for i in range(10):
+            line = serial.readline()
             line = pynmea2.parse(
                 serial.readline().decode('ascii', errors='replace'))
+            msg.append(line)
 
-            msg = line
-
-            return msg
-        except pynmea2.nmea.ParseError as e:
-            print(e)
+        return msg
 
 
 @app.get('/stop')
@@ -258,10 +268,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = json.loads(data)
             event = data['event']
 
-            if(event == 'onConnection'):
-                await manager.broadcast(json.dumps({"event": "connected"}))
-                if(started):
-                    await manager.broadcast(json.dumps({"event": "starting"}))
+    await manager.connect(websocket)
+    await websocket.send_text(json.dumps({"connection": "connected"}))
 
             elif(event == 'start'):
                 start = True
@@ -274,18 +282,25 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
+            data = await websocket.receive_text()
+            print(data)
+            # data = gpsQueue.get_nowait()
             # data = json.dumps(data)
+            # print(data)
             # await websocket.send_text(data)
 
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect) as e:
+
         manager.disconnect(websocket)
-        await manager.broadcast(json.dumps({"event": "disconnect{client_id}"}))
+
+        pass
 
 
 @app.on_event("startup")
 async def startup():
     app.state.executor = ProcessPoolExecutor()
 
+    # Prime the push notification generator
     print("startup")
 
 
