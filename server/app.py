@@ -13,7 +13,10 @@ import shutil
 import json
 import serial
 from core.camera import Camera
-import time
+import threading
+from threading import Lock
+import base64
+from time import sleep
 import pynmea2
 import math
 import cvb
@@ -21,28 +24,34 @@ from core.models import models
 from time import time
 from fastapi.middleware.cors import CORSMiddleware
 from manager import ConnectionManager
+from io import BytesIO
+
+from core.helpers.helper_server import cvbImage_b64
 
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
 image_freq = 10
 app = FastAPI()
-camera_1 = Camera(0)
-camera_2 = Camera(1)
-camera_stream_1 = None
-camera_stream_2 = None
+image_lock = Lock()
+camera_1 = Camera(1)
+camera_2 = Camera(0)
+valider = False
 
 
-camera = Camera()
-camera.start_stream()
+isRunning1 = True
+isRunning2 = True
 
-# gps = Gps(gpsQueue)
-# gps.start()
-serial = serial.Serial('COM8', 9600, timeout=0)
+
+image_lock = Lock()
+
+gps_connect = 0
+started = False
 
 
 origins = [
     "http://localhost.tiangolo.com",
+
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
@@ -90,55 +99,73 @@ async def root():
 
 @app.get('/gps')
 async def getData():
-
-    while(True):
-        msg = []
-
-        for i in range(10):
-            line = serial.readline()
-            line = pynmea2.parse(
-                serial.readline().decode('ascii', errors='replace'))
-            msg.append(line)
-
-        return msg
+    return "hallo"
 
 
+@app.get('discoverDevices')
 @app.get('/stop')
 async def stop():
     print("stanser bildetaking")
     # stopp bildetaking
 
 
-@app.get('/start')
+@app.get('/start1')
 def start():
-    global camera_1, camera_stream_1, camera_2, camera_stream_2
 
-    print("starter bildetaking")
+    global camera_1, camera_stream_1, isRunning1, image_lock
+    camera_1.start_stream()
 
-    camera_stream_1 = CameraStream(camera_1)
-    cameraStatus = camera_stream_1.init()
+    isRunning1 = True
+    while isRunning1:
 
-    cameraStatus = camera_stream_1.startStream()
-    camera_stream_1.setDaemon(True)
+        image, status = camera_1.get_image()
 
-    camera_stream_2 = CameraStream(camera_2)
-    cameraStatus = camera_stream_2.init()
-    cameraStatus = camera_stream_2.startStream()
-    camera_stream_2.setDaemon(True)
+        if status == cvb.WaitStatus.Ok:
+            image = cvb.as_array(image, copy=True)
+            frame = cv2.resize(image, (640, 480))
+            cv2.imshow("fddsf", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
 
-    if cameraStatus == "stream ok":
+                break
 
-        camera_stream_1.start()
-        camera_stream_2.start()
+        else:
+            print(status)
 
-        camera_stream_1.join()
-        camera_stream_2.join()
+    cv2.destroyAllWindows()
 
-        # with app.state.executor as pool:
-        #     # wait result
+    camera_1.stopStream()
 
-        #     result = pool.map(camera_stream_1.run())
-        #     print(result)
+    return "starting"
+    # start bildetaking
+
+
+@app.get('/start2')
+def start():
+
+    global camera_2, isRunning2, image_lock
+
+    camera_2.start_stream()
+    isRunning2 = True
+    while isRunning2:
+
+        image, status = camera_2.get_image()
+
+        if status == cvb.WaitStatus.Ok:
+            image = cvb.as_array(image, copy=True)
+            frame = cv2.resize(image, (640, 480))
+
+            cv2.imshow("fdsf", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        else:
+
+            print(status)
+
+    # closing all open windows
+    cv2.destroyAllWindows()
+
+    camera_2.stopStream()
 
     return "starting"
     # start bildetaking
@@ -199,9 +226,9 @@ def estimateStorageTime(storage):
 
 
 def gen():
-    global camera
-    while True:
-        frame, status = camera.get_image()
+    global camera_1, valider
+    if valider:
+        frame, status = camera_1.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
             frame = cv2.resize(frame, (640, 480))
@@ -213,42 +240,92 @@ def gen():
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
-def startStream1():
-
-    global camera_1, camera_stream_1
-
-    camera_stream_1 = CameraStream(camera_1)
-    cameraStatus = camera_stream_1.init()
-
-    cameraStatus = camera_stream_1.startStream()
-
-    if cameraStatus == "stream ok":
-        camera_stream_1.run()
-
-
-async def startStream2():
-    global camera_2, camera_stream_2
-
-    camera_stream_2 = CameraStream(camera_2)
-    cameraStatus = camera_stream_2.init()
-    await manager.broadcast(json.dumps({"event": "cameraStatus2", "data": cameraStatus}))
-
-    cameraStatus = camera_stream_2.startStream()
-    await manager.broadcast(json.dumps({"event": "cameraStatus2", "data": cameraStatus}))
-
-    if cameraStatus == "stream ok":
-
-        camera_stream_2.run()
-
-
 async def stopStream():
-    global camera_stream_1, camera_stream_2
+    global camera_1, camera_2
 
-    camera_stream_1.terminate()
-    camera_stream_2.terminate()
+    camera_1.stopStream()
+    camera_2.stopStream()
 
 
-@app.get('/video_feed')
+async def initCameraA():
+    global camera_1
+    status = "ok"
+    try:
+        camera_1.init()
+
+    except:
+        print("initializing of camera failed")
+        status = "failed"
+    finally:
+        await manager.broadcast(json.dumps({"event": "initA", "data": status}))
+
+
+async def initCameraB():
+    global camera_2
+    status = "ok"
+    try:
+        camera_2.init()
+
+    except:
+        print("initializing of camera failed")
+        status = "failed"
+    finally:
+        await manager.broadcast(json.dumps({"event": "initB", "data": status}))
+
+
+async def startStreamA():
+    global camera_1
+    status = "started"
+    try:
+        camera_1.start_stream()
+
+    except:
+        print("initializing of camera failed")
+        status = "failed"
+    finally:
+        await manager.broadcast(json.dumps({"event": "streamA", "data": status}))
+
+
+async def startStreamB():
+    global camera_2
+    status = "started"
+    try:
+        camera_2.start_stream()
+
+    except:
+        print("stream failed")
+        status = "failed"
+    finally:
+        await manager.broadcast(json.dumps({"event": "streamB", "data": status}))
+
+
+async def discoverCameras():
+
+    discover = cvb.DeviceFactory.discover_from_root()
+    mock_info = next(
+        (info for info in discover if "GenICam.vin" in info.access_token), None)
+    if mock_info is None:
+
+        raise RuntimeError("unable to find CVMock.vin")
+
+    print(mock_info.access_token)
+
+
+async def validate():
+    global camera_1, valider
+
+    frame, status = camera_1.get_image()
+
+    b64 = cvbImage_b64(frame)
+
+    raw_data = {"event": "snapshot", "data": b64}
+
+    data = json.dumps(raw_data)
+
+    await manager.broadcast(data)
+
+
+@app.get('/video_feed1')
 def video_feed():
     return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
@@ -271,23 +348,30 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"connection": "connected"}))
 
-            elif(event == 'start'):
-                start = True
+       elif(event == 'start'):
+            start = True
 
-                await manager.broadcast(json.dumps({"event": "starting"}))
+            await manager.broadcast(json.dumps({"event": "starting"}))
 
-            elif(event == 'stop'):
-                started = False
-                await stopStream()
+        elif(event == 'stop'):
+            started = False
+            await stopStream()
 
-                await manager.broadcast(json.dumps({"event": "stopping"}))
+            await manager.broadcast(json.dumps({"event": "stopping"}))
 
-            data = await websocket.receive_text()
-            print(data)
-            # data = gpsQueue.get_nowait()
-            # data = json.dumps(data)
-            # print(data)
-            # await websocket.send_text(data)
+        elif(event == "init"):
+            await initCameraA()
+            await initCameraB()
+
+        elif(event == "stream"):
+            await startStreamA()
+            await startStreamB()
+        elif(event == "validation"):
+            await validate()
+
+        # data = json.dumps(data)
+        # print(data)
+        # await websocket.send_text(data)
 
     except (WebSocketDisconnect) as e:
 
