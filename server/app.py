@@ -26,6 +26,9 @@ from core.models import models
 from time import time
 from fastapi.middleware.cors import CORSMiddleware
 from manager import ConnectionManager
+from io import BytesIO
+
+from core.helpers.helper_server import cvbImage_b64
 
 # camera = Camera()
 # camera.start_stream()
@@ -210,7 +213,7 @@ def estimateStorageTime(storage):
 
 def gen():
     global camera_1, valider
-    while valider:
+    if valider:
         frame, status = camera_1.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
@@ -282,12 +285,30 @@ async def startStreamB():
         await manager.broadcast(json.dumps({"event": "streamB", "data": status}))
 
 
+async def discoverCameras():
+
+    discover = cvb.DeviceFactory.discover_from_root()
+    mock_info = next(
+        (info for info in discover if "GenICam.vin" in info.access_token), None)
+    if mock_info is None:
+
+        raise RuntimeError("unable to find CVMock.vin")
+
+    print(mock_info.access_token)
+
+
 async def validate():
     global camera_1, valider
 
-    valider = True
+    frame, status = camera_1.get_image()
 
-    # await manager.broadcast(json.dumps({"event": "snapshot", "data": im_b64}))
+    b64 = cvbImage_b64(frame)
+
+    raw_data = {"event": "snapshot", "data": b64}
+
+    data = json.dumps(raw_data)
+
+    await manager.broadcast(data)
 
 
 @app.get('/video_feed1')
