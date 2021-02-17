@@ -74,7 +74,6 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
-        print(self.active_connections)
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
@@ -208,9 +207,8 @@ async def getStorage():
 
     storage = {"total": total, "used": used, "free": free}
 
-    timeLeft = estimateStorageTime(storage)
+    estimateStorageTime(storage)
 
-    payload = {storage, "estimatedTime": timeLeft}
     return storage
 
 # estimate how
@@ -221,7 +219,7 @@ def estimateStorageTime(storage):
     # 1 bilde 144kB
 
     bilder_pr_sek = 20
-    bilde_size = 0, 144  # Mb
+    bilde_size = 0.144  # Mb
 
     free = storage["free"]
     seconds_left = free/(bilder_pr_sek*bilde_size)
@@ -349,29 +347,30 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = json.loads(data)
             event = data['event']
 
-    await manager.connect(websocket)
-    await websocket.send_text(json.dumps({"connection": "connected"}))
+            if(event == "onConnection"):
+                await websocket.send_text(json.dumps({"connection": "connected"}))
+            elif(event == 'start'):
+                start = True
 
-       elif(event == 'start'):
-            start = True
+            elif(event == 'stop'):
+                started = False
+                await stopStream()
 
-            await manager.broadcast(json.dumps({"event": "starting"}))
+                await manager.broadcast(json.dumps({"event": "stopping"}))
 
-        elif(event == 'stop'):
-            started = False
-            await stopStream()
+            elif(event == "init"):
+                await initCameraA()
+                await initCameraB()
 
-            await manager.broadcast(json.dumps({"event": "stopping"}))
+            elif(event == "stream"):
+                await startStreamA()
+                await startStreamB()
+            elif(event == "validation"):
+                await validate()
 
-        elif(event == "init"):
-            await initCameraA()
-            await initCameraB()
-
-        elif(event == "stream"):
-            await startStreamA()
-            await startStreamB()
-        elif(event == "validation"):
-            await validate()
+        # data = json.dumps(data)
+        # print(data)
+        # await websocket.send_text(data)
 
         # data = json.dumps(data)
         # print(data)
