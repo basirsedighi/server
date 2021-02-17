@@ -368,14 +368,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "validation"):
                 await validate()
 
-        # data = json.dumps(data)
-        # print(data)
-        # await websocket.send_text(data)
-
-        # data = json.dumps(data)
-        # print(data)
-        # await websocket.send_text(data)
-
     except (WebSocketDisconnect) as e:
 
         manager.disconnect(websocket)
