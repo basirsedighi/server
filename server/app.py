@@ -190,7 +190,7 @@ async def change_image_freq(freq: models.freq):
 async def getStorage():
 
     # Path
-    path = "C:/Users/norby"
+    path = "C:/Users/norby/Pictures/test"
 
     # Get the disk usage statistics
     # about the given path
@@ -207,9 +207,12 @@ async def getStorage():
 
     storage = {"total": total, "used": used, "free": free}
 
-    estimateStorageTime(storage)
+    timeleft = estimateStorageTime(storage)
+    payload = {}
+    payload['timeleft'] = timeleft
+    payload['storage'] = storage
 
-    return storage
+    return payload
 
 # estimate how
 
@@ -223,8 +226,11 @@ def estimateStorageTime(storage):
 
     free = storage["free"]
     seconds_left = free/(bilder_pr_sek*bilde_size)
+    minleft = math.floor(seconds_left/60)
+    hoursLeft = int(minleft/60)
+    minleft = minleft % 60
 
-    return seconds_left
+    return {"h": hoursLeft, "m": minleft}
 
 
 def gen():
@@ -341,6 +347,7 @@ def video_feed():
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     global started
     await manager.connect(websocket)
+    await manager.broadcast(json.dumps({"event": "connected"}))
     try:
         while True:
             data = await websocket.receive_text()
