@@ -208,7 +208,9 @@ async def getStorage():
 
     storage = {"total": total, "used": used, "free": free}
 
-    estimateStorageTime(storage)
+    timeLeft = estimateStorageTime(storage)
+
+    payload = {storage, "estimatedTime": timeLeft}
     return storage
 
 # estimate how
@@ -216,13 +218,15 @@ async def getStorage():
 
 def estimateStorageTime(storage):
     # 20 bilder/sek
-    # 1 bilde 5Mb
+    # 1 bilde 144kB
 
     bilder_pr_sek = 20
-    bilde_size = 5  # mb
+    bilde_size = 0, 144  # Mb
 
     free = storage["free"]
     seconds_left = free/(bilder_pr_sek*bilde_size)
+
+    return seconds_left
 
 
 def gen():
