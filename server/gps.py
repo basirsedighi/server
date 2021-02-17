@@ -5,25 +5,37 @@ import sys
 import glob
 import socket
 import codecs
+import csv
+import datetime
 import serial
 import pynmea2
 from collections import namedtuple
 Position = namedtuple("Position","lat lon timestamp")
-class Gps:
 
+
+class Gps:
+    
     ser = serial.Serial()
+    connected = False
 
     def __init__(self):
         print("object created")
         self.ser.baudrate = 9600
         self.ser.port = 'COM5'
-        self.ser.open()
+        try: 
+            self.ser.open()
+            self.__createLogger()
+            self.connected = True
+        except serial.SerialException:
+            print("serial error")
+            self.connected = False
 
         #these are current positions
-        self.position = Position(1000.0, 500.0, 100)
-
+        self.position = Position(0.0, 0.0, 0.0)
+        self.str_position = Position('', '', '')
+        
         #these are old positions
-        self.old_position = Position(0.0, 0.0, 0)
+        self.old_position = Position(0.0, 0.0, 0.0)
 
         #velocity in kmh
         self.velocity = 0.0
@@ -35,12 +47,20 @@ class Gps:
             result = self.__trimLine(line)
             self.timestamp = time.time()
             msg = pynmea2.parse(result)
-            self.__updateFields(msg)
+            if self.__updateFields(msg):
+                self.__logData()
+                
+                return True
+            
+            
+
         except serial.SerialException as e:
             print('Device error: {}'.format(e))
+            self.connected = False
+            return False
         except pynmea2.ParseError as e:
             print('Parse error: {}'.format(e))
-        
+            return False
 
     def calculatePwm(self, distance):
         result = 1000 / self.__calculateFrequency(distance)
@@ -68,16 +88,14 @@ class Gps:
             self.velocity = self.__knotsToKmh(msg.spd_over_grnd)
 
             #set old positions before updating
-            self.old_position.lat = self.position.lat
-            self.old_position.lon = self.position.lon
-            self.old_position.timestamp = self.position.timestamp
-
-            self.position.lat = msg.lat
-            self.position.lon = msg.lon
-            self.position.timestamp = time.time()
+            self.old_position = Position(self.position.lat, self.position.lon , self.position.timestamp)
+            self.position = Position(msg.lat, msg.lon, time.time())
             
-        
-
+            self.str_position = Position(str(self.position.lat),str(self.position.lon), datetime.datetime.fromtimestamp(self.position.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f'))
+            return True
+        else:
+            return False
+            
     def __knotsToKmh(self, knots):
         factor = 1.852
         result = factor * knots
@@ -102,19 +120,34 @@ class Gps:
             positions.append(Position(lats[i], lons[i], timestamps[i]))
         return positions
 
+    def __createLogger(self):
+        name = ("gpsLog.csv")
+        with open(name, 'w', newline='') as f:
+            self.writer = csv.writer(f)
+            self.writer.writerow(['Latitude', 'Longitude', 'Timestamp'])
+
+    def __logData(self):
+        if ((self.position.timestamp) != (self.old_position.timestamp)):
+            name = ('gpsLog.csv')
+            with open(name, 'a', newline='') as f:
+                self.writer = csv.writer(f)
+                self.writer.writerow(self.position)
+    
 def main():
     #need exceptions in case it would not connect to gps
-    g = Gps()
-    """
     while True:
-        #check fault with serial message
-        g.checkGps()
-
-        print("vel: " + str(g.velocity))
-        print("lat: " + str(g.lat))
-        print("lon: " + str(g.lon))
+        g = Gps()
+        i = 0
+        while g.connected:
+            #check fault with serial message
+            if g.checkGps():
+                i = i+1
+                print("updated " + str(i))
         
-     """ 
+        
+
+        
+     
 if __name__ == "__main__":
     main()
         
