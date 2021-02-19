@@ -9,58 +9,74 @@ import csv
 import datetime
 import serial
 import pynmea2
+import time
+import signal
 from collections import namedtuple
 Position = namedtuple("Position","lat lon timestamp")
 
 
 class Gps:
     
-    ser = serial.Serial()
+    
     connected = False
+    log_name_and_path = ""
+    status = 0
 
-    def __init__(self):
-        print("object created")
-        self.ser.baudrate = 9600
-        self.ser.port = 'COM5'
+    def __init__(self, log_path):
+        print("connecting...")
+        self.status = 0
+
         try: 
+            self.ser = serial.Serial(timeout=5)
+            self.ser.baudrate = 9600
+            self.ser.port = 'COM5'
             self.ser.open()
-            self.__createLogger()
+            self.__createLogger(log_path)
+            print("connected")
+            self.status = 1
             self.connected = True
         except serial.SerialException:
-            print("serial error")
+            print("did not connect to com port")
             self.connected = False
-
+            time.sleep(2.0)
+        except serial.SerialTimeoutException:
+            print('trying to reconnect')
+            time.sleep(2.0)
         #these are current positions
         self.position = Position(0.0, 0.0, 0.0)
         self.str_position = Position('', '', '')
         
         #these are old positions
         self.old_position = Position(0.0, 0.0, 0.0)
-
+        
         #velocity in kmh
         self.velocity = 0.0
         
     def checkGps(self):
+        self.connected = False
         try:
+            print("trying to read")
             line = str(self.ser.readline())
+            self.connected = True
+            print("did read")
             result = ''
             result = self.__trimLine(line)
+            print(result)
             self.timestamp = time.time()
             msg = pynmea2.parse(result)
+            print(msg)
             if self.__updateFields(msg):
                 self.__logData()
-                
                 return True
-            
-            
-
+        except serial.SerialTimeoutException as e:
+            print('Timeout: {}'.format(e))
+            return False
         except serial.SerialException as e:
             print('Device error: {}'.format(e))
-            self.connected = False
             return False
-        except pynmea2.ParseError as e:
-            print('Parse error: {}'.format(e))
-            return False
+        
+        
+
 
     def calculatePwm(self, distance):
         result = 1000 / self.__calculateFrequency(distance)
@@ -120,35 +136,38 @@ class Gps:
             positions.append(Position(lats[i], lons[i], timestamps[i]))
         return positions
 
-    def __createLogger(self):
-        name = ("gpsLog.csv")
-        with open(name, 'w', newline='') as f:
+    def __createLogger(self, path):
+        name =  datetime.date.today().strftime("%d_%m_%Y")
+        file_name = name + (".csv")
+        self.log_name_and_path = path + file_name
+        
+        with open(self.log_name_and_path, 'w', newline='') as f:
             self.writer = csv.writer(f)
             self.writer.writerow(['Latitude', 'Longitude', 'Timestamp'])
 
     def __logData(self):
         if ((self.position.timestamp) != (self.old_position.timestamp)):
-            name = ('gpsLog.csv')
-            with open(name, 'a', newline='') as f:
+            with open(self.log_name_and_path, 'a', newline='') as f:
                 self.writer = csv.writer(f)
                 self.writer.writerow(self.position)
-    
 def main():
     #need exceptions in case it would not connect to gps
     while True:
-        g = Gps()
+        g = Gps("C:/Users/Michal Leikanger/Desktop/")
         i = 0
         while g.connected:
-            #check fault with serial message
-            if g.checkGps():
-                i = i+1
-                print("updated " + str(i))
+            try:
+                #check fault with serial message
+                if g.checkGps():
+                    i = i+1
+                    #print("updated " + str(i))
+            except pynmea2.ParseError:
+                print('disconnected from gps')
+                g.connected = False
+            
         
-        
-
-        
-     
 if __name__ == "__main__":
     main()
         
+
 
