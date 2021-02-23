@@ -28,6 +28,7 @@ from io import BytesIO
 from core.timer import Timer
 from core.imageSave import ImageSave
 import queue
+from gps import Gps
 
 
 from core.helpers.helper_server import cvbImage_b64
@@ -48,6 +49,7 @@ imagesave = ImageSave(imageQueue)
 imagesave.daemon = True
 imagesave.start()
 valider = False
+g = Gps('C:/Users/norby/Desktop')
 
 
 isRunning1 = True
@@ -109,8 +111,14 @@ async def root():
 
 
 @app.get('/gps')
-async def getData():
-    return "hallo"
+def getData():
+    global g
+
+    if g.connected:
+
+        g.checkGps()
+
+        return {"status": g.status, "velocity": g.velocity}
 
 
 @app.get('discoverDevices')
