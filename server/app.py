@@ -14,7 +14,7 @@ import json
 import serial
 from core.camera import Camera
 import threading
-from threading import Lock
+from threading import Lock, Thread
 import base64
 from time import sleep
 import pynmea2
@@ -25,8 +25,13 @@ from time import time
 from fastapi.middleware.cors import CORSMiddleware
 from manager import ConnectionManager
 from io import BytesIO
+from core.timer import Timer
+from core.imageSave import ImageSave
+import queue
+
 
 from core.helpers.helper_server import cvbImage_b64
+
 
 # camera = Camera()
 # camera.start_stream()
@@ -36,6 +41,12 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(1)
 camera_2 = Camera(0)
+cameraStream_1 = CameraStream(camera_1, Lock)
+cameraStream_2 = CameraStream(camera_2, Lock)
+imageQueue = queue.Queue()
+imagesave = ImageSave(imageQueue)
+imagesave.daemon = True
+imagesave.start()
 valider = False
 
 
@@ -75,7 +86,8 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections.append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket):
+        await websocket.close()
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -111,62 +123,63 @@ async def stop():
 @app.get('/start1')
 def start():
 
-    global camera_1, camera_stream_1, isRunning1, image_lock
-    camera_1.start_stream()
-
+    global camera_1, isRunning1, image_lock, imageQueue
+    i = 0
+    timer = Timer("stream1")
     isRunning1 = True
     while isRunning1:
+        timer.start()
 
         image, status = camera_1.get_image()
 
         if status == cvb.WaitStatus.Ok:
-            image = cvb.as_array(image, copy=True)
-            frame = cv2.resize(image, (640, 480))
-            cv2.imshow("fddsf", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-
-                break
+            # image = cvb.as_array(image, copy=False)
+            # frame = cv2.resize(image, (640, 480))
+            imageQueue.put(image)
+            timer.stop()
 
         else:
             print(status)
 
-    cv2.destroyAllWindows()
+        i = i+1
 
     camera_1.stopStream()
 
-    return "starting"
+    return "stopped"
     # start bildetaking
 
 
 @app.get('/start2')
 def start():
 
-    global camera_2, isRunning2, image_lock
-
-    camera_2.start_stream()
+    global camera_2, isRunning2, image_lock, imageQueue
+    timer = Timer("stream2")
     isRunning2 = True
+    i = 0
     while isRunning2:
+        timer.start()
 
         image, status = camera_2.get_image()
 
         if status == cvb.WaitStatus.Ok:
-            image = cvb.as_array(image, copy=True)
-            frame = cv2.resize(image, (640, 480))
 
-            cv2.imshow("fdsf", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            imageQueue.put(image)
 
-        else:
+            # image = cvb.as_array(image, copy=False)
+            # frame = cv2.resize(image, (640, 480))
 
-            print(status)
+            timer.stop()
+        # else:
+
+        #     print(status)
+
+        i = i+1
 
     # closing all open windows
-    cv2.destroyAllWindows()
 
     camera_2.stopStream()
 
-    return "starting"
+    return "stopped"
     # start bildetaking
 
 
@@ -249,10 +262,11 @@ def gen():
 
 
 async def stopStream():
-    global camera_1, camera_2
+    global isRunning1, isRunning2
+    print("stopping stream")
 
-    camera_1.stopStream()
-    camera_2.stopStream()
+    isRunning1 = False
+    isRunning2 = False
 
 
 async def initCameraA():
@@ -319,18 +333,26 @@ async def discoverCameras():
     print(mock_info.access_token)
 
 
-async def validate():
-    global camera_1, valider
+async def validate(cam):
+    global camera_1, camera_2, valider
 
-    frame, status = camera_1.get_image()
+    camera = None
+    if cam == 'A':
+        camera = camera_1
 
-    b64 = cvbImage_b64(frame)
+    else:
+        camera = camera_2
 
-    raw_data = {"event": "snapshot", "data": b64}
+    frame, status = camera.get_image()
+    if status == cvb.WaitStatus.Ok:
 
-    data = json.dumps(raw_data)
+        b64 = cvbImage_b64(frame)
 
-    await manager.broadcast(data)
+        raw_data = {"event": "snapshot", "data": b64}
+
+        data = json.dumps(raw_data)
+
+        await manager.broadcast(data)
 
 
 @app.get('/video_feed1')
@@ -353,6 +375,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             data = json.loads(data)
             event = data['event']
+            msg = data['data']
 
             if(event == "onConnection"):
                 await websocket.send_text(json.dumps({"connection": "connected"}))
@@ -373,11 +396,15 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await startStreamA()
                 await startStreamB()
             elif(event == "validation"):
-                await validate()
+                await validate(msg)
 
-    except (WebSocketDisconnect) as e:
+            elif(event == "start_acquisition"):
+                status = start_acquisition()
+                await manager.broadcast(json.dumps({"event": "started"}))
 
-        manager.disconnect(websocket)
+    except Exception as e:  # WebSocketDisconnect
+        print(e)
+        await manager.disconnect(websocket)
 
         pass
 
@@ -392,4 +419,7 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event():
+    global imagesave
+    imagesave.stop()
+    imagesave.join()
     print("shutdown")
