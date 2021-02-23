@@ -60,10 +60,8 @@ class CameraStream():
         while self.running:
             try:
 
-                # get image from camera stream
-                self.lock.acquire()
                 image, status = self.camera.get_image()
-                self.lock.release()
+
                 # time.sleep(0.5)
 
                 # check if status is ok

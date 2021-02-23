@@ -2,12 +2,15 @@
 
 import time
 
+
 class TimerError(Exception):
     """A custom exception used to report errors in use of Timer class"""
 
+
 class Timer:
-    def __init__(self):
+    def __init__(self, name):
         self._start_time = None
+        self.name = name
 
     def start(self):
         """Start a new timer"""
@@ -23,4 +26,4 @@ class Timer:
 
         elapsed_time = time.perf_counter() - self._start_time
         self._start_time = None
-        print(f"Elapsed time: {elapsed_time:0.4f} seconds")
+        print(f"Elapsed time: {elapsed_time:0.4f} seconds : {self.name}")
