@@ -20,27 +20,30 @@ class Gps:
     
     connected = False
     log_name_and_path = ""
+    #status is to indicate the quality of the gps signal on the screen
+    #   0:  is not connected to the gps at all:                             status red
+    #   1:  connected to the gps, has not received fix available from gps:  status red
+    #   2:  has received fix available, HDOP is below threshold:            status yellow
+    #   3:  HDOP is above threshold:                                        status green
+    
     status = 0
 
     def __init__(self, log_path):
-        print("connecting...")
         self.status = 0
-
         try: 
             self.ser = serial.Serial(timeout=5)
             self.ser.baudrate = 9600
             self.ser.port = 'COM5'
             self.ser.open()
             self.__createLogger(log_path)
-            print("connected")
             self.status = 1
             self.connected = True
         except serial.SerialException:
-            print("did not connect to com port")
+            self.status = 0
             self.connected = False
             time.sleep(2.0)
         except serial.SerialTimeoutException:
-            print('trying to reconnect')
+            self.status = 0
             time.sleep(2.0)
         #these are current positions
         self.position = Position(0.0, 0.0, 0.0)
@@ -55,27 +58,31 @@ class Gps:
     def checkGps(self):
         self.connected = False
         try:
-            print("trying to read")
             line = str(self.ser.readline())
             self.connected = True
-            print("did read")
             result = ''
             result = self.__trimLine(line)
-            print(result)
             self.timestamp = time.time()
             msg = pynmea2.parse(result)
-            print(msg)
             if self.__updateFields(msg):
                 self.__logData()
                 return True
+            elif self.__checkConnection(msg):
+                return True
+            else:
+                return False
         except serial.SerialTimeoutException as e:
             print('Timeout: {}'.format(e))
+            self.status = 0
             return False
         except serial.SerialException as e:
             print('Device error: {}'.format(e))
+            self.status = 0
             return False
-        
-        
+        except pynmea2.ParseError:
+            self.connected = False
+            self.status = 0
+            return False
 
 
     def calculatePwm(self, distance):
@@ -111,11 +118,23 @@ class Gps:
             return True
         else:
             return False
-            
+
+    def __checkConnection(self, msg):
+        if msg.sentence_type == 'GSA':
+            if msg.mode_fix_type != 1:
+                self.status = 2
+                try:
+                    if float(msg.hdop) < 5.0:
+                        self.status = 3
+                except ValueError:
+                    return False
+            return True
+        else:
+            return False
+
     def __knotsToKmh(self, knots):
         factor = 1.852
         result = factor * knots
-        
         return result
 
     def __caluclatePositions(self, number):
@@ -154,18 +173,11 @@ def main():
     #need exceptions in case it would not connect to gps
     while True:
         g = Gps("C:/Users/Michal Leikanger/Desktop/")
-        i = 0
+        print(g.status)
         while g.connected:
-            try:
-                #check fault with serial message
-                if g.checkGps():
-                    i = i+1
-                    #print("updated " + str(i))
-            except pynmea2.ParseError:
-                print('disconnected from gps')
-                g.connected = False
-            
-        
+            g.checkGps()
+            print(g.status)
+                    
 if __name__ == "__main__":
     main()
         
