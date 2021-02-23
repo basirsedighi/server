@@ -58,6 +58,7 @@ class Gps:
         self.connected = False
         try:
             line = str(self.ser.readline())
+
             self.connected = True
             result = ''
             result = self.__trimLine(line)

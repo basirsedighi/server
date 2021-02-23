@@ -48,8 +48,8 @@ imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue)
 imagesave.daemon = True
 imagesave.start()
+gps_status = {}
 valider = False
-g = Gps('C:/Users/norby/Desktop')
 
 
 isRunning1 = True
@@ -111,17 +111,22 @@ async def root():
 
 
 @app.get('/gps')
-def getData():
-    global g
+async def getData():
+    global gps_status
+    return gps_status
 
-    if g.connected:
+
+@app.get('/gpsLoop')
+def getData():
+    global g, gps_status
+    g = Gps('C:/Users/norby/Desktop')
+    while g.connected:
 
         g.checkGps()
 
-        return {"status": g.status, "velocity": g.velocity}
+        gps_status = {'status': g.status, 'velocity': g.velocity}
 
 
-@app.get('discoverDevices')
 @app.get('/stop')
 async def stop():
     print("stanser bildetaking")
