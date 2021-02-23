@@ -20,7 +20,7 @@ while True:
         if i%100==0:
             #messagePOST = RestConnect+"?FPS=0"
             #requests.post(messagePOST)
-    elif int(response)!= fps:
+    elif int(response) not fps:
         fps = int(response)
         myPWM.ChangeDutyCycle(50)
         myPWM.ChangeFrequency(int(fps))
