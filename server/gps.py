@@ -33,18 +33,16 @@ class Gps:
             self.ser = serial.Serial(timeout=5)
             self.ser.baudrate = 9600
             self.ser.port = 'COM6'
-            self.ser.open()
             self.__createLogger(log_path)
+            self.ser.open()
             self.status = 1
             self.connected = True
         except serial.SerialException:
             self.status = 0
             self.connected = False
-            time.sleep(2.0)
         except serial.SerialTimeoutException:
             self.status = 0
-            time.sleep(2.0)
-        # these are current positions
+        #these are current positions
         self.position = Position(0.0, 0.0, 0.0)
         self.str_position = Position('', '', '')
 
@@ -53,6 +51,17 @@ class Gps:
 
         #velocity in kmh
         self.velocity = 0.0
+    def reconnect(self):
+        self.ser.close()
+        try:
+            self.ser.open()
+            self.status = 1
+            self.connected = True
+        except serial.SerialException:
+            self.status = 0
+            self.connected = False
+        except serial.SerialTimeoutException:
+            self.status = 0
 
     def checkGps(self):
         self.connected = False
@@ -174,13 +183,18 @@ class Gps:
 
 
 def main():
-    # need exceptions in case it would not connect to gps
+    #need exceptions in case it would not connect to gps
+    g = Gps("C:/Users/Michal Leikanger/Desktop/")
     while True:
-        g = Gps("C:/Users/Michal Leikanger/Desktop/")
         print(g.status)
-        while g.connected:
+        if g.connected:
             g.checkGps()
-            print(g.status)
+        else:
+            g.reconnect()
+                    
+if __name__ == "__main__":
+    main()
+        
 
 
 if __name__ == "__main__":
