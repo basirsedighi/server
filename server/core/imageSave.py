@@ -17,25 +17,29 @@ class ImageSave(Thread):
         timer = Timer("thread loop")
 
         while True:
+
+            if not self.isRunning:
+                break
             if self.queue.empty():
                 pass
             else:
 
-                image = self.queue.get()
+                data = self.queue.get()
+
+                image = data['image']
+                camera = data['camera']
+                index = data['index']
 
                 image.save(
-                    "C:/Users/norby/Pictures/test/kamera1/"+str(i)+'.jpg')
+                    "C:/Users/norby/Pictures/test/kamera"+str(camera)+"/"+str(index)+'.bmp')
                 self.queue.task_done()
 
                 i = i+1
-
-                if not self.isRunning:
-                    break
 
         print("stopped")
 
         return "Stopped"
 
-    def stop():
+    def stop(self):
 
         self.isRunning = False

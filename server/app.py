@@ -50,10 +50,11 @@ imagesave.daemon = True
 imagesave.start()
 gps_status = {}
 valider = False
+abort = False
 
-
-isRunning1 = True
-isRunning2 = True
+closeServer = False
+isRunning1 = False
+isRunning2 = False
 
 
 image_lock = Lock()
@@ -85,11 +86,15 @@ class ConnectionManager:
         self.active_connections: List[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
+        try:
+            await websocket.accept()
+            self.active_connections.append(websocket)
+
+        except Exception as e:
+            print(e)
 
     async def disconnect(self, websocket: WebSocket):
-        await websocket.close()
+        # await websocket.close()
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -124,15 +129,20 @@ def connect():
 
 @app.get('/gpsLoop')
 def getData():
-    global g, gps_status
+    global g, gps_status, closeServer
     g = connect()
-    while g.connected:
+    while True:
 
-        g.checkGps()
+        if closeServer:
+            break
 
-        gps_status = {'status': g.status, 'velocity': g.velocity}
+        if g.connected:
+            g.checkGps()
+            gps_status = {'status': g.status, 'velocity': g.velocity}
 
-    gps_status = {'status': 0, 'velocity': 0}
+        else:
+            gps_status = {'status': 0, 'velocity': 0}
+            g.reconnect()
 
     return "disconnected"
 
@@ -146,63 +156,59 @@ async def stop():
 @app.get('/start1')
 def start():
 
-    global camera_1, isRunning1, image_lock, imageQueue
+    global camera_1, isRunning1, image_lock, imageQueue, abort
     i = 0
     timer = Timer("stream1")
-    isRunning1 = True
-    while isRunning1:
-        timer.start()
 
-        image, status = camera_1.get_image()
+    while True:
 
-        if status == cvb.WaitStatus.Ok:
-            # image = cvb.as_array(image, copy=False)
-            # frame = cv2.resize(image, (640, 480))
-            imageQueue.put(image)
-            timer.stop()
+        if abort:
+            break
 
-        else:
-            print(status)
+        if isRunning1:
 
-        i = i+1
+            image, status = camera_1.get_image()
+
+            if status == cvb.WaitStatus.Ok:
+                data = {"image": image, "camera": 1, "index": i}
+                imageQueue.put(data)
+
+            i = i+1
 
     camera_1.stopStream()
 
-    return "stopped"
+    return "stream 1 has stopped"
     # start bildetaking
 
 
 @app.get('/start2')
 def start():
 
-    global camera_2, isRunning2, image_lock, imageQueue
+    global camera_2, isRunning2, image_lock, imageQueue, abort
     timer = Timer("stream2")
-    isRunning2 = True
+
     i = 0
-    while isRunning2:
-        timer.start()
+    while True:
+        if abort:
+            break
 
-        image, status = camera_2.get_image()
+        if isRunning2:
 
-        if status == cvb.WaitStatus.Ok:
+            image, status = camera_2.get_image()
 
-            imageQueue.put(image)
+            if status == cvb.WaitStatus.Ok:
 
-            # image = cvb.as_array(image, copy=False)
-            # frame = cv2.resize(image, (640, 480))
+                data = {"image": image, "camera": 2, "index": i}
 
-            timer.stop()
-        # else:
+                imageQueue.put(data)
 
-        #     print(status)
-
-        i = i+1
+            i = i+1
 
     # closing all open windows
 
     camera_2.stopStream()
 
-    return "stopped"
+    return "stream2 has stopped"
     # start bildetaking
 
 
@@ -284,16 +290,27 @@ def gen():
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
-async def stopStream():
-    global isRunning1, isRunning2
+async def abortStream():
+    global isRunning1, isRunning2, abort
     print("stopping stream")
+    abort = not abort
 
-    isRunning1 = False
-    isRunning2 = False
+    isRunning1 = not isRunning1
+    isRunning2 = not isRunning2
+
+
+async def start_acquisition():
+    global isRunning1, isRunning2
+    print("Starting stream")
+
+    isRunning1 = not isRunning1
+    isRunning2 = not isRunning2
 
 
 async def initCameraA():
-    global camera_1
+    global camera_1, abort
+    if abort:
+        abort = False
     status = "ok"
     try:
         camera_1.init()
@@ -400,14 +417,17 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             event = data['event']
             msg = data['data']
 
+            print(event)
+
             if(event == "onConnection"):
                 await websocket.send_text(json.dumps({"connection": "connected"}))
             elif(event == 'start'):
-                start = True
+                await start_acquisition()
+                await manager.broadcast(json.dumps({"event": "started"}))
 
             elif(event == 'stop'):
                 started = False
-                await stopStream()
+                await abortStream()
 
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
@@ -423,7 +443,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
             elif(event == "start_acquisition"):
                 status = start_acquisition()
-                await manager.broadcast(json.dumps({"event": "started"}))
 
     except Exception as e:  # WebSocketDisconnect
         print(e)
@@ -434,7 +453,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-    app.state.executor = ProcessPoolExecutor()
 
     # Prime the push notification generator
     print("startup")
@@ -442,7 +460,7 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event():
-    global imagesave
+    global imagesave, closeServer
+
     imagesave.stop()
     imagesave.join()
-    print("shutdown")
