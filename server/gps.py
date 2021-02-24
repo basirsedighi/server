@@ -30,7 +30,7 @@ class Gps:
     def __init__(self, log_path):
         self.status = 0
         try:
-            self.ser = serial.Serial(timeout=5)
+            self.ser = serial.Serial(timeout=10)
             self.ser.baudrate = 9600
             self.ser.port = 'COM6'
             self.__createLogger(log_path)
@@ -81,11 +81,11 @@ class Gps:
             else:
                 return False
         except serial.SerialTimeoutException as e:
-            print('Timeout: {}'.format(e))
+            #print('Timeout: {}'.format(e))
             self.status = 0
             return False
         except serial.SerialException as e:
-            print('Device error: {}'.format(e))
+            #print('Device error: {}'.format(e))
             self.status = 0
             return False
         except pynmea2.ParseError:
