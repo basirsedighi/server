@@ -52,7 +52,7 @@ gps_status = {}
 valider = False
 abort = False
 
-
+closeServer = False
 isRunning1 = False
 isRunning2 = False
 
@@ -129,9 +129,12 @@ def connect():
 
 @app.get('/gpsLoop')
 def getData():
-    global g, gps_status
+    global g, gps_status, closeServer
     g = connect()
     while True:
+
+        if closeServer:
+            break
 
         if g.connected:
             g.checkGps()
@@ -457,6 +460,7 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event():
-    global imagesave
+    global imagesave, closeServer
+
     imagesave.stop()
     imagesave.join()
