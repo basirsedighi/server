@@ -116,15 +116,25 @@ async def getData():
     return gps_status
 
 
+def connect():
+    g = Gps('C:/Users/norby/Desktop')
+
+    return g
+
+
 @app.get('/gpsLoop')
 def getData():
     global g, gps_status
-    g = Gps('C:/Users/norby/Desktop')
+    g = connect()
     while g.connected:
 
         g.checkGps()
 
         gps_status = {'status': g.status, 'velocity': g.velocity}
+
+    gps_status = {'status': 0, 'velocity': 0}
+
+    return "disconnected"
 
 
 @app.get('/stop')
@@ -382,7 +392,7 @@ def video_feed():
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     global started
     await manager.connect(websocket)
-    await manager.broadcast(json.dumps({"event": "connected"}))
+    await manager.broadcast(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
         while True:
             data = await websocket.receive_text()
