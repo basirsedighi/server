@@ -46,6 +46,9 @@ cameraStream_1 = CameraStream(camera_1, Lock)
 cameraStream_2 = CameraStream(camera_2, Lock)
 imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue)
+
+g = Gps('C:/Users/norby/Desktop')
+
 imagesave.daemon = True
 imagesave.start()
 gps_status = {}
@@ -122,27 +125,30 @@ async def getData():
 
 
 def connect():
-    g = Gps('C:/Users/norby/Desktop')
 
     return g
 
 
 @app.get('/gpsLoop')
-def getData():
+def startGps():
     global g, gps_status, closeServer
-    g = connect()
+    print("connecting")
+
     while True:
 
         if closeServer:
             break
 
-        if g.connected:
-            g.checkGps()
-            gps_status = {'status': g.status, 'velocity': g.velocity}
+        g.checkGps()
+        gps_status = {'status': g.status,
+                      'velocity': g.velocity}
 
-        else:
-            gps_status = {'status': 0, 'velocity': 0}
-            g.reconnect()
+        # else:
+        #     gps_status = {'status': 0, 'velocity': 0, "test": "no connection"}
+        #     # print("reconnect")
+        #     g.reconnect()
+
+    print("gps disconnected")
 
     return "disconnected"
 
@@ -420,7 +426,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             print(event)
 
             if(event == "onConnection"):
+
                 await websocket.send_text(json.dumps({"connection": "connected"}))
+
             elif(event == 'start'):
                 await start_acquisition()
                 await manager.broadcast(json.dumps({"event": "started"}))
@@ -444,8 +452,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "start_acquisition"):
                 status = start_acquisition()
 
-    except Exception as e:  # WebSocketDisconnect
-        print(e)
+    except WebSocketDisconnect:  # WebSocketDisconnect
+
         await manager.disconnect(websocket)
 
         pass

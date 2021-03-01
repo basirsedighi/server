@@ -42,7 +42,7 @@ class Gps:
             self.connected = False
         except serial.SerialTimeoutException:
             self.status = 0
-        #these are current positions
+        # these are current positions
         self.position = Position(0.0, 0.0, 0.0)
         self.str_position = Position('', '', '')
 
@@ -51,16 +51,20 @@ class Gps:
 
         #velocity in kmh
         self.velocity = 0.0
+
     def reconnect(self):
+
         self.ser.close()
         try:
             self.ser.open()
             self.status = 1
             self.connected = True
-        except serial.SerialException:
+        except serial.SerialException as e:
+
             self.status = 0
             self.connected = False
-        except serial.SerialTimeoutException:
+        except serial.SerialTimeoutException as e:
+
             self.status = 0
 
     def checkGps(self):
@@ -69,17 +73,27 @@ class Gps:
             rmc = False
             gsa = False
             while not(rmc and gsa):
-                line = str(self.ser.readline())
-                self.connected = True
-                result = ''
-                result = self.__trimLine(line)
-                self.timestamp = time.time()
-                msg = pynmea2.parse(result)
-                if self.__updateFields(msg):
-                    self.__logData()
-                    rmc = True
-                elif self.__checkConnection(msg):
-                    gsa = True
+                print("reading")
+                line = self.ser.readline()
+                print(type(line))
+                if line:
+                    line = str(line)
+                    print(type(line))
+
+                    self.connected = True
+                    result = ''
+                    result = self.__trimLine(line)
+                    self.timestamp = time.time()
+                    msg = pynmea2.parse(result)
+                    if self.__updateFields(msg):
+                        self.__logData()
+                        rmc = True
+                    elif self.__checkConnection(msg):
+                        gsa = True
+
+                else:
+                    pass
+
         except serial.SerialTimeoutException as e:
             #print('Timeout: {}'.format(e))
             self.status = 0
@@ -92,6 +106,8 @@ class Gps:
             self.connected = False
             self.status = 0
             return False
+        except TypeError as e:
+            print("TYPE ERROR")
 
     def calculatePwm(self, distance):
         result = 1000 / self.__calculateFrequency(distance)
@@ -181,6 +197,7 @@ class Gps:
                 self.writer = csv.writer(f)
                 self.writer.writerow(self.position)
 
+
 def main():
     g = Gps("C:/Users/Michal Leikanger/Desktop/")
     while True:
@@ -189,10 +206,6 @@ def main():
             g.checkGps()
         else:
             g.reconnect()
-            
-if __name__ == "__main__":
-    main()
-        
 
 
 if __name__ == "__main__":
