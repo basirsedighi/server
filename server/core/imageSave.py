@@ -35,12 +35,12 @@ class ImageSave(Thread):
                     camera = data['camera']
                     index = data['index']
 
-                    image.save(
-                        "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpeg')
+                    # image.save(
+                    #     "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpeg')
                     try:
                         
                          image.save(
-                        "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpeg')
+                        "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
                     
                     except:
                         print("error")

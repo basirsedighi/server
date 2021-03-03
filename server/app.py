@@ -195,7 +195,7 @@ def startA():
 async def fps():
 
 
-    return 10
+    return 1
 
 @app.get('/start2')
 def startB():
