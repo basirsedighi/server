@@ -11,29 +11,33 @@ i = 0
 RestConnect ="http://169.254.231.20:8000/RaspFPS"
 
 while True:
+
+    try:
     
-    response = requests.get(RestConnect).text
-    print(response)
-    #response = "15"
-    if int(response)==0:
-        myPWM.ChangeDutyCycle(0)
-        if i%100==0:
-            print("1")
-            #messagePOST = RestConnect+"?FPS=0"
+        response = requests.get(RestConnect).text
+        print(response)
+        #response = "15"
+        if int(response)==0:
+            myPWM.ChangeDutyCycle(0)
+            if i%100==0:
+                print("1")
+                #messagePOST = RestConnect+"?FPS=0"
+                #requests.post(messagePOST)
+        elif int(response)!= fps:
+            fps = int(response)
+            myPWM.ChangeDutyCycle(50)
+            myPWM.ChangeFrequency(int(fps))
+        elif fps==int(response) and i%100==0:
+            #messagePOST = RestConnect+"?FPS="+str(fps)
             #requests.post(messagePOST)
-    elif int(response)!= fps:
-        fps = int(response)
-        myPWM.ChangeDutyCycle(50)
-        myPWM.ChangeFrequency(int(fps))
-    elif fps==int(response) and i%100==0:
-        #messagePOST = RestConnect+"?FPS="+str(fps)
-        #requests.post(messagePOST)
-        myPWM.ChangeDutyCycle(50)
-        myPWM.ChangeFrequency(int(fps))
+            myPWM.ChangeDutyCycle(50)
+            myPWM.ChangeFrequency(int(fps))
+            
         
-    
-    
-    i=i+1
+        
+        i=i+1
+    except Exception as e:
+        print(e)
 
 
 GPIO.cleanup()
