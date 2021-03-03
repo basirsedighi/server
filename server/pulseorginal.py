@@ -8,17 +8,17 @@ myPWM = GPIO.PWM(18,50)
 myPWM.start(10)
 fps = None
 i = 0
-#RestConnect ="http://10.10.10.62:8090/RaspFPS"
+RestConnect ="http://169.254.231.20:8000/RaspFPS"
 
 while True:
     
-    #response = requests.get(RestConnect).text
-    #print(response)
-    response = "15"
+    response = requests.get(RestConnect).text
+    print(response)
+    #response = "15"
     if int(response)==0:
         myPWM.ChangeDutyCycle(0)
         if i%100==0:
-            print("")
+            print("1")
             #messagePOST = RestConnect+"?FPS=0"
             #requests.post(messagePOST)
     elif int(response)!= fps:
