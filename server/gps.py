@@ -30,21 +30,19 @@ class Gps:
     def __init__(self, log_path):
         self.status = 0
         try:
-            self.ser = serial.Serial(timeout=5)
+            self.ser = serial.Serial(timeout=10)
             self.ser.baudrate = 9600
             self.ser.port = 'COM6'
-            self.ser.open()
             self.__createLogger(log_path)
+            self.ser.open()
             self.status = 1
             self.connected = True
         except serial.SerialException:
             self.status = 0
             self.connected = False
-            time.sleep(2.0)
         except serial.SerialTimeoutException:
             self.status = 0
-            time.sleep(2.0)
-        # these are current positions
+        #these are current positions
         self.position = Position(0.0, 0.0, 0.0)
         self.str_position = Position('', '', '')
 
@@ -53,30 +51,41 @@ class Gps:
 
         #velocity in kmh
         self.velocity = 0.0
+    def reconnect(self):
+        self.ser.close()
+        try:
+            self.ser.open()
+            self.status = 1
+            self.connected = True
+        except serial.SerialException:
+            self.status = 0
+            self.connected = False
+        except serial.SerialTimeoutException:
+            self.status = 0
 
     def checkGps(self):
         self.connected = False
         try:
-            line = str(self.ser.readline())
-
-            self.connected = True
-            result = ''
-            result = self.__trimLine(line)
-            self.timestamp = time.time()
-            msg = pynmea2.parse(result)
-            if self.__updateFields(msg):
-                self.__logData()
-                return True
-            elif self.__checkConnection(msg):
-                return True
-            else:
-                return False
+            rmc = False
+            gsa = False
+            while not(rmc and gsa):
+                line = str(self.ser.readline())
+                self.connected = True
+                result = ''
+                result = self.__trimLine(line)
+                self.timestamp = time.time()
+                msg = pynmea2.parse(result)
+                if self.__updateFields(msg):
+                    self.__logData()
+                    rmc = True
+                elif self.__checkConnection(msg):
+                    gsa = True
         except serial.SerialTimeoutException as e:
-            print('Timeout: {}'.format(e))
+            #print('Timeout: {}'.format(e))
             self.status = 0
             return False
         except serial.SerialException as e:
-            print('Device error: {}'.format(e))
+            #print('Device error: {}'.format(e))
             self.status = 0
             return False
         except pynmea2.ParseError:
@@ -172,15 +181,18 @@ class Gps:
                 self.writer = csv.writer(f)
                 self.writer.writerow(self.position)
 
-
 def main():
-    # need exceptions in case it would not connect to gps
+    g = Gps("C:/Users/Michal Leikanger/Desktop/")
     while True:
-        g = Gps("C:/Users/Michal Leikanger/Desktop/")
         print(g.status)
-        while g.connected:
+        if g.connected:
             g.checkGps()
-            print(g.status)
+        else:
+            g.reconnect()
+            
+if __name__ == "__main__":
+    main()
+        
 
 
 if __name__ == "__main__":
