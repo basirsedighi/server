@@ -8,7 +8,8 @@ myPWM = GPIO.PWM(18,50)
 myPWM.start(10)
 fps = None
 i = 0
-RestConnect ="http://169.254.231.20:8000/RaspFPS"
+169.254.246.13:8000
+RestConnect ="http://169.254.246.13:8000/RaspFPS"
 
 while True:
 
