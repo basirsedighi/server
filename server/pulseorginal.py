@@ -11,8 +11,10 @@ i = 0
 #RestConnect ="http://10.10.10.62:8090/RaspFPS"
 
 while True:
-        
-    response = "4"
+    
+    #response = requests.get(RestConnect).text
+    #print(response)
+    response = "15"
     if int(response)==0:
         myPWM.ChangeDutyCycle(0)
         if i%100==0:
@@ -23,7 +25,6 @@ while True:
         fps = int(response)
         myPWM.ChangeDutyCycle(50)
         myPWM.ChangeFrequency(int(fps))
-        print()
     elif fps==int(response) and i%100==0:
         #messagePOST = RestConnect+"?FPS="+str(fps)
         #requests.post(messagePOST)
