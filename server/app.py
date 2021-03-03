@@ -195,7 +195,7 @@ def startA():
 async def fps():
 
 
-    return 15
+    return 10
 
 @app.get('/start2')
 def startB():
@@ -462,11 +462,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await websocket.send_text(json.dumps({"connection": "connected"}))
 
             elif(event == 'start'):
+                await createImageFolder(msg)
+                await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
 
-                await createImageFolder(msg)
+                
 
-                await manager.broadcast(json.dumps({"event": "starting"}))
+                
 
             elif(event == 'stop'):
                 started = False
