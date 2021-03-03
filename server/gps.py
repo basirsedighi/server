@@ -73,7 +73,7 @@ class Gps:
             rmc = False
             gsa = False
             while not(rmc and gsa):
-                print("reading")
+                
                 line = self.ser.readline()
                 print(type(line))
                 if line:

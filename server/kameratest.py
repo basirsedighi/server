@@ -31,8 +31,8 @@ o = io.BytesIO()
 
 def folderConstructor():
     #   Making a folder for the images
-    if not (path.exists('C:/Users/tor_9/Documents/test_jpg/01.04.2021')):        
-         os.mkdir("C:/Users/tor_9/Documents/test_jpg/"+date) #   setting up folder for pictures
+    if not (path.exists('bilder'+date)):        
+         os.mkdir("bilder/"+date) #   setting up folder for pictures
     else:
         # List all files in a directory using os.listdir
         basepath = 'C:/Users/tor_9/Documents/test_jpg/'+date
@@ -41,7 +41,7 @@ def folderConstructor():
                 list_of_images.append(entry)                
         image_name = len(list_of_images) + 1        
 
-folderConstructor()
+
 
 
 while True: 
