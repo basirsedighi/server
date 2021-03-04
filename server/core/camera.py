@@ -9,7 +9,7 @@ class Camera:
         self.image = None
         self.device = None
         self.stream = None
-        self.config_path ="core/config/nyconf.gcs"
+        self.config_path ="core/config/calconf.gcs"
         
 
     def init(self):

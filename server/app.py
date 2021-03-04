@@ -45,10 +45,9 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(1)
 camera_2 = Camera(0)
-cameraStream_1 = CameraStream(camera_1, Lock)
-cameraStream_2 = CameraStream(camera_2, Lock)
+
 imageQueue = queue.Queue()
-imagesave = ImageSave(imageQueue)
+imagesave = ImageSave(imageQueue,"saving thread")
 
 g = Gps('C:/Users/norby/Desktop')
 
@@ -511,5 +510,5 @@ async def startup():
 def shutdown_event():
     global imagesave, closeServer
 
-    imagesave.stop()
+    imagesave.raise_exception()
     imagesave.join()
