@@ -29,7 +29,10 @@ from core.timer import Timer
 from core.imageSave import ImageSave
 import queue
 from gps import Gps
-
+from core.helpers.helper_server import createFolder
+import os
+from os import path
+from datetime import datetime
 
 from core.helpers.helper_server import cvbImage_b64
 
@@ -42,10 +45,12 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(1)
 camera_2 = Camera(0)
-cameraStream_1 = CameraStream(camera_1, Lock)
-cameraStream_2 = CameraStream(camera_2, Lock)
+
 imageQueue = queue.Queue()
-imagesave = ImageSave(imageQueue)
+imagesave = ImageSave(imageQueue,"saving thread")
+
+g = Gps('C:/Users/norby/Desktop')
+
 imagesave.daemon = True
 imagesave.start()
 gps_status = {}
@@ -55,7 +60,8 @@ abort = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
-
+#creates new folder for saving imaging
+createFolder()
 
 image_lock = Lock()
 
@@ -122,27 +128,30 @@ async def getData():
 
 
 def connect():
-    g = Gps('C:/Users/norby/Desktop')
 
     return g
 
 
 @app.get('/gpsLoop')
-def getData():
+def startGps():
     global g, gps_status, closeServer
-    g = connect()
+    print("connecting")
+
     while True:
 
         if closeServer:
             break
 
-        if g.connected:
-            g.checkGps()
-            gps_status = {'status': g.status, 'velocity': g.velocity}
+        g.checkGps()
+        gps_status = {'status': g.status,
+                      'velocity': g.velocity}
 
-        else:
-            gps_status = {'status': 0, 'velocity': 0}
-            g.reconnect()
+        # else:
+        #     gps_status = {'status': 0, 'velocity': 0, "test": "no connection"}
+        #     # print("reconnect")
+        #     g.reconnect()
+
+    print("gps disconnected")
 
     return "disconnected"
 
@@ -154,11 +163,11 @@ async def stop():
 
 
 @app.get('/start1')
-def start():
+def startA():
 
     global camera_1, isRunning1, image_lock, imageQueue, abort
     i = 0
-    timer = Timer("stream1")
+    
 
     while True:
 
@@ -181,16 +190,25 @@ def start():
     # start bildetaking
 
 
+@app.get('/RaspFPS')
+async def fps():
+
+
+    return 1
+
 @app.get('/start2')
-def start():
+def startB():
 
     global camera_2, isRunning2, image_lock, imageQueue, abort
-    timer = Timer("stream2")
+    
 
+    
     i = 0
     while True:
         if abort:
             break
+
+        
 
         if isRunning2:
 
@@ -210,6 +228,25 @@ def start():
 
     return "stream2 has stopped"
     # start bildetaking
+
+def getDate():
+
+    return datetime.today().strftime('%Y-%m-%d')
+
+
+async def createImageFolder(tripName):
+    global imagesave
+    date = getDate()
+    imagesave.setTripName(str(tripName))
+    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
+       
+        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
+        
+    
+    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
+    
+        
+        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
 
 
 @app.get('imagefreq')
@@ -232,11 +269,11 @@ async def change_image_freq(freq: models.freq):
 async def getStorage():
 
     # Path
-    path = "C:/Users/norby/Pictures/test"
+    
 
     # Get the disk usage statistics
     # about the given path
-    stat = shutil.disk_usage(path)
+    stat = shutil.disk_usage("/")
 
     a, b, c = stat
 
@@ -261,10 +298,10 @@ async def getStorage():
 
 def estimateStorageTime(storage):
     # 20 bilder/sek
-    # 1 bilde 144kB
+    # 1 bilde 8000kB
 
     bilder_pr_sek = 20
-    bilde_size = 0.144  # Mb
+    bilde_size = 6  # Mb
 
     free = storage["free"]
     seconds_left = free/(bilder_pr_sek*bilde_size)
@@ -420,10 +457,17 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             print(event)
 
             if(event == "onConnection"):
+
                 await websocket.send_text(json.dumps({"connection": "connected"}))
+
             elif(event == 'start'):
+                await createImageFolder(msg)
+                await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
-                await manager.broadcast(json.dumps({"event": "started"}))
+
+                
+
+                
 
             elif(event == 'stop'):
                 started = False
@@ -443,9 +487,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
             elif(event == "start_acquisition"):
                 status = start_acquisition()
+            
+            elif(event == "create_trip"):
+                await createImageFolder(data)
+                await manager.broadcast(json.dumps({"event":"folderCreated"}))
 
-    except Exception as e:  # WebSocketDisconnect
-        print(e)
+    except WebSocketDisconnect:  # WebSocketDisconnect
+
         await manager.disconnect(websocket)
 
         pass
@@ -462,5 +510,5 @@ async def startup():
 def shutdown_event():
     global imagesave, closeServer
 
-    imagesave.stop()
+    imagesave.raise_exception()
     imagesave.join()
