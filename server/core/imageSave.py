@@ -7,11 +7,12 @@ from os import path
 from datetime import datetime
 import cvb
 import ctypes
+from multiprocessing import Process
 
 
-class ImageSave(Thread):
+class ImageSave(Process):
     def __init__(self, queue,name):
-        Thread.__init__(self)
+        super(ImageSave,self).__init__()
         self.tripName = "first"
         self.queue = queue
         self.isRunning = True

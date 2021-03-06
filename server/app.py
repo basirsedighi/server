@@ -29,13 +29,14 @@ from core.timer import Timer
 from core.imageSave import ImageSave
 import queue
 from gps import Gps
+from gps2 import gpsHandler
 from core.helpers.helper_server import createFolder
 import os
 from os import path
 from datetime import datetime
-
+from multiprocessing import Process,Queue,Pool
+from pydantic import BaseModel
 from core.helpers.helper_server import cvbImage_b64
-
 
 # camera = Camera()
 # camera.start_stream()
@@ -45,14 +46,17 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(1)
 camera_2 = Camera(0)
-
-imageQueue = queue.Queue()
+gps = gpsHandler()
+imageQueue = Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
 
-g = Gps('C:/Users/norby/Desktop')
+#g = Gps('C:/Users/norby/Desktop')
 
 imagesave.daemon = True
 imagesave.start()
+
+gps.daemon = True
+gps.start()
 gps_status = {}
 valider = False
 abort = False
@@ -68,6 +72,16 @@ image_lock = Lock()
 gps_connect = 0
 started = False
 
+class GpsData(BaseModel):
+    velocity: str
+    timeStamp:str
+    lat:str
+    lon:str
+
+
+    
+    
+
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -75,7 +89,10 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:4200"
+    "http://localhost:4200",
+    "http://10.22.182.47:4200",
+    "http://10.22.182.47"
+
 ]
 
 app.add_middleware(
@@ -85,6 +102,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 
 class ConnectionManager:
@@ -121,10 +141,19 @@ async def root():
 # {"status":1,}
 
 
-@app.get('/gps')
-async def getData():
+@app.post('/gps')
+async def getData(test:GpsData):
     global gps_status
-    return gps_status
+
+    print(test.timeStamp)
+    
+    return test
+
+
+@app.post('/gpserror')
+async def data(test):
+
+    return test
 
 
 def connect():
@@ -138,13 +167,19 @@ def startGps():
     print("connecting")
 
     while True:
+        try:
 
-        if closeServer:
-            break
+            if closeServer:
+                break
 
-        g.checkGps()
-        gps_status = {'status': g.status,
-                      'velocity': g.velocity}
+            
+
+            g.checkGps()
+            gps_status = {'status': g.status,
+                        'velocity': g.velocity}
+        
+        except Exception:
+            pass
 
         # else:
         #     gps_status = {'status': 0, 'velocity': 0, "test": "no connection"}
@@ -169,7 +204,7 @@ def startA():
     i = 0
     
 
-    while True:
+    while isRunning1:
 
         if abort:
             break
@@ -204,13 +239,15 @@ def startB():
 
     
     i = 0
-    while True:
+    while isRunning2:
         if abort:
             break
 
         
 
         if isRunning2:
+
+            
 
             image, status = camera_2.get_image()
 
@@ -442,6 +479,7 @@ def video_feed():
     return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
+
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     global started
@@ -492,7 +530,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await createImageFolder(data)
                 await manager.broadcast(json.dumps({"event":"folderCreated"}))
 
-    except WebSocketDisconnect:  # WebSocketDisconnect
+    except Exception:  # WebSocketDisconnect
 
         await manager.disconnect(websocket)
 
@@ -512,3 +550,4 @@ def shutdown_event():
 
     imagesave.raise_exception()
     imagesave.join()
+    gps.join()

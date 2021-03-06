@@ -10,6 +10,8 @@ import datetime
 import serial
 import pynmea2
 import time
+import sys
+import glob
 import signal
 from collections import namedtuple
 Position = namedtuple("Position", "lat lon timestamp")
@@ -51,6 +53,11 @@ class Gps:
 
         #velocity in kmh
         self.velocity = 0.0
+    
+
+
+
+
 
     def reconnect(self):
 
@@ -75,10 +82,10 @@ class Gps:
             while not(rmc and gsa):
                 
                 line = self.ser.readline()
-                print(type(line))
+                
                 if line:
                     line = str(line)
-                    print(type(line))
+                    
 
                     self.connected = True
                     result = ''
@@ -143,6 +150,26 @@ class Gps:
             return True
         else:
             return False
+
+
+
+    def _scan_ports(self):
+        if sys.platform.startswith('win'):
+            ports = ['COM%s' % (i + 1) for i in range(256)]
+        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+            # this excludes your current terminal "/dev/tty"
+            patterns = ('/dev/tty[A-Za-z]*', '/dev/ttyUSB*')
+            ports = [glob.glob(pattern) for pattern in patterns]
+            ports = [item for sublist in ports for item in sublist]  # flatten
+        elif sys.platform.startswith('darwin'):
+            patterns = ('/dev/*serial*', '/dev/ttyUSB*', '/dev/ttyS*')
+            ports = [glob.glob(pattern) for pattern in patterns]
+            ports = [item for sublist in ports for item in sublist]  # flatten
+        else:
+            raise EnvironmentError('Unsupported platform')
+        return ports
+
+
 
     def __checkConnection(self, msg):
         if msg.sentence_type == 'GSA':
