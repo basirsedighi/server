@@ -3,13 +3,20 @@ import requests
 import pynmea2, serial, os, time, sys, glob, datetime
 from datetime import datetime
 import json
+import enum
+
+class GPS_QUALITY(enum.Enum):
+   BEST = 3
+   GOOD = 2
+   LOW = 1
+   BAD = 0
 
 class gpsHandler(Process):
     def __init__(self):
         super(gpsHandler,self).__init__()
 
-        self.RestConnect ="http://10.22.182.47:8000/gps"
-
+        self.GpsDataUrl ="http://localhost:8000/gpsPost"
+        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
 
     
     def run(self):
@@ -47,12 +54,14 @@ class gpsHandler(Process):
                                     result = ''
                                     result = self.__trimLine(line)
                                     msg = pynmea2.parse(result)
-                                    if msg.sentence_type =="RMC":
+                                    
 
-                                        #message = self.createMessage(msg)
-                                        data = self.createMessage(msg)
+                                        
+                                    data = self.createMessage(msg)
+                                    
+                                    
 
-                                        x = requests.post(self.RestConnect, data =data,headers={'content-type':'application/json'})
+                                    x = requests.post(self.GpsDataUrl, data =data,headers={'content-type':'application/json'})
 
                                         
 
@@ -75,16 +84,49 @@ class gpsHandler(Process):
 
 
     def createMessage(self,msg):
-        now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+        now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S.%f')[:-3]
+        fix_quality = 0
+        hdop = 5
         
-        
-        message = {"velocity":str(msg.spd_over_grnd),"timeStamp":str(now),"lat":str(msg.lat),"lon":str(msg.lon)}
 
-        data = json.dumps(message)
+        if(msg.sentence_type =="RMC"):
+
+            velocity = self.__knotsToKmh(msg.spd_over_grnd)
+        
+            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
+
+        if(msg.sentence_type=="GGA"):
+
+            
+            fix_quality = int(msg.gps_qual)
+            
+            hdop = float(msg.horizontal_dil)
+           
+
+            
+
+            quality = self.getGpsQuality(fix_quality,hdop)
+            
+            self.message.update({"quality":int(quality)})    
+
+        data = json.dumps(self.message)
        
         return data
 
+    def getGpsQuality(self,fixQuality, hdop):
+        gpsQuality = GPS_QUALITY.BAD.value
+        if (fixQuality and hdop > 0):
+            if (fixQuality == 4):
+                gpsQuality = GPS_QUALITY.BEST.value
+            elif ((fixQuality == 5 and hdop < 2) or hdop <= 1):
+                gpsQuality = GPS_QUALITY.GOOD.value
+            else:
 
+                gpsQuality = GPS_QUALITY.LOW.value
+        
+    
+        return gpsQuality
+  
     def scan_ports(self):
 
         if sys.platform.startswith('win'):
@@ -103,11 +145,21 @@ class gpsHandler(Process):
         return ports
     
 
-    def logfilename(self):
-        now = datetime.datetime.now()
-        return 'NMEA_%0.4d-%0.2d-%0.2d_%0.2d-%0.2d-%0.2d.nmea' % \
-                    (now.year, now.month, now.day,
-                    now.hour, now.minute, now.second)
+    
+
+    
+
+    def __calculateFrequency(self, distance):
+
+        factor = 3.6
+        velocityInMs = self.velocity / factor
+        result = velocityInMs / distance
+        return result
+
+    def __knotsToKmh(self, knots):
+        factor = 1.852
+        result = factor * knots
+        return result  
 
 
 

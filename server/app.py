@@ -54,7 +54,7 @@ imagesave = ImageSave(imageQueue,"saving thread")
 
 imagesave.daemon = True
 imagesave.start()
-
+gpsData ={}
 gps.daemon = True
 gps.start()
 gps_status = {}
@@ -74,9 +74,10 @@ started = False
 
 class GpsData(BaseModel):
     velocity: str
-    timeStamp:str
+    timestamp:str
     lat:str
     lon:str
+    quality:int
 
 
     
@@ -134,18 +135,20 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
-# {"status":1,}
+@app.get('/gps')
+async def getData():
+    global gps_status
+
+    return gps_status
 
 
-@app.post('/gps')
+
+@app.post('/gpsPost')
 async def getData(test:GpsData):
     global gps_status
 
-    print(test.timeStamp)
+    gps_status = test
     
     return test
 
@@ -161,40 +164,25 @@ def connect():
     return g
 
 
+
+
+
 @app.get('/gpsLoop')
 def startGps():
     global g, gps_status, closeServer
     print("connecting")
-
+   
+    i = 0
+    file1 = open("myfile.txt","w") 
     while True:
+
         try:
-
-            if closeServer:
-                break
-
-            
-
-            g.checkGps()
-            gps_status = {'status': g.status,
-                        'velocity': g.velocity}
         
-        except Exception:
-            pass
-
-        # else:
-        #     gps_status = {'status': 0, 'velocity': 0, "test": "no connection"}
-        #     # print("reconnect")
-        #     g.reconnect()
-
-    print("gps disconnected")
-
-    return "disconnected"
-
-
-@app.get('/stop')
-async def stop():
-    print("stanser bildetaking")
-    # stopp bildetaking
+            file1.write("Hello"+str(i)+"\n") 
+        
+        except KeyboardInterrupt as e:
+                        sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
+        i=i+1
 
 
 @app.get('/start1')
