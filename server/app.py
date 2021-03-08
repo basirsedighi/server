@@ -60,7 +60,7 @@ gps.start()
 gps_status = {}
 valider = False
 abort = False
-
+logging = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
@@ -146,9 +146,11 @@ async def getData():
 
 @app.post('/gpsPost')
 async def getData(test:GpsData):
-    global gps_status
+    global gps_status,logging
 
     gps_status = test
+    if(logging):
+
     
     return test
 
@@ -210,7 +212,7 @@ def startA():
     camera_1.stopStream()
 
     return "stream 1 has stopped"
-    # start bildetaking
+    
 
 
 @app.get('/RaspFPS')
