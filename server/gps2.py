@@ -4,6 +4,7 @@ import pynmea2, serial, os, time, sys, glob, datetime
 from datetime import datetime
 import json
 import enum
+import io
 
 class GPS_QUALITY(enum.Enum):
    BEST = 3
@@ -38,29 +39,30 @@ class gpsHandler(Process):
                 # try to read a line of data from the serial port and parse
                         with serial.Serial(port, 4800, timeout=1) as ser:
 
+                            sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+
                 # 'warm up' with reading some input
                             for i in range(10):
-                                ser.readline()
+                                sio.readline()
                             # try to parse (will throw an exception if input is not valid NMEA)
                             pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
 
                
   
                             while True:
-                                line = ser.readline()
+                                line = sio.readline()
 
                                 if line:
-                                    line = str(line)
-                                    result = ''
-                                    result = self.__trimLine(line)
-                                    msg = pynmea2.parse(result)
+                                    
+                                    
+                                    msg = pynmea2.parse(line)
                                     
 
-                                        
+                                     
                                     data = self.createMessage(msg)
                                     
                                     
-
+                                    
                                     x = requests.post(self.GpsDataUrl, data =data,headers={'content-type':'application/json'})
 
                                         
@@ -82,9 +84,16 @@ class gpsHandler(Process):
         except KeyboardInterrupt:
             sys.stderr.write('Ctrl-C pressed, exiting port scanner\n')
 
+    def getTimeStamp(self):
+
+        now = time.time()
+
+        timenow = datetime.today().strftime('%H:%M:%S')
+        milliseconds = '%03d' % int((now - int(now)) * 1000)
+        return str(timenow) +":"+ str(milliseconds)
 
     def createMessage(self,msg):
-        now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S.%f')[:-3]
+        now = self.getTimeStamp()
         fix_quality = 0
         hdop = 5
         
@@ -94,20 +103,32 @@ class gpsHandler(Process):
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
         
             self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
+        
+        if msg.sentence_type =="VTG":
+
+            velocity = msg.spd_over_grnd_kmph
+            self.message.update({"timestamp":str(now),"velocity":str(velocity)})
+
 
         if(msg.sentence_type=="GGA"):
 
+           
             
             fix_quality = int(msg.gps_qual)
             
             hdop = float(msg.horizontal_dil)
-           
-
-            
-
+        
             quality = self.getGpsQuality(fix_quality,hdop)
             
-            self.message.update({"quality":int(quality)})    
+            self.message.update({"quality":int(quality),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})    
+
+        
+
+        if(msg.sentence_type=="GLL"):
+            
+            
+            self.message.update({"timestamp":str(now),"lat":str(msg.lat),"lon":str(msg.lon)})    
+            
 
         data = json.dumps(self.message)
        

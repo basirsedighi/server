@@ -9,7 +9,7 @@ class Camera:
         self.image = None
         self.device = None
         self.stream = None
-        self.config_path ="core/config/calconf.gcs"
+        self.config_path ="core/config/nyconf.gcs"
         
 
 
@@ -25,8 +25,8 @@ class Camera:
 
 
     def init(self):
-        self.device = cvb.DeviceFactory.open(os.path.join(
-            cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
+        # self.device = cvb.DeviceFactory.open(os.path.join(
+        #     cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
 
 
         # self.device_node_map = self.device.node_maps["Device"]
@@ -58,5 +58,5 @@ class Camera:
         self.device.close()
 
     def getSnapShot(self):
-        image, status = self.stream.wait()
+        image, status = self.stream.get_snapshot()
         return image, status

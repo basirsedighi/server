@@ -21,7 +21,7 @@ import pynmea2
 import math
 import cvb
 from core.models import models
-from time import time
+import time
 from fastapi.middleware.cors import CORSMiddleware
 from manager import ConnectionManager
 from io import BytesIO
@@ -47,8 +47,9 @@ image_lock = Lock()
 camera_1 = Camera(1)
 camera_2 = Camera(0)
 gps = gpsHandler()
-imageQueue = Queue()
+imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
+config_loaded = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
@@ -149,7 +150,13 @@ async def getData(test:GpsData):
     global gps_status,logging
 
     gps_status = test
+
+    print(gps_status)
     if(logging):
+
+        
+
+        print("logging")
 
     
     return test
@@ -193,7 +200,7 @@ def startA():
     global camera_1, isRunning1, image_lock, imageQueue, abort
     i = 0
     
-
+    #camera_1.start_stream()
     while isRunning1:
 
         if abort:
@@ -203,8 +210,10 @@ def startA():
 
             image, status = camera_1.get_image()
 
+            timeStamp = getTimeStamp()
+
             if status == cvb.WaitStatus.Ok:
-                data = {"image": image, "camera": 1, "index": i}
+                data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
                 imageQueue.put(data)
 
             i = i+1
@@ -229,6 +238,8 @@ def startB():
 
     
     i = 0
+
+    #camera_2.start_stream()
     while isRunning2:
         if abort:
             break
@@ -241,9 +252,11 @@ def startB():
 
             image, status = camera_2.get_image()
 
+            timeStamp = getTimeStamp()
+
             if status == cvb.WaitStatus.Ok:
 
-                data = {"image": image, "camera": 2, "index": i}
+                data = {"image": image, "camera": 2, "index": i,"timeStamp":timeStamp}
 
                 imageQueue.put(data)
 
@@ -255,6 +268,14 @@ def startB():
 
     return "stream2 has stopped"
     # start bildetaking
+
+def getTimeStamp():
+
+    now = time.time()
+
+    timenow = datetime.today().strftime('%H:%M:%S')
+    milliseconds = '%03d' % int((now - int(now)) * 1000)
+    return str(timenow) +":"+ str(milliseconds)
 
 def getDate():
 
@@ -274,6 +295,13 @@ async def createImageFolder(tripName):
     
         
         os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+
+    
+
+    if not path.exists('log/'+str(date)):
+
+
+        os.makedirs('log/'+str(date)) 
 
 
 @app.get('imagefreq')
@@ -320,7 +348,8 @@ async def getStorage():
 
     return payload
 
-# estimate how
+# estimate hows
+
 
 
 def estimateStorageTime(storage):
@@ -328,7 +357,7 @@ def estimateStorageTime(storage):
     # 1 bilde 8000kB
 
     bilder_pr_sek = 20
-    bilde_size = 6  # Mb
+    bilde_size = 9  # Mb
 
     free = storage["free"]
     seconds_left = free/(bilder_pr_sek*bilde_size)
@@ -364,8 +393,11 @@ async def abortStream():
 
 
 async def start_acquisition():
-    global isRunning1, isRunning2
+    global isRunning1, isRunning2,camera_1,camera_2
     print("Starting stream")
+
+    camera_1.start_stream()
+    camera_2.start_stream()
 
     isRunning1 = not isRunning1
     isRunning2 = not isRunning2
@@ -386,6 +418,27 @@ async def initCameraA():
         await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
 
+async def loadConfig():
+    global camera_1,camera_2,config_loaded
+    status="Konfig vellykket"
+    try:
+        camera_1.loadConfig()
+        camera_2.loadConfig()
+        
+        config_loaded = True
+    except:
+        print("config failed")
+        status = "Konfig feilet"
+        config_loaded = False
+
+    finally:
+
+        
+        
+        await manager.broadcast(json.dumps({"event": "loadConfig", "data": status}))
+
+ 
+
 async def initCameraB():
     global camera_2
     status = "ok"
@@ -403,8 +456,8 @@ async def startStreamA():
     global camera_1
     status = "started"
     try:
-        camera_1.start_stream()
-
+        #camera_1.start_stream()
+        print("testing stream")
     except:
         print("initializing of camera failed")
         status = "failed"
@@ -416,7 +469,8 @@ async def startStreamB():
     global camera_2
     status = "started"
     try:
-        camera_2.start_stream()
+        #camera_2.start_stream()
+        print("testing stream")
 
     except:
         print("stream failed")
@@ -447,7 +501,7 @@ async def validate(cam):
     else:
         camera = camera_2
 
-    frame, status = camera.get_image()
+    frame, status = camera.getSnapShot()
     if status == cvb.WaitStatus.Ok:
 
         b64 = cvbImage_b64(frame)
@@ -472,9 +526,9 @@ def video_feed():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started
+    global started,config_loaded
     await manager.connect(websocket)
-    await manager.broadcast(json.dumps({"event": "connected", "data": "connected to server"}))
+    await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
         while True:
             data = await websocket.receive_text()
@@ -486,13 +540,27 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
             if(event == "onConnection"):
 
-                await websocket.send_text(json.dumps({"connection": "connected"}))
+                await manager.broadcast(json.dumps({"connection": "connected"}))
+                
+
+        
+            elif(event == "loadConfig"):
+
+                if not config_loaded:
+                    await loadConfig()
+                
+                else:
+
+                    await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
+                
+
+
 
             elif(event == 'start'):
                 await createImageFolder(msg)
                 await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
-
+                
                 
 
                 
@@ -520,11 +588,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await createImageFolder(data)
                 await manager.broadcast(json.dumps({"event":"folderCreated"}))
 
-    except Exception:  # WebSocketDisconnect
+    except WebSocketDisconnect as e:  # WebSocketDisconnect
+
+        print("[WEBSOCKET] websocket disconnect")
 
         await manager.disconnect(websocket)
 
-        pass
+        
 
 
 @app.on_event("startup")
