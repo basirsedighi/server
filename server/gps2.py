@@ -74,7 +74,12 @@ class gpsHandler(Thread):
                                     
                                     
                                      
-                                    self.data = self.createMessage(msg)
+                                    message = self.createMessage(msg)
+                                    if message =="no_data":
+                                        pass
+                                    else:
+                                                                            
+                                        self.data = message
 
                                     if(self.logging):
                                         with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
@@ -124,7 +129,7 @@ class gpsHandler(Thread):
         return datetime.today().strftime('%Y-%m-%d')
     def getTimeStamp(self):
 
-        now = time.time()
+        now = time.time_ns()
 
         timenow = datetime.today().strftime('%H:%M:%S')
         milliseconds = '%03d' % int((now - int(now)) * 1000)
@@ -141,11 +146,13 @@ class gpsHandler(Thread):
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
         
             self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
+            return self.message 
         
         if msg.sentence_type =="VTG":
 
             velocity = msg.spd_over_grnd_kmph
             self.message.update({"timestamp":str(now),"velocity":str(velocity)})
+            return self.message 
 
 
         if(msg.sentence_type=="GGA"):
@@ -162,19 +169,21 @@ class gpsHandler(Thread):
         
             quality = self.getGpsQuality(fix_quality,hdop)
             
-            self.message.update({"quality":int(quality),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})    
+            self.message.update({"quality":int(quality),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
+            return self.message   
 
         
 
         if(msg.sentence_type=="GLL"):
             
             
-            self.message.update({"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})    
+            self.message.update({"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
+            return self.message    
             
 
         
-       
-        return self.message
+
+        return "no_data"
 
     def getGpsQuality(self,fixQuality, hdop):
         gpsQuality = GPS_QUALITY.BAD.value

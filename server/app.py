@@ -123,9 +123,9 @@ async def getData():
     global gps_status,gps
 
 
-    data = gps.getData()
-    print(data)
-    return data
+    gps_status = gps.getData()
+   
+    return gps_status
 
 
 
@@ -153,9 +153,10 @@ async def data(test):
 
 @app.get('/RaspFPS')
 async def fps():
+    global gps_status
 
 
-    return 1
+    return gps_status
 
 
 
