@@ -30,14 +30,14 @@ from core.imageSave import ImageSave
 import queue
 from gps import Gps
 from gps2 import gpsHandler
-from core.helpers.helper_server import createFolder
 import os
 from os import path
 from datetime import datetime
 from multiprocessing import Process,Queue,Pool
 from pydantic import BaseModel
-from core.helpers.helper_server import cvbImage_b64
-
+from core.helpers.helper_server import *
+from core.helpers.helper_server import ConnectionManager
+from core.models.models import GpsData 
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -65,12 +65,14 @@ logging = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
+
+#manage socket connections
+manager = ConnectionManager()
+
 #creates new folder for saving imaging
 createFolder()
 
-image_lock = Lock()
 
-gps_connect = 0
 started = False
 
 class GpsData(BaseModel):
@@ -109,39 +111,21 @@ app.add_middleware(
 
 
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        try:
-            await websocket.accept()
-            self.active_connections.append(websocket)
-
-        except Exception as e:
-            print(e)
-
-    async def disconnect(self, websocket: WebSocket):
-        # await websocket.close()
-        self.active_connections.remove(websocket)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
 
 
-manager = ConnectionManager()
+
+
 
 
 
 @app.get('/gps')
 async def getData():
-    global gps_status
+    global gps_status,gps
 
-    return gps_status
+
+    data = gps.getData()
+    print(data)
+    return data
 
 
 
@@ -151,7 +135,7 @@ async def getData(test:GpsData):
 
     gps_status = test
 
-    print(gps_status)
+    #print(gps_status)
     if(logging):
 
         
@@ -167,31 +151,12 @@ async def data(test):
 
     return test
 
-
-def connect():
-
-    return g
+@app.get('/RaspFPS')
+async def fps():
 
 
+    return 1
 
-
-
-@app.get('/gpsLoop')
-def startGps():
-    global g, gps_status, closeServer
-    print("connecting")
-   
-    i = 0
-    file1 = open("myfile.txt","w") 
-    while True:
-
-        try:
-        
-            file1.write("Hello"+str(i)+"\n") 
-        
-        except KeyboardInterrupt as e:
-                        sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
-        i=i+1
 
 
 @app.get('/start1')
@@ -224,11 +189,7 @@ def startA():
     
 
 
-@app.get('/RaspFPS')
-async def fps():
 
-
-    return 1
 
 @app.get('/start2')
 def startB():
@@ -269,39 +230,9 @@ def startB():
     return "stream2 has stopped"
     # start bildetaking
 
-def getTimeStamp():
-
-    now = time.time()
-
-    timenow = datetime.today().strftime('%H:%M:%S')
-    milliseconds = '%03d' % int((now - int(now)) * 1000)
-    return str(timenow) +":"+ str(milliseconds)
-
-def getDate():
-
-    return datetime.today().strftime('%Y-%m-%d')
 
 
-async def createImageFolder(tripName):
-    global imagesave
-    date = getDate()
-    imagesave.setTripName(str(tripName))
-    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
-       
-        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
-        
-    
-    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
-    
-        
-        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
 
-    
-
-    if not path.exists('log/'+str(date)):
-
-
-        os.makedirs('log/'+str(date)) 
 
 
 @app.get('imagefreq')
@@ -352,20 +283,7 @@ async def getStorage():
 
 
 
-def estimateStorageTime(storage):
-    # 20 bilder/sek
-    # 1 bilde 8000kB
 
-    bilder_pr_sek = 20
-    bilde_size = 9  # Mb
-
-    free = storage["free"]
-    seconds_left = free/(bilder_pr_sek*bilde_size)
-    minleft = math.floor(seconds_left/60)
-    hoursLeft = int(minleft/60)
-    minleft = minleft % 60
-
-    return {"h": hoursLeft, "m": minleft}
 
 
 def gen():
@@ -384,17 +302,21 @@ def gen():
 
 
 async def abortStream():
-    global isRunning1, isRunning2, abort
+    global isRunning1, isRunning2, abort,gps
     print("stopping stream")
     abort = not abort
 
     isRunning1 = not isRunning1
     isRunning2 = not isRunning2
+    gps.toggleLogging()
+
 
 
 async def start_acquisition():
-    global isRunning1, isRunning2,camera_1,camera_2
+    global isRunning1, isRunning2,camera_1,camera_2,gps
     print("Starting stream")
+
+    gps.toggleLogging()
 
     camera_1.start_stream()
     camera_2.start_stream()
@@ -452,43 +374,13 @@ async def initCameraB():
         await manager.broadcast(json.dumps({"event": "initB", "data": status}))
 
 
-async def startStreamA():
-    global camera_1
-    status = "started"
-    try:
-        #camera_1.start_stream()
-        print("testing stream")
-    except:
-        print("initializing of camera failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "streamA", "data": status}))
 
 
-async def startStreamB():
-    global camera_2
-    status = "started"
-    try:
-        #camera_2.start_stream()
-        print("testing stream")
-
-    except:
-        print("stream failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "streamB", "data": status}))
 
 
-async def discoverCameras():
 
-    discover = cvb.DeviceFactory.discover_from_root()
-    mock_info = next(
-        (info for info in discover if "GenICam.vin" in info.access_token), None)
-    if mock_info is None:
 
-        raise RuntimeError("unable to find CVMock.vin")
 
-    print(mock_info.access_token)
 
 
 async def validate(cam):
@@ -526,7 +418,7 @@ def video_feed():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded
+    global started,config_loaded,imagesave,gps
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -557,6 +449,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 
             elif(event == 'start'):
+                imagesave.setTripName(str(msg))
+                gps.setTripName(str(msg))
                 await createImageFolder(msg)
                 await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
@@ -580,6 +474,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await startStreamB()
             elif(event == "validation"):
                 await validate(msg)
+            
+            elif(event =="gps"):
+                print(msg)
 
             elif(event == "start_acquisition"):
                 status = start_acquisition()

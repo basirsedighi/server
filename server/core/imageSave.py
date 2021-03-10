@@ -40,6 +40,7 @@ class ImageSave(Thread):
                 if not self.isRunning:
                     break
                 if self.queue.empty():
+                    
                     pass
                 else:
 
