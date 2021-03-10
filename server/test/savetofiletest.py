@@ -3,6 +3,7 @@ from os import path
 
 date = "01.04.2021"
 number_of_images = []
+path 
 if not (path.exists('C:/Users/tor_9/Documents/test_jpg/'+date)):        
         os.mkdir("C:/Users/tor_9/Documents/test_jpg/"+date) #   setting up folder for pictures
 else:
