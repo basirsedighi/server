@@ -1,5 +1,3 @@
-import win32api
+import time
 
-drives = win32api.GetLogicalDriveStrings()
-drives = drives.split('\000')[:-1]
-print(drives)
+print(round(time.time() * 1000))
