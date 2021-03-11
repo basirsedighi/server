@@ -20,8 +20,8 @@ class gpsHandler(Thread):
         Thread.__init__(self)
 
         self.GpsDataUrl ="http://localhost:8000/gpsPost"
-        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
-        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
+        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False}
+        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
@@ -36,7 +36,7 @@ class gpsHandler(Thread):
                 ports = self.scan_ports()
                 if len(ports) == 0:
                     sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
-                    time.sleep(10)
+                    time.sleep(5)
                     continue
 
                 for port in ports:
@@ -74,22 +74,28 @@ class gpsHandler(Thread):
                                     
                                     
                                      
-                                    self.data = self.createMessage(msg)
+                                    message = self.createMessage(msg)
+                                    if message =="no_data":
+                                        pass
+                                    else:
+                                                                            
+                                        self.data = message
+                                    
 
-                                    if(self.logging):
-                                        with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
-                            
+                                        if(self.logging and self.data['new'] ==True):
+                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
+                                
 
-                                            fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon"]
-                                            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                            
-                                            row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon']})
-                                            writer.writerow(row)
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon"]
+                                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                                
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon']})
+                                                writer.writerow(row)
 
                                        
                                     
                                     
-                                   # x = requests.post(self.GpsDataUrl, data =data,headers={'content-type':'application/json'})
+                                  
 
                                         
 
@@ -135,20 +141,18 @@ class gpsHandler(Thread):
         fix_quality = 0
         hdop = 5
         
-        self.message.update({"timestamp":str(now)})
         if(msg.sentence_type =="RMC"):
 
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
+            velocity = self.__kmhToMs(velocity)
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})
-        
-        if msg.sentence_type =="VTG":
-
-            velocity = msg.spd_over_grnd_kmph
-            self.message.update({"timestamp":str(now),"velocity":str(velocity)})
+            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True})
+            return self.message 
+      
 
 
         if(msg.sentence_type=="GGA"):
+            print(repr(msg.timestamp))
 
            
             
@@ -162,19 +166,14 @@ class gpsHandler(Thread):
         
             quality = self.getGpsQuality(fix_quality,hdop)
             
-            self.message.update({"quality":int(quality),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})    
+            self.message.update({"quality":int(quality),"new":False})
+            return self.message   
 
-        
-
-        if(msg.sentence_type=="GLL"):
-            
-            
-            self.message.update({"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude)})    
             
 
         
-       
-        return self.message
+
+        return "no_data"
 
     def getGpsQuality(self,fixQuality, hdop):
         gpsQuality = GPS_QUALITY.BAD.value
@@ -200,7 +199,7 @@ class gpsHandler(Thread):
     def scan_ports(self):
 
         if sys.platform.startswith('win'):
-            ports = ['COM%s' % (i + 1) for i in range(10)]
+            ports = ['COM%s' % (i + 1) for i in range(6)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
             # this excludes your current terminal "/dev/tty"
             patterns = ('/dev/tty[A-Za-z]*', '/dev/ttyUSB*')
@@ -229,8 +228,17 @@ class gpsHandler(Thread):
     def __knotsToKmh(self, knots):
         factor = 1.852
         result = factor * knots
-        return result  
+        return result
 
+
+
+    def __kmhToMs(self,speedKmh):
+
+        return speedKmh/3.6
+
+
+
+    
 
 
     def __trimLine(self, msg):
