@@ -1,33 +1,43 @@
 import csv
+from collections import defaultdict
+
 path = "C:/Users/tor_9/Documents/csv/"
-pictime = []
-gpstime = []
+millispiclist = []
+millisgpslist = []
+longlist = []
+latlist = []
 # Python code t get difference of two lists
 # Using set()
-def Diff(li1, li2):
-    return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
 
 with open(path +'pictest.csv', newline='') as csvpic:
     picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
     for row in picreader:
-        pictime.append(row[3])
-#print(pictime)
+        millispiclist(row[3])
+
+
 with open(path +'gpstest.csv', newline='') as csvgps:
     gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
     for row in gpsreader:
-        gpstime.append(row[3])
+        millisgpslist(row[3])
+        longlist(row[4])
+        latlist(row[5])
 
-lastpictime = pictime[-1].split(':')
-lastpictime = list(map(int, lastpictime))
+
+
+
+
+print(lastpictime)
+#lastpictime = list(map(int, lastpictime))
 
 
 for i in gpstime:
-        x = i.split(":")         
+        x = i.split(":")  
+        x.reverse()       
         x = list(map(int, x))  
-        print(len(Diff(lastpictime, x)))
-        print(Diff(lastpictime, x))
-        print(lastpictime)
-        print(x)
+        # print(len(Diff(lastpictime, x)))
+        # print(Diff(lastpictime, x))
+        # print(lastpictime)
+        # print(x)
         #if len(temp) >= 3:
         #    print(lastpictime)
         #    print(x)
