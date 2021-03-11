@@ -152,7 +152,7 @@ class gpsHandler(Thread):
 
 
         if(msg.sentence_type=="GGA"):
-            print(repr(msg.timestamp))
+            
 
            
             

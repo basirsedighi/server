@@ -20,6 +20,8 @@ from time import sleep
 import pynmea2
 import math
 import cvb
+import uvicorn
+
 from core.models import models
 import time
 from fastapi.middleware.cors import CORSMiddleware
@@ -156,7 +158,7 @@ async def fps():
     global gps_status
 
 
-    return gps_status
+    return 10
 
 
 
@@ -509,3 +511,8 @@ def shutdown_event():
     imagesave.raise_exception()
     imagesave.join()
     gps.join()
+
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="169.254.108.159", port=8000)
