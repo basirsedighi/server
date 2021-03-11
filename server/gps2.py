@@ -20,8 +20,8 @@ class gpsHandler(Thread):
         Thread.__init__(self)
 
         self.GpsDataUrl ="http://localhost:8000/gpsPost"
-        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False}
-        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False}
+        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,"millis":0}
+        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,'millis':0}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
@@ -86,10 +86,10 @@ class gpsHandler(Thread):
                                             with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
                                 
 
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon"]
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon","millis"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                                 
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon']})
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
                                                 writer.writerow(row)
 
                                        
@@ -138,6 +138,7 @@ class gpsHandler(Thread):
 
     def createMessage(self,msg):
         now = self.getTimeStamp()
+        milliseconds = int(round(time.time() * 1000))
         fix_quality = 0
         hdop = 5
         
@@ -146,7 +147,7 @@ class gpsHandler(Thread):
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
             velocity = self.__kmhToMs(velocity)
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True})
+            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
             return self.message 
       
 

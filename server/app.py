@@ -39,7 +39,7 @@ from multiprocessing import Process,Queue,Pool
 from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
-from core.models.models import GpsData 
+from core.models.models import GpsData ,freq
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -160,6 +160,12 @@ async def fps():
 
     return 10
 
+@app.post('/changeFps')
+async def change(freq:freq):
+    global image_freq
+
+
+
 
 
 @app.get('/start1')
@@ -178,7 +184,7 @@ def startA():
 
             image, status = camera_1.get_image()
 
-            timeStamp = getTimeStamp()
+            timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
             if status == cvb.WaitStatus.Ok:
                 data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
@@ -216,7 +222,7 @@ def startB():
 
             image, status = camera_2.get_image()
 
-            timeStamp = getTimeStamp()
+            timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
             if status == cvb.WaitStatus.Ok:
 
@@ -246,10 +252,10 @@ async def getfreq():
 
 
 @app.post('/changeimagefreq/')
-async def change_image_freq(freq: models.freq):
+async def change_image_freq(freq:freq):
     global image_freq
 
-    image_freq = freq.freq
+    image_freq = freq
 
     return image_freq
 
