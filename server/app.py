@@ -1,11 +1,15 @@
 import numpy as np
 from typing import List
 import cv2
-from fastapi import FastAPI
+from fastapi import FastAPI,Request
 from starlette.responses import HTMLResponse, StreamingResponse
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_until_first_complete
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 from starlette.routing import WebSocketRoute
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from core.cameraStream import CameraStream
 import asyncio
 from concurrent.futures.process import ProcessPoolExecutor
@@ -87,7 +91,11 @@ class GpsData(BaseModel):
     quality:int
 
 
-    
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+templates = Jinja2Templates(directory="templates")
+
     
 
 
@@ -110,6 +118,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    return RedirectResponse("/")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", context={"request": request})
 
 
 @app.get('/gps')
@@ -492,7 +510,7 @@ def shutdown_event():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="169.254.108.159", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
     #169.254.108.159

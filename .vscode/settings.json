@@ -2,5 +2,5 @@
     "python.linting.enabled": false,
     "python.linting.pylintEnabled": true,
     "python.linting.flake8Enabled": false,
-    "python.pythonPath": "C:\\Users\\norby\\AppData\\Local\\Programs\\Python\\Python37\\python.exe"
+    "python.pythonPath": "c:\\Users\\norby\\Documents\\Prosjekter\\bachelor\\server\\venv\\Scripts\\python.exe"
 }
