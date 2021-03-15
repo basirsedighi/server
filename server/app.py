@@ -45,6 +45,7 @@ from core.models.models import GpsData ,freq
 # camera.start_stream()
 manager = ConnectionManager()
 image_freq = 10
+storage = {}
 app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(1)
@@ -111,42 +112,20 @@ app.add_middleware(
 )
 
 
-
-
-
-
-
-
-
-
-
-
 @app.get('/gps')
 async def getData():
-    global gps_status,gps
+    global gps_status,gps,image_freq
 
 
     gps_status = gps.getData()
+
+    image_freq = gps_status['velocity']
    
     return gps_status
 
 
 
-@app.post('/gpsPost')
-async def getData(test:GpsData):
-    global gps_status,logging
 
-    gps_status = test
-
-    #print(gps_status)
-    if(logging):
-
-        
-
-        print("logging")
-
-    
-    return test
 
 
 @app.post('/gpserror')
@@ -156,7 +135,7 @@ async def data(test):
 
 @app.get('/RaspFPS')
 async def fps():
-    global gps_status
+    global image_freq
 
 
     return 10
@@ -175,21 +154,24 @@ def startA():
     global camera_1, isRunning1, image_lock, imageQueue, abort
     i = 0
     
-    #camera_1.start_stream()
+   
     while isRunning1:
 
         if abort:
             break
 
         if isRunning1:
+            try:
 
-            image, status = camera_1.get_image()
+                image, status = camera_1.get_image()
 
             timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
-            if status == cvb.WaitStatus.Ok:
-                data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
-                imageQueue.put(data)
+                if status == cvb.WaitStatus.Ok:
+                    data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
+                    imageQueue.put(data)
+            except Exception:
+                pass
 
             i = i+1
 
@@ -210,7 +192,7 @@ def startB():
     
     i = 0
 
-    #camera_2.start_stream()
+    
     while isRunning2:
         if abort:
             break
@@ -220,16 +202,20 @@ def startB():
         if isRunning2:
 
             
+            try:
+                image, status = camera_2.get_image()
 
             image, status = camera_2.get_image()
 
             timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
-            if status == cvb.WaitStatus.Ok:
+                if status == cvb.WaitStatus.Ok:
 
-                data = {"image": image, "camera": 2, "index": i,"timeStamp":timeStamp}
+                    data = {"image": image, "camera": 2, "index": i,"timeStamp":timeStamp}
 
-                imageQueue.put(data)
+                    imageQueue.put(data)
+            except Exception:
+                pass
 
             i = i+1
 
@@ -245,11 +231,7 @@ def startB():
 
 
 
-@app.get('imagefreq')
-async def getfreq():
-    global image_freq
-    return image_freq
-# change imagefreq from Gui
+
 
 
 @app.post('/changeimagefreq/')
@@ -263,29 +245,12 @@ async def change_image_freq(freq:freq):
 
 @app.get('/storage')
 async def getStorage():
+    global storage
 
-    # Path
+    storages =checkStorageAllDrives()
     
-
-    # Get the disk usage statistics
-    # about the given path
-    stat = shutil.disk_usage("/")
-
-    a, b, c = stat
-
-    # byte to  Gigabyte
-    total = math.floor(a*(10 ** -6))
-    used = math.floor(b *
-                      (10 ** -6))
-
-    free = math.floor(c*(10 ** -6))
-
-    storage = {"total": total, "used": used, "free": free}
-
-    timeleft = estimateStorageTime(storage)
-    payload = {}
-    payload['timeleft'] = timeleft
-    payload['storage'] = storage
+    payload = estimateStorageTime(storages,10)
+    
 
     return payload
 

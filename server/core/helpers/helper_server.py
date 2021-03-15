@@ -1,13 +1,14 @@
 import cvb
 import cv2
 import base64
-import os
+import os,string
 from os import path
 from datetime import datetime
 import math
 import uuid
 from starlette.websockets import WebSocket, WebSocketDisconnect
 import time
+import shutil
 
 
 class ConnectionManager:
@@ -63,6 +64,30 @@ def getTimeStamp():
     return str(timenow) +":"+ str(milliseconds)
 
 
+def checkStorageAllDrives():
+    available_drives = []
+
+
+    for d in string.ascii_uppercase: # Iterating through the english alphabet    
+        path = '%s:' % d    
+        if os.path.exists(path): # checks if path exists
+            available_drives.append(path)  #  append the path from a drive to a list
+
+
+    nested_storage= {'drives':{} } #  Initializing a dictionary
+
+    number= 1 # Variable for 
+    for i in available_drives:  #  Iterating through all drives
+        
+        total, used, free = shutil.disk_usage(i) # Return disk usage statistics about the given path as a named tuple with the attributes total, used and free
+        
+        dictname = "hd"+ str(number)
+        nested_storage['drives'].update ({dictname:{ "name": i,"total": "%d" % (total // (2**30))
+        , "used": "%d" % (used // (2**30)), "free": "%d" % (free // (2**30))}})  #  Appends a dictionary containing storage info(harddrive) into a nested dictionary.
+        number += 1
+
+
+    return nested_storage
 def createFolder():
     
     """Creates a folder at startup in 'bilder' with todays date
@@ -99,20 +124,54 @@ async def createImageFolder(tripName):
         os.makedirs('log/'+str(date)) 
 
 
-def estimateStorageTime(storage):
+def estimateStorageTime(storages,fps):
     # 20 bilder/sek
     # 1 bilde 8000kB
 
-    bilder_pr_sek = 20
-    bilde_size = 9  # Mb
+    total = 0
+    
+    for storage in storages['drives']:
+        
+      
+        bilder_pr_sek = 20
+        bilde_size = 9  # Mb
 
-    free = storage["free"]
+        free = int(storages['drives'][storage]["free"])
+        if storages['drives'][storage]['name'] == "C:":
+
+            pass
+        else:
+
+            total = total + free
+
+        free = free*1000
+        seconds_left = free/(bilder_pr_sek*bilde_size)
+        minleft = math.floor(seconds_left/60)
+        hoursLeft = int(minleft/60)
+        minleft = minleft % 60
+
+        storages['drives'][storage]['h'] = hoursLeft
+        storages['drives'][storage]['m'] =minleft
+    
+
+
+    storages['total'] = {'free':total,'timeleft':{}}
+    free = total*1000
     seconds_left = free/(bilder_pr_sek*bilde_size)
     minleft = math.floor(seconds_left/60)
     hoursLeft = int(minleft/60)
     minleft = minleft % 60
 
-    return {"h": hoursLeft, "m": minleft}
+    storages['total'].update({'timeleft':{'h':hoursLeft,'m':minleft}})
+
+    storages['total'].update({'h': hoursLeft})
+    storages['total'].update({'m':minleft})
+
+
+
+
+
+    return storages
 
 def getDate():
 
