@@ -88,6 +88,7 @@ class gpsHandler(Thread):
 
                                                 fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon","millis"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                                writer.writeheader()
                                                 
                                                 row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
                                                 writer.writerow(row)

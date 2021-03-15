@@ -22,6 +22,7 @@ import math
 import cvb
 import uvicorn
 
+
 from core.models import models
 import time
 from fastapi.middleware.cors import CORSMiddleware
@@ -352,6 +353,7 @@ async def initCameraA():
 async def loadConfig():
     global camera_1,camera_2,config_loaded
     status="Konfig vellykket"
+    cameraStatus = "config_ok"
     try:
         camera_1.loadConfig()
         camera_2.loadConfig()
@@ -359,13 +361,14 @@ async def loadConfig():
         config_loaded = True
     except:
         print("config failed")
+        cameraStatus ="config_failed"
         status = "Konfig feilet"
         config_loaded = False
 
     finally:
 
-        
-        
+        await manager.broadcast(json.dumps({"event": "initB", "data": cameraStatus}))
+        await manager.broadcast(json.dumps({"event": "initA", "data": cameraStatus}))
         await manager.broadcast(json.dumps({"event": "loadConfig", "data": status}))
 
  
@@ -452,6 +455,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 
                 else:
 
+
+                    await manager.broadcast(json.dumps({"event": "initB", "data": "config_ok"}))
+                    await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
                 
 
@@ -521,7 +527,7 @@ def shutdown_event():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="169.254.108.159", port=8000)
 
 
     #169.254.108.159
