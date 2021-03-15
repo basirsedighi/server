@@ -165,7 +165,7 @@ def startA():
 
                 image, status = camera_1.get_image()
 
-            timeStamp = int(round(time.time() * 1000))#getTimeStamp()
+                timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
                 if status == cvb.WaitStatus.Ok:
                     data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
@@ -205,9 +205,9 @@ def startB():
             try:
                 image, status = camera_2.get_image()
 
-            image, status = camera_2.get_image()
+            
 
-            timeStamp = int(round(time.time() * 1000))#getTimeStamp()
+                timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
                 if status == cvb.WaitStatus.Ok:
 
