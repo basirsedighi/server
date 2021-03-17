@@ -73,6 +73,8 @@ logging = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
+drive_in_use ="C:"
+storageLeft_in_use = 50
 
 #manage socket connections
 manager = ConnectionManager()
@@ -263,16 +265,43 @@ async def change_image_freq(freq:freq):
 
 @app.get('/storage')
 async def getStorage():
-    global storage
+    global storage,imagesave
 
     storages =checkStorageAllDrives()
+    storageLeft(storages)
+
     
     payload = estimateStorageTime(storages,10)
+
+    total = payload['total']['free']
+    if int(total)<10:
+        abortStream()
+        
     
 
     return payload
 
 # estimate hows
+
+def storageLeft(storages):
+    global drive_in_use,imagesave,storageLeft_in_use
+
+    drives = storages['drives']
+
+    for i in drives:
+        drive = drives[i]
+
+        if(drive['name'] == drive_in_use):
+
+            storageLeft_in_use = int(drive['free'])
+            imagesave.setStorageLeft(int(drive['free']))
+            
+
+
+
+
+
+        
 
 
 
@@ -413,7 +442,7 @@ def video_feed():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps
+    global started,config_loaded,imagesave,gps,drive_in_use
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -449,7 +478,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == 'start'):
                 imagesave.setTripName(str(msg))
                 gps.setTripName(str(msg))
-                await createImageFolder(msg)
+                drive_in_use = await createImageFolder(msg)
+                imagesave.setDrive(drive_in_use)
                 await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
                 

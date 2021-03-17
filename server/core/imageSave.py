@@ -8,7 +8,7 @@ from datetime import datetime
 import cvb
 import ctypes
 import csv
-from multiprocessing import Process
+from core.helpers.helper_server import most_free_space
 
 
 class ImageSave(Thread):
@@ -21,6 +21,8 @@ class ImageSave(Thread):
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.path = self.fixPath(self.path)
         self.date = self.getDate()
+        self.drive = 'C:'
+        self.storageLeft = 50
 
 
     def fixPath(self,path):
@@ -53,9 +55,13 @@ class ImageSave(Thread):
 
                     
                     try:
+
+                        if self.storageLeft < 5:
+                           newDrive = most_free_space()
+                           self.drive = newDrive['name']
                         
                         
-                        image.save(
+                        image.save(self.drive+"/"+
                         "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
 
                         with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+".csv",'a',newline='')as csvfile:
@@ -88,11 +94,23 @@ class ImageSave(Thread):
 
         self.isRunning = False
     
+    def setDrive(self,drive):
+
+        self.drive = drive
+
 
     def getDate(self):
 
         return datetime.today().strftime('%Y-%m-%d')
     
+
+    def setStorageLeft(self,storage):
+
+        self.storageLeft = storage
+        
+
+
+
 
     def getTimeStamp(self):
 

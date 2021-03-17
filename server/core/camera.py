@@ -14,6 +14,7 @@ class Camera:
 
 
     def loadConfig(self):
+        
 
         self.device = cvb.DeviceFactory.open(os.path.join(
             cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)

@@ -11,6 +11,7 @@ import time
 import shutil
 
 
+
 class ConnectionManager:
     """class that handles the socket connections
 
@@ -88,6 +89,72 @@ def checkStorageAllDrives():
 
 
     return nested_storage
+
+
+
+def most_free_space():
+    
+    useableDrives = {}
+    drives = checkStorageAllDrives()
+    drives = drives['drives']
+
+
+    for drive in drives:
+
+        hd = drives[drive]
+
+        if(hd['name']=='C:'):
+            pass
+
+        else:
+            useableDrives.update({hd['name']:hd})
+            onedrive = hd
+    bestDrive ={}
+    if len(useableDrives)> 1:
+        
+    
+
+       
+        for drive in useableDrives:
+            drive1 = useableDrives[drive]
+            free = drive1['free']
+            for drives in useableDrives:
+                drive2 = useableDrives[drives]
+                compare = int(drive2['free'])
+                if int(free) > compare:
+                    bestDrive = drive1
+                
+                elif int(free)< compare:
+                    bestDrive = drive2
+    
+    else:
+
+        bestDrive = onedrive
+
+            
+            
+        
+
+    
+    return bestDrive
+
+
+
+
+
+def getExternalStorage():
+    available_drives = []
+
+
+    for d in string.ascii_uppercase: # Iterating through the english alphabet    
+        path = '%s:' % d    
+        if os.path.exists(path): # checks if path exists
+            available_drives.append(path)  #  append the path from a drive to a list
+    
+
+    return available_drives
+    
+
 def createFolder():
     
     """Creates a folder at startup in 'bilder' with todays date
@@ -95,6 +162,8 @@ def createFolder():
     parameter: cvb Image
     """
     date = getDate()
+
+    
 
         #   Making a folder for the images
     if not path.exists('bilder/'+date):
@@ -105,16 +174,23 @@ def createFolder():
 async def createImageFolder(tripName):
    
     date = getDate()
+
+    bestDrive = most_free_space()
+    drive = bestDrive['name']
+
+
+
     
-    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
+    
+    if not path.exists(drive+"/"+"bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
        
-        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
+        os.makedirs(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
         
     
-    if not path.exists("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
+    if not path.exists(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
     
         
-        os.makedirs("bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+        os.makedirs(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
 
     
 
@@ -123,6 +199,8 @@ async def createImageFolder(tripName):
 
         os.makedirs('log/'+str(date)) 
 
+
+    return drive
 
 def estimateStorageTime(storages,fps):
     # 20 bilder/sek
