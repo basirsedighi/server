@@ -43,6 +43,6 @@ while True:
     except Exception as e:
         print(e)
         myPWM.ChangeDutyCycle(50)
-        myPWM.ChangeFrequency(5)
+        myPWM.ChangeFrequency(0)
 
 GPIO.cleanup()
