@@ -160,7 +160,7 @@ async def fps():
     global image_freq,start_Puls
 
 
-    return {'fps':5,"start":start_Puls}
+    return {'fps':1,"start":start_Puls}
 
 @app.post('/changeFps')
 async def change(freq:freq):
@@ -193,13 +193,14 @@ def startA():
 
             if status == cvb.WaitStatus.Ok:
                 timeStamp = int(time.time() * 1000)#getTimeStamp()
-                #timeStamp= image.raw_timestamp
+                
                 data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp}
                 imageQueue.put(data)
 
                 index = index +1
             
-
+            else:
+                print("SOMETHING WRONG 1")
 
         except Exception as e :
 
@@ -247,6 +248,8 @@ def startB():
                 imageQueue.put(data)
 
                 index = index +1
+            else:
+                print("SOMETHING WRONG 1")
         except Exception as e:
             print(e)
             pass
@@ -266,11 +269,11 @@ async def abortStream():
     global isRunning1, isRunning2, abort,gps,start_Puls
     print("stopping stream")
     start_Puls = False
-    #abort = not abort
+    abort = not abort
 
-    # isRunning1 = not isRunning1
-    # isRunning2 = not isRunning2
-    #isRunning = not isRunning
+    isRunning1 = not isRunning1
+    isRunning2 = not isRunning2
+   
 
     gps.toggleLogging()
 
@@ -460,7 +463,7 @@ async def validate(cam):
         
 
     finally:
-        manager.broadcast(json.dumps({"event":"validerfailed","data":"feeeels"}))
+      await manager.broadcast(json.dumps({"event":"validerfailed","data":"feeeels"}))
         
         
 
