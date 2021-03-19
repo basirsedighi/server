@@ -343,7 +343,7 @@ def gen():
 
 
 async def abortStream():
-    global isRunning1, isRunning2, abort,gps,isRunning
+    global isRunning1, isRunning2, abort,gps,start_Puls
     print("stopping stream")
     abort = not abort
 
@@ -352,6 +352,8 @@ async def abortStream():
     #isRunning = not isRunning
 
     gps.toggleLogging()
+
+    start_Puls = False
 
 
 
@@ -365,7 +367,12 @@ async def start_acquisition():
     isRunning2 = not isRunning2
     #isRunning = not isRunning
 
-    
+
+
+def startPulse():
+    global start_Puls
+
+    start_Puls = True
 
    
 
@@ -505,13 +512,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 imagesave.setDrive(drive_in_use)
-                await manager.broadcast(json.dumps({"event": "starting"}))
                 await start_acquisition()
+                await manager.broadcast(json.dumps({"event": "starting"}))
+                
                 
                 
 
                 
-
+            elif(event =="pulse"):
+                pass
+                #startPulse()
             elif(event == 'stop'):
                 started = False
                 await abortStream()
