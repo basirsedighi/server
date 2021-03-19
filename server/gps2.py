@@ -88,7 +88,7 @@ class gpsHandler(Thread):
 
                                                 fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon","millis"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                                writer.writeheader()
+                                                #writer.writeheader()
                                                 
                                                 row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
                                                 writer.writerow(row)
@@ -139,7 +139,7 @@ class gpsHandler(Thread):
 
     def createMessage(self,msg):
         now = self.getTimeStamp()
-        milliseconds = int(round(time.time() * 1000))
+        milliseconds = int(time.time() * 1000)
         fix_quality = 0
         hdop = 5
         

@@ -185,9 +185,11 @@ def startA():
 
                 image, status = camera_1.get_image()
 
-                timeStamp = int(round(time.time() * 1000))#getTimeStamp()
+               
 
                 if status == cvb.WaitStatus.Ok:
+                    timeStamp = int(time.time() * 1000)#getTimeStamp()
+                    #timeStamp= image.raw_timestamp
                     data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
                     imageQueue.put(data)
             except Exception:
@@ -419,6 +421,8 @@ async def validate(cam):
 
     frame, status = camera.getSnapShot()
     if status == cvb.WaitStatus.Ok:
+
+        
 
         b64 = cvbImage_b64(frame)
 
