@@ -14,25 +14,28 @@ while True:
 
     try:
     
-        response = requests.get(RestConnect).json
-        print(response)
-        #response = "15"
-        if int(response)==0:
-            myPWM.ChangeDutyCycle(0)
-            if i%100==0:
-                print("1")
-                #messagePOST = RestConnect+"?FPS=0"
+        response = requests.get(RestConnect)
+        data = response.json()
+        fps = data['fps']
+        start = data['start']
+
+        if start:
+            if int(response)==0:
+                myPWM.ChangeDutyCycle(0)
+                if i%100==0:
+                    print("1")
+                    #messagePOST = RestConnect+"?FPS=0"
+                    #requests.post(messagePOST)
+            elif int(response)!= fps:
+                fps = int(response)
+                myPWM.ChangeDutyCycle(50)
+                myPWM.ChangeFrequency(int(fps))
+            elif fps==int(response) and i%100==0:
+                #messagePOST = RestConnect+"?FPS="+str(fps)
                 #requests.post(messagePOST)
-        elif int(response)!= fps:
-            fps = int(response)
-            myPWM.ChangeDutyCycle(50)
-            myPWM.ChangeFrequency(int(fps))
-        elif fps==int(response) and i%100==0:
-            #messagePOST = RestConnect+"?FPS="+str(fps)
-            #requests.post(messagePOST)
-            myPWM.ChangeDutyCycle(50)
-            myPWM.ChangeFrequency(int(fps))
-            
+                myPWM.ChangeDutyCycle(50)
+                myPWM.ChangeFrequency(int(fps))
+                
         
         
         i=i+1
