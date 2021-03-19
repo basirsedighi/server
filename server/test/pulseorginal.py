@@ -36,6 +36,9 @@ while True:
                 #requests.post(messagePOST)
                 myPWM.ChangeDutyCycle(50)
                 myPWM.ChangeFrequency(int(fps))
+        else:
+            myPWM.ChangeDutyCycle(0)
+
                 
         
         
