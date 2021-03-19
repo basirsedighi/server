@@ -160,7 +160,7 @@ async def fps():
     global image_freq,start_Puls
 
 
-    return {'fps':20,"start":start_Puls}
+    return {'fps':5,"start":start_Puls}
 
 @app.post('/changeFps')
 async def change(freq:freq):
@@ -232,12 +232,7 @@ def startB():
     while isRunning2:
         if abort:
             break
-
-        
-
-        
-
-            
+   
         try:
             image, status = camera_2.get_image()
 
@@ -267,9 +262,28 @@ def startB():
 
 
 
+async def abortStream():
+    global isRunning1, isRunning2, abort,gps,start_Puls
+    print("stopping stream")
+    start_Puls = False
+    #abort = not abort
+
+    # isRunning1 = not isRunning1
+    # isRunning2 = not isRunning2
+    #isRunning = not isRunning
+
+    gps.toggleLogging()
 
 
+async def start_acquisition():
+    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning
+    print("Starting stream")
 
+    gps.toggleLogging()
+    
+    isRunning1 = not isRunning1
+    isRunning2 = not isRunning2
+    #isRunning = not isRunning
 
 
 
@@ -342,30 +356,12 @@ def gen():
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
-async def abortStream():
-    global isRunning1, isRunning2, abort,gps,start_Puls
-    print("stopping stream")
-    abort = not abort
 
-    isRunning1 = not isRunning1
-    isRunning2 = not isRunning2
-    #isRunning = not isRunning
-
-    gps.toggleLogging()
-
-    start_Puls = False
-
-
-
-async def start_acquisition():
-    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning
-    print("Starting stream")
-
-    gps.toggleLogging()
     
-    isRunning1 = not isRunning1
-    isRunning2 = not isRunning2
-    #isRunning = not isRunning
+
+
+
+
 
 
 
@@ -438,15 +434,16 @@ async def initCameraB():
 
 
 async def validate(cam):
-    global camera_1, camera_2, valider
-    data = ""
-    camera = None
-    if cam == 'A':
-        camera = camera_1
-
-    else:
-        camera = camera_2
+    global camera_1, camera_2
     try:
+        
+        camera = None
+        if cam == 'A':
+            camera = camera_1
+
+        else:
+            camera = camera_2
+    
         frame, status = camera.getSnapShot()
         if status == cvb.WaitStatus.Ok:
 
@@ -457,11 +454,15 @@ async def validate(cam):
             raw_data = {"event": "snapshot", "data": b64}
 
             data = json.dumps(raw_data)
-    except Exception:
-        pass
+            await manager.broadcast(data)
+    except Exception as e:
+        print(e)
+        
 
     finally:
-        await manager.broadcast(data)
+        manager.broadcast(json.dumps({"event":"validerfailed","data":"feeeels"}))
+        
+        
 
 
 @app.get('/video_feed1')
@@ -523,8 +524,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 
             elif(event =="pulse"):
-                pass
-                #startPulse()
+                
+                startPulse()
             elif(event == 'stop'):
                 started = False
                 await abortStream()

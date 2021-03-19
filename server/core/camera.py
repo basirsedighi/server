@@ -50,7 +50,7 @@ class Camera:
         self.stream = None
 
     def stopStream(self):
-        self.stream.stop()
+        self.stream.abort()
 
     def getPort(self):
         return self.port
