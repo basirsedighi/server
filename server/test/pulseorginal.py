@@ -4,7 +4,7 @@ import requests
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
-myPWM = GPIO.PWM(18,50)
+myPWM = GPIO.PWM(18,0)
 myPWM.start(0)
 fps = None
 i = 0
