@@ -73,6 +73,8 @@ logging = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
+isRunning = False
+start_Puls = False
 drive_in_use ="C:"
 storageLeft_in_use = 50
 
@@ -155,10 +157,10 @@ async def data(test):
 
 @app.get('/RaspFPS')
 async def fps():
-    global image_freq
+    global image_freq,start_Puls
 
 
-    return 10
+    return {'fps':20,"start":start_Puls}
 
 @app.post('/changeFps')
 async def change(freq:freq):
@@ -171,31 +173,40 @@ async def change(freq:freq):
 @app.get('/start1')
 def startA():
 
-    global camera_1, isRunning1, image_lock, imageQueue, abort
-    i = 0
+    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning
+    index = 0
     
-   
+    print("started camera 1")
+    print(time.time()*1000)
+    camera_1.start_stream()
     while isRunning1:
 
         if abort:
             break
 
-        if isRunning1:
-            try:
+        
+        try:
 
-                image, status = camera_1.get_image()
+            image, status = camera_1.get_image()
 
-               
+            
 
-                if status == cvb.WaitStatus.Ok:
-                    timeStamp = int(time.time() * 1000)#getTimeStamp()
-                    #timeStamp= image.raw_timestamp
-                    data = {"image": image, "camera": 1, "index": i,"timeStamp":timeStamp}
-                    imageQueue.put(data)
-            except Exception:
-                pass
+            if status == cvb.WaitStatus.Ok:
+                timeStamp = int(time.time() * 1000)#getTimeStamp()
+                #timeStamp= image.raw_timestamp
+                data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp}
+                imageQueue.put(data)
 
-            i = i+1
+                index = index +1
+            
+
+
+        except Exception as e :
+
+            print(e)
+            pass
+
+            
 
     camera_1.stopStream()
 
@@ -208,38 +219,44 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning2, image_lock, imageQueue, abort
+    global camera_2, isRunning2, image_lock, imageQueue, abort,isRunning
     
 
     
-    i = 0
-
+   
+    index = 0
+    print("started camera 2") 
+    print(time.time()*1000) 
     
+    camera_2.start_stream()
     while isRunning2:
         if abort:
             break
 
         
 
-        if isRunning2:
+        
 
             
-            try:
-                image, status = camera_2.get_image()
+        try:
+            image, status = camera_2.get_image()
 
-            
+        
 
-                timeStamp = int(round(time.time() * 1000))#getTimeStamp()
+            timeStamp = int(round(time.time() * 1000))#getTimeStamp()
 
-                if status == cvb.WaitStatus.Ok:
+            if status == cvb.WaitStatus.Ok:
 
-                    data = {"image": image, "camera": 2, "index": i,"timeStamp":timeStamp}
+                data = {"image": image, "camera": 2, "index": index,"timeStamp":timeStamp}
 
-                    imageQueue.put(data)
-            except Exception:
-                pass
+                imageQueue.put(data)
 
-            i = i+1
+                index = index +1
+        except Exception as e:
+            print(e)
+            pass
+
+          
 
     # closing all open windows
 
@@ -326,27 +343,31 @@ def gen():
 
 
 async def abortStream():
-    global isRunning1, isRunning2, abort,gps
+    global isRunning1, isRunning2, abort,gps,isRunning
     print("stopping stream")
     abort = not abort
 
     isRunning1 = not isRunning1
     isRunning2 = not isRunning2
+    #isRunning = not isRunning
+
     gps.toggleLogging()
 
 
 
 async def start_acquisition():
-    global isRunning1, isRunning2,camera_1,camera_2,gps
+    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning
     print("Starting stream")
 
     gps.toggleLogging()
-
-    camera_1.start_stream()
-    camera_2.start_stream()
-
+    
     isRunning1 = not isRunning1
     isRunning2 = not isRunning2
+    #isRunning = not isRunning
+
+    
+
+   
 
 
 async def initCameraA():

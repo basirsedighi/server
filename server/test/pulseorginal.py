@@ -14,7 +14,7 @@ while True:
 
     try:
     
-        response = requests.get(RestConnect).text
+        response = requests.get(RestConnect).json
         print(response)
         #response = "15"
         if int(response)==0:
