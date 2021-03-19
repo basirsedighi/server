@@ -439,25 +439,28 @@ async def initCameraB():
 
 async def validate(cam):
     global camera_1, camera_2, valider
-
+    data = ""
     camera = None
     if cam == 'A':
         camera = camera_1
 
     else:
         camera = camera_2
+    try:
+        frame, status = camera.getSnapShot()
+        if status == cvb.WaitStatus.Ok:
 
-    frame, status = camera.getSnapShot()
-    if status == cvb.WaitStatus.Ok:
+            
 
-        
+            b64 = cvbImage_b64(frame)
 
-        b64 = cvbImage_b64(frame)
+            raw_data = {"event": "snapshot", "data": b64}
 
-        raw_data = {"event": "snapshot", "data": b64}
+            data = json.dumps(raw_data)
+    except Exception:
+        pass
 
-        data = json.dumps(raw_data)
-
+    finally:
         await manager.broadcast(data)
 
 
