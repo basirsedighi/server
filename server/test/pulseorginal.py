@@ -15,7 +15,7 @@ while True:
     try:
     
         response = requests.get(RestConnect).json
-        print(response.fps)
+        print(response)
         #response = "15"
         if int(response)==0:
             myPWM.ChangeDutyCycle(0)
