@@ -280,8 +280,8 @@ async def abortStream():
     
     abort = True
 
-    isRunning1 = not isRunning1
-    isRunning2 = not isRunning2
+    isRunning1 = False
+    isRunning2 = False
    
     image_freq = 0
     gps.toggleLogging()
@@ -293,8 +293,8 @@ async def start_acquisition():
     abort=False
     gps.toggleLogging()
     
-    isRunning1 = not isRunning1
-    isRunning2 = not isRunning2
+    isRunning1 = True
+    isRunning2 = True
     #isRunning = not isRunning
 
 

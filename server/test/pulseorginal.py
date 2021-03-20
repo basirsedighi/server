@@ -6,7 +6,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
 myPWM = GPIO.PWM(18,50)
 myPWM.start(10)
-fps = None
+fps = 0
 i = 0
 Restget ="http://192.168.0.100:8000/RaspFPS"
 
@@ -20,22 +20,25 @@ while True:
         data = response.json()
         fps_new = data['fps']
         start = data['start']
-        print(fps)
+        fps = fps_new
+
+        myPWM.ChangeDutyCycle(50)
+        myPWM.ChangeFrequency(int(fps))
 
         
-        if int(fps_new)==0:
-            myPWM.ChangeDutyCycle(0)
-            if i%100==0:
-                print("1")
+        # if int(fps_new)==0:
+        #     myPWM.ChangeDutyCycle(0)
+        #     if i%100==0:
+        #         print("1")
                
-        elif int(fps_new)!= fps:
-            fps = int(fps_new)
-            myPWM.ChangeDutyCycle(50)
-            myPWM.ChangeFrequency(int(fps))
-        elif fps==int(fps_new) and i%100==0:
+        # elif int(fps_new)!= fps:
+        #     fps = int(fps_new)
+        #     myPWM.ChangeDutyCycle(50)
+        #     myPWM.ChangeFrequency(int(fps))
+        # elif fps==int(fps_new) and i%100==0:
            
-            myPWM.ChangeDutyCycle(50)
-            myPWM.ChangeFrequency(int(fps))
+        #     myPWM.ChangeDutyCycle(50)
+        #     myPWM.ChangeFrequency(int(fps))
         
 
                 
