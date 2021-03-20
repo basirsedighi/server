@@ -160,11 +160,14 @@ async def fps():
     global image_freq,start_Puls
 
 
-    return {'fps':1,"start":start_Puls}
+    return {'fps':image_freq,"start":start_Puls}
 
 @app.post('/changeFps')
 async def change(freq:freq):
     global image_freq
+
+
+    image_freq = freq
 
 
 
