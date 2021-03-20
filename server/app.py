@@ -372,9 +372,11 @@ def gen():
 
 
 def startPulse():
-    global start_Puls
+    global image_freq
 
-    start_Puls = True
+        image_freq = 10
+
+    
 
    
 
