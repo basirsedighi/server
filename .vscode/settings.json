@@ -2,5 +2,9 @@
     "python.linting.enabled": false,
     "python.linting.pylintEnabled": true,
     "python.linting.flake8Enabled": false,
+<<<<<<< HEAD
     "python.pythonPath": "c:\\Users\\norby\\Documents\\Prosjekter\\bachelor\\server\\venv\\Scripts\\python.exe"
+=======
+    "python.pythonPath": "C:\\Users\\tor_9\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
+>>>>>>> gpsgen
 }
