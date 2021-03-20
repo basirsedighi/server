@@ -269,9 +269,9 @@ def startB():
 
 
 async def abortStream():
-    global isRunning1, isRunning2, abort,gps,start_Puls
+    global isRunning1, isRunning2, abort,gps,start_Puls,image_freq
     print("stopping stream")
-    start_Puls = False
+    image_freq = 0
     abort = not abort
 
     isRunning1 = not isRunning1
@@ -374,7 +374,8 @@ def gen():
 def startPulse():
     global image_freq
 
-        image_freq = 10
+
+    image_freq = 10
 
     
 
