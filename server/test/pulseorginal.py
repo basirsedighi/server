@@ -20,7 +20,7 @@ while True:
         data = response.json()
         fps_new = data['fps']
         start = data['start']
-        print(fps_new)
+        print(fps)
 
         
         if int(fps_new)==0:
