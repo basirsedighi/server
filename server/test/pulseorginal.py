@@ -12,6 +12,8 @@ Restget ="http://192.168.0.100:8000/RaspFPS"
 
 while True:
 
+    time.sleep(2)
+
     try:
     
         response = requests.get(Restget)
