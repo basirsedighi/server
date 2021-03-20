@@ -48,7 +48,7 @@ from core.models.models import GpsData ,freq
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
-image_freq = 10
+image_freq = 0
 storage = {}
 app = FastAPI()
 image_lock = Lock()
@@ -167,7 +167,7 @@ async def change(freq:freq):
     global image_freq
 
 
-    image_freq = freq
+    #image_freq = freq
 
 
 
@@ -252,7 +252,7 @@ def startB():
 
                 index = index +1
             else:
-                print("SOMETHING WRONG 1")
+                print("SOMETHING WRONG 2")
         except Exception as e:
             print(e)
             pass
