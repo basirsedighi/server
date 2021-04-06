@@ -48,16 +48,22 @@ from core.models.models import GpsData ,freq
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
-image_freq = 0
+image_freq = 5
 storage = {}
 app = FastAPI()
 image_lock = Lock()
-camera_1 = Camera(1)
-camera_2 = Camera(0)
+camera_1 = Camera(0)
+camera_2 = Camera(1)
+camera_3 = Camera(2)
 gps = gpsHandler()
 imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
+
+#temp images to show user
+temp_img_1 = None
+temp_img_2 =None
+temp_img_3 =None
 
 #g = Gps('C:/Users/norby/Desktop')
 
@@ -73,6 +79,7 @@ logging = False
 closeServer = False
 isRunning1 = False
 isRunning2 = False
+isRunning3 = False
 isRunning = False
 start_Puls = False
 drive_in_use ="C:"
@@ -178,17 +185,18 @@ def startA():
 
     global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning
     index = 0
+    test  =0
     
     print("started camera 1")
     print(time.time()*1000)
-    camera_1.start_stream()
+    #camera_1.start_stream()
     while True:
 
         if abort:
             break
 
-        if isRunning1:
-
+       
+        if isRunning1:    
         
             try:
 
@@ -197,23 +205,33 @@ def startA():
                 
 
                 if status == cvb.WaitStatus.Ok:
-                    timeStamp = int(time.time() * 1000)#getTimeStamp()
+                    timeStamp = int(time.time() * 1000) #getTimeStamp()
                     
                     data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp}
                     imageQueue.put(data)
-
                     index = index +1
                 
-                else:
-                    print("SOMETHING WRONG 1")
+                elif status == cvb.WaitStatus.Abort:
+                    print("stream 1 abort")
+                    break
+
+                elif status == cvb.WaitStatus.Timeout and isRunning1:
+                    print("stream 1 timeout")
+                    break
+
+                    
+                
+                
+                
+                
 
             except Exception as e :
 
                 print(e)
                 pass
 
-            
-    print("stream 1 stopped")
+    isRunning1=False        
+    print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
 
     return "stream 1 has stopped"
@@ -231,71 +249,160 @@ def startB():
     
    
     index = 0
+    test =0
     print("started camera 2") 
     print(time.time()*1000) 
     
-    camera_2.start_stream()
+    #camera_2.start_stream()
     while True:
         if abort:
             break
 
-
         if isRunning2:
+
+        
    
             try:
                 image, status = camera_2.get_image()
 
             
 
-                timeStamp = int(round(time.time() * 1000))#getTimeStamp()
+                #getTimeStamp()
 
                 if status == cvb.WaitStatus.Ok:
+                    timeStamp = int(time.time() * 1000)
 
                     data = {"image": image, "camera": 2, "index": index,"timeStamp":timeStamp}
 
                     imageQueue.put(data)
-
                     index = index +1
-                else:
-                    print("SOMETHING WRONG 2")
+                
+                elif status == cvb.WaitStatus.Abort :
+                    print("stream 2 abort")
+                    break
+
+                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                    print("stream 2 timeout")
+                    break
+
+                    
+                
+                
+
+                
             except Exception as e:
                 print(e)
                 pass
 
           
 
-    
-    print("stream 2 stopped")
-
+    isRunning2=False
     camera_2.stopStream()
+    print("stream 2 stopped: "+str(index))
+
+    
+
+    return "stream2 has stopped"
+    # start bildetaking
+
+@app.get('/start3')
+def startB():
+
+    global camera_3, isRunning3, image_lock, imageQueue, abort
+    
+
+    
+   
+    index = 0
+    test =0
+    print("started camera 2") 
+    print(time.time()*1000) 
+    
+    
+    while True:
+        if abort:
+            break
+
+        if isRunning2:
+
+        
+   
+            try:
+                image, status = camera_3.get_image()
+
+            
+
+                #getTimeStamp()
+
+                if status == cvb.WaitStatus.Ok:
+                    timeStamp = int(time.time() * 1000)
+
+                    data = {"image": image, "camera": 3, "index": index,"timeStamp":timeStamp}
+
+                    imageQueue.put(data)
+                    index = index +1
+                
+                elif status == cvb.WaitStatus.Abort :
+                    print("stream 3 abort")
+                    break
+
+                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                    print("stream 3 timeout")
+                    break
+
+                    
+                
+                
+
+                
+            except Exception as e:
+                print(e)
+                pass
+
+          
+
+    isRunning3=False
+    camera_3.stopStream()
+    print("stream 3 stopped: "+str(index))
+
+    
 
     return "stream2 has stopped"
     # start bildetaking
 
 
-
 async def abortStream():
-    global isRunning1, isRunning2, abort,gps,start_Puls,image_freq
+    global camera_1,camera_2, abort,gps,start_Puls,image_freq
     print("stopping stream")
-    
-    abort = True
-
-    isRunning1 = False
-    isRunning2 = False
-   
     image_freq = 0
+
+   
+
+
+    
+   
+    
     gps.toggleLogging()
 
 
 async def start_acquisition():
-    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort
+    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
     print("Starting stream")
     abort=False
+    
+    
     gps.toggleLogging()
     
+    
+   
+    
+def startPulse():
+    global image_freq,isRunning1,isRunning2
+    
+
     isRunning1 = True
     isRunning2 = True
-    #isRunning = not isRunning
+    image_freq = 5
 
 
 
@@ -306,6 +413,11 @@ async def change_image_freq(freq:freq):
     image_freq = freq
 
     return image_freq
+
+
+def toggleGPSControl():
+
+    gpsControl =  not gpsControl
 
 
 @app.get('/storage')
@@ -377,11 +489,7 @@ def gen():
 
 
 
-def startPulse():
-    global image_freq
 
-
-    image_freq = 10
 
     
 
@@ -395,11 +503,18 @@ async def initCameraA():
     status = "ok"
     try:
         camera_1.init()
+       
+        
+        if not camera_1.isRunning():
+            
+            camera_1.start_stream()
+
 
     except:
-        print("initializing of camera failed")
+        print("initializing of cmera failed")
         status = "failed"
     finally:
+        
         await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
 
@@ -429,15 +544,20 @@ async def loadConfig():
 async def initCameraB():
     global camera_2
     status = "ok"
+
     try:
         camera_2.init()
+        if not camera_2.isRunning():
+
+            camera_2.start_stream()
+       
 
     except:
         print("initializing of camera failed")
         status = "failed"
     finally:
         await manager.broadcast(json.dumps({"event": "initB", "data": status}))
-
+        
 
 
 
@@ -459,7 +579,7 @@ async def validate(cam):
         else:
             camera = camera_2
     
-        frame, status = camera.getSnapShot()
+        frame, status = camera.get_image()
         if status == cvb.WaitStatus.Ok:
 
             
@@ -550,6 +670,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "init"):
                 await initCameraA()
                 await initCameraB()
+                
 
             elif(event == "stream"):
                 await startStreamA()

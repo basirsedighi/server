@@ -9,7 +9,7 @@ class Camera:
         self.image = None
         self.device = None
         self.stream = None
-        self.config_path ="core/config/nyconf.gcs"
+        self.config_path ="core/config/conf1.gcs"
         
 
 
@@ -41,7 +41,7 @@ class Camera:
 
     def get_image(self):
 
-        image, status = self.stream.wait_for(1000)
+        image, status = self.stream.wait_for(8000)
         return image, status
 
     def abortStream(self):
@@ -50,7 +50,7 @@ class Camera:
         self.stream = None
 
     def stopStream(self):
-        self.stream.abort()
+        self.stream.stop()
 
     def getPort(self):
         return self.port
@@ -61,3 +61,6 @@ class Camera:
     def getSnapShot(self):
         image, status = self.stream.get_snapshot()
         return image, status
+
+    def isRunning(self):
+        return self.stream.is_running
