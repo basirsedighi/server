@@ -189,7 +189,6 @@ def startA():
     
     print("started camera 1")
     print(time.time()*1000)
-    #camera_1.start_stream()
     while True:
 
         if abort:
@@ -253,7 +252,7 @@ def startB():
     print("started camera 2") 
     print(time.time()*1000) 
     
-    #camera_2.start_stream()
+    
     while True:
         if abort:
             break
@@ -306,7 +305,7 @@ def startB():
     # start bildetaking
 
 @app.get('/start3')
-def startB():
+def startC():
 
     global camera_3, isRunning3, image_lock, imageQueue, abort
     
@@ -323,7 +322,7 @@ def startB():
         if abort:
             break
 
-        if isRunning2:
+        if isRunning3:
 
         
    
@@ -389,6 +388,7 @@ async def start_acquisition():
     global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
     print("Starting stream")
     abort=False
+    image_freq = 0
     
     
     gps.toggleLogging()
@@ -397,11 +397,13 @@ async def start_acquisition():
    
     
 def startPulse():
-    global image_freq,isRunning1,isRunning2
+    global image_freq,isRunning1,isRunning2,isRunning3
     
 
     isRunning1 = True
     isRunning2 = True
+    isRunning3 = True
+
     image_freq = 5
 
 
@@ -559,7 +561,22 @@ async def initCameraB():
         await manager.broadcast(json.dumps({"event": "initB", "data": status}))
         
 
+async def initCameraC():
+    global camera_3
+    status = "ok"
 
+    try:
+        camera_3.init()
+        if not camera_3.isRunning():
+
+            camera_3.start_stream()
+       
+
+    except:
+        print("initializing of camera failed")
+        status = "failed"
+    finally:
+        await manager.broadcast(json.dumps({"event": "initC", "data": status}))
 
 
 
@@ -670,6 +687,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "init"):
                 await initCameraA()
                 await initCameraB()
+                #await initCameraC()
                 
 
             elif(event == "stream"):
