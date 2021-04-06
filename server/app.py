@@ -49,6 +49,7 @@ from core.models.models import GpsData ,freq
 # camera.start_stream()
 manager = ConnectionManager()
 image_freq = 5
+gps_freq =0
 storage = {}
 app = FastAPI()
 image_lock = Lock()
@@ -84,6 +85,7 @@ isRunning = False
 start_Puls = False
 drive_in_use ="C:"
 storageLeft_in_use = 50
+gpsControl = False
 
 #manage socket connections
 manager = ConnectionManager()
@@ -143,12 +145,12 @@ async def read_root(request: Request):
 
 @app.get('/gps')
 async def getData():
-    global gps_status,gps,image_freq
+    global gps_status,gps,gps_freq
 
 
     gps_status = gps.getData()
 
-    #image_freq = gps_status['velocity']
+    gps_freq = int(gps_status['velocity'])
    
     return gps_status
 
@@ -164,17 +166,27 @@ async def data(test):
 
 @app.get('/RaspFPS')
 async def fps():
-    global image_freq,start_Puls
+    global image_freq,start_Puls,gps_freq,gpsControl
+
+    
+
+    if not gpsControl:
+        fps = image_freq
+    
+    else:
+        fps = gps_freq
+
+     
 
 
-    return {'fps':image_freq,"start":start_Puls}
+    return {'fps':fps,"start":start_Puls}
 
 @app.post('/changeFps')
 async def change(freq:freq):
     global image_freq
+ 
 
-
-    #image_freq = freq
+    image_freq = freq
 
 
 
@@ -372,7 +384,8 @@ def startC():
 
 async def abortStream():
     global camera_1,camera_2, abort,gps,start_Puls,image_freq
-    print("stopping stream")
+    print("stopping stream")¨
+    #toggleGPSControl()
     image_freq = 0
 
    
@@ -387,6 +400,7 @@ async def abortStream():
 async def start_acquisition():
     global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
     print("Starting stream")
+    #toggleGPSControl()
     abort=False
     image_freq = 0
     
@@ -417,9 +431,10 @@ async def change_image_freq(freq:freq):
     return image_freq
 
 
-def toggleGPSControl():
+def toggleGPSControl(value):
+    global gpsControl
 
-    gpsControl =  not gpsControl
+    gpsControl =  value
 
 
 @app.get('/storage')
@@ -630,7 +645,7 @@ def video_feed():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -705,6 +720,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "create_trip"):
                 await createImageFolder(data)
                 await manager.broadcast(json.dumps({"event":"folderCreated"}))
+            
+            elif(event == "toggleGps"):
+                toggleGPSControl(msg)
+                
 
     except WebSocketDisconnect as e:  # WebSocketDisconnect
 
