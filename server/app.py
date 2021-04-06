@@ -384,7 +384,7 @@ def startC():
 
 async def abortStream():
     global camera_1,camera_2, abort,gps,start_Puls,image_freq
-    print("stopping stream")¨
+    print("stopping stream")
     #toggleGPSControl()
     image_freq = 0
 
@@ -752,7 +752,8 @@ def shutdown_event():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="192.168.0.100", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
     #169.254.108.159
+    192.168.0.100
