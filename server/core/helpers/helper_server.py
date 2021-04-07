@@ -86,7 +86,7 @@ def checkStorageAllDrives():
     nested_storage= {'drives':{} } #  Initializing a dictionary
 
     number= 1 # Variable for 
-    for i in test:  #  Iterating through all drives
+    for i in available_drives:  #  Iterating through all drives
         
         total, used, free = shutil.disk_usage(i) # Return disk usage statistics about the given path as a named tuple with the attributes total, used and free
         
