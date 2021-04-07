@@ -78,7 +78,7 @@ def checkStorageAllDrives():
     for item in directory_contents:
         if os.path.isdir(item):
             print(item)
-    test = ["/media/sda1","/dev/sda2","/dev/sdb1"]
+    test = ["/media/rekkverk/8fa8497a-6758-4780-8e00-63feac8f857a"]
 
 
     nested_storage= {'drives':{} } #  Initializing a dictionary
