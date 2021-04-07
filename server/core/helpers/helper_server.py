@@ -96,8 +96,9 @@ def most_free_space():
     
     useableDrives = {}
     drives = checkStorageAllDrives()
+    print(drives)
     drives = drives['drives']
-    
+
 
 
     for drive in drives:
