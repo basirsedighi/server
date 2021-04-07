@@ -150,7 +150,7 @@ async def getData():
 
     gps_status = gps.getData()
 
-    gps_freq = int(gps_status['velocity'],base=10)
+    gps_freq = float(gps_status['velocity'])
    
     return gps_status
 
