@@ -19,7 +19,9 @@ def take_closest(myList, myNumber):
        return before
 
 for n in 
-
+def closest(myList, value): 
+      
+    return myList[min(range(len(myList)), key = lambda i: abs(int(myList[i])-int(value)))] 
 #x = take_closest(lst,k)
 #print(x)      
 #print([item for item, count in collections.Counter(millispiclist).items() if count > 1])   
