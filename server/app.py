@@ -91,7 +91,7 @@ gpsControl = False
 manager = ConnectionManager()
 
 #creates new folder for saving imaging
-createFolder()
+#createFolder()
 
 
 started = False
