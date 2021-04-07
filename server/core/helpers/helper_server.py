@@ -75,7 +75,7 @@ def checkStorageAllDrives():
             available_drives.append(path)  #  append the path from a drive to a list
     
 
-    test = ["/dev/sda1","/dev/sda2","/dev/sdb1"]
+    test = ["/dev/sda1/","/dev/sda2/","/dev/sdb1/"]
 
 
     nested_storage= {'drives':{} } #  Initializing a dictionary
