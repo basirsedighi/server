@@ -208,11 +208,12 @@ def estimateStorageTime(storages,fps):
 
     total = 0
     
+    bilder_pr_sek = 20
+    bilde_size = 9  # Mb
+    
     for storage in storages['drives']:
         
       
-        bilder_pr_sek = 20
-        bilde_size = 9  # Mb
 
         free = int(storages['drives'][storage]["free"])
         if storages['drives'][storage]['name'] == "C:":
