@@ -76,7 +76,7 @@ def checkStorageAllDrives():
     
     directory_contents = os.listdir("/media/rekkverk")
     for item in directory_contents:
-        available_drives.append(str(item))
+        available_drives.append("/media/rekkverk/"+str(item))
         
         
         
