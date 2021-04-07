@@ -76,8 +76,8 @@ def checkStorageAllDrives():
     
     directory_contents = os.listdir("/media/rekkverk")
     for item in directory_contents:
-        if os.path.isdir(item):
-            print(item)
+        
+        print(item)
     test = ["/media/rekkverk/8fa8497a-6758-4780-8e00-63feac8f857a"]
 
 
