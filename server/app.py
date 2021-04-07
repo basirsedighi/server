@@ -442,6 +442,7 @@ async def getStorage():
     global storage,imagesave
 
     storages =checkStorageAllDrives()
+    print(storages)
     storageLeft(storages)
 
     
