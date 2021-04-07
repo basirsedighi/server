@@ -449,7 +449,7 @@ async def getStorage():
 
     total = payload['total']['free']
     if int(total)<10:
-        abortStream()
+        await abortStream()
         
     
 
