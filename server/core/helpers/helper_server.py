@@ -69,15 +69,17 @@ def checkStorageAllDrives():
     available_drives = []
 
 
-    for d in string.ascii_uppercase: # Iterating through the english alphabet    
-        path = '%s:' % d    
-        if os.path.exists(path): # checks if path exists
-            available_drives.append(path)  #  append the path from a drive to a list
+    # for d in string.ascii_uppercase: # Iterating through the english alphabet    
+    #     path = '%s:' % d    
+    #     if os.path.exists(path): # checks if path exists
+    #         available_drives.append(path)  #  append the path from a drive to a list
     
     directory_contents = os.listdir("/media/rekkverk")
     for item in directory_contents:
+        available_drives.append(str(item))
         
-        print(item)
+        
+        
     test = ["/media/rekkverk/8fa8497a-6758-4780-8e00-63feac8f857a"]
 
 
