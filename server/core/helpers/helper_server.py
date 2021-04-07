@@ -73,12 +73,15 @@ def checkStorageAllDrives():
         path = '%s:' % d    
         if os.path.exists(path): # checks if path exists
             available_drives.append(path)  #  append the path from a drive to a list
+    
+
+    test = ["/dev/sda1","/dev/sda2","/dev/sdb1"]
 
 
     nested_storage= {'drives':{} } #  Initializing a dictionary
 
     number= 1 # Variable for 
-    for i in available_drives:  #  Iterating through all drives
+    for i in test:  #  Iterating through all drives
         
         total, used, free = shutil.disk_usage(i) # Return disk usage statistics about the given path as a named tuple with the attributes total, used and free
         
