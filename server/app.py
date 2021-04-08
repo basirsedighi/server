@@ -646,7 +646,7 @@ def gen1():
                 b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 @app.get('/video_feed1')
-def video_feed():
+async def video_feed():
     global valider
 
     
@@ -656,7 +656,7 @@ def video_feed():
 
 
 @app.get('/video_feed2')
-def video_feed():
+async def video_feed():
     global valider
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
