@@ -186,6 +186,7 @@ async def createImageFolder(tripName):
 
     bestDrive = most_free_space()
     drive = bestDrive['name']
+    print(drive)
 
 
 
@@ -193,13 +194,13 @@ async def createImageFolder(tripName):
     
     if not path.exists(drive+"/"+"bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
        
-        os.makedirs(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
+        os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
         
     
-    if not path.exists(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
+    if not path.exists(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
     
         
-        os.makedirs(drive+"/""bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+        os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
 
     
 
