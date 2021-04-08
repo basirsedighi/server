@@ -35,7 +35,7 @@ class gpsHandler(Thread):
             while True:
                 ports = self.scan_ports()
                 if len(ports) == 0:
-                    sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
+                    #sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
                     time.sleep(5)
                     continue
 
@@ -108,7 +108,7 @@ class gpsHandler(Thread):
                                 
 
                     except Exception as e:
-                        sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
+                        #sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
                         self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                     except KeyboardInterrupt as e:
                         pass
