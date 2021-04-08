@@ -638,7 +638,7 @@ def gen():
 
 
 def gen1():
-    global camera_2,valider
+    global camera_2,valider2
 
     while valider2:
 
