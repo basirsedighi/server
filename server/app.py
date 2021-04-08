@@ -618,6 +618,7 @@ def gen():
         try:
             frame, status = camera_1.get_image()
             if status == cvb.WaitStatus.Ok:
+                 print("generator1")
                 frame = np.array(frame)
                 frame = cv2.resize(frame, (640, 480))
                 _, frame = cv2.imencode('.jpg', frame)
@@ -645,7 +646,7 @@ def gen1():
         try:
             frame, status = camera_2.get_image()
             if status == cvb.WaitStatus.Ok:
-                print("generator")
+                print("generator2")
                 frame = np.array(frame)
                 frame = cv2.resize(frame, (640, 480))
                 _, frame = cv2.imencode('.jpg', frame)
