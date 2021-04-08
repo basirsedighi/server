@@ -204,10 +204,10 @@ async def createImageFolder(tripName):
 
     
 
-    if not path.exists('log/'+str(date)):
+    if not path.exists('/log/'+str(date)):
 
 
-        os.makedirs('log/'+str(date)) 
+        os.makedirs('/log/'+str(date)) 
 
 
     return drive
