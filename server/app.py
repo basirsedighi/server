@@ -659,7 +659,7 @@ def gen1():
             print(e)
 
 @app.get('/video_feed1')
-async def video_feed():
+async def video_feed1():
     global valider
 
     
@@ -669,7 +669,7 @@ async def video_feed():
 
 
 @app.get('/video_feed2')
-async def video_feed():
+async def video_feed2():
     global valider
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
