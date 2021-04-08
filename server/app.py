@@ -74,7 +74,7 @@ gpsData ={}
 gps.daemon = True
 gps.start()
 gps_status = {}
-valider = False
+valider = True
 abort = False
 logging = False
 closeServer = False
@@ -483,40 +483,7 @@ def storageLeft(storages):
 
 
 
-def gen():
-    global camera_1, valider
-    if valider:
-        frame, status = camera_1.get_image()
-        if status == cvb.WaitStatus.Ok:
-            frame = np.array(frame)
-            frame = cv2.resize(frame, (640, 480))
-            _, frame = cv2.imencode('.jpg', frame)
 
-            image = frame.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
-
-
-
-    
-
-
-
-
-def gen1():
-    global camera_2, valider
-    if valider:
-        frame, status = camera_2.get_image()
-        if status == cvb.WaitStatus.Ok:
-            frame = np.array(frame)
-            frame = cv2.resize(frame, (640, 480))
-            _, frame = cv2.imencode('.jpg', frame)
-
-            image = frame.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
 
@@ -643,7 +610,40 @@ async def validate(cam):
       await manager.broadcast(json.dumps({"event":"validerfailed","data":"feeeels"}))
         
         
+def gen():
+    global camera_1, valider
+    if valider:
+        frame, status = camera_1.get_image()
+        if status == cvb.WaitStatus.Ok:
+            frame = np.array(frame)
+            frame = cv2.resize(frame, (640, 480))
+            _, frame = cv2.imencode('.jpg', frame)
 
+            image = frame.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+
+
+
+    
+
+
+
+
+def gen1():
+    global camera_2, valider
+    if valider:
+        frame, status = camera_2.get_image()
+        if status == cvb.WaitStatus.Ok:
+            frame = np.array(frame)
+            frame = cv2.resize(frame, (640, 480))
+            _, frame = cv2.imencode('.jpg', frame)
+
+            image = frame.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 @app.get('/video_feed1')
 def video_feed():
