@@ -74,7 +74,8 @@ gpsData ={}
 gps.daemon = True
 gps.start()
 gps_status = {}
-valider = True
+valider1 = True
+valider2 = True
 abort = False
 logging = False
 closeServer = False
@@ -611,9 +612,9 @@ async def validate(cam):
         
         
 def gen():
-    global camera_1
+    global camera_1.valider1
     
-    while True:
+    while valider:
         try:
             frame, status = camera_1.get_image()
             if status == cvb.WaitStatus.Ok:
@@ -637,9 +638,9 @@ def gen():
 
 
 def gen1():
-    global camera_2
+    global camera_2,valider
 
-    while True:
+    while valider2:
 
         try:
             frame, status = camera_2.get_image()
