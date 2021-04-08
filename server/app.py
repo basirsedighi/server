@@ -614,7 +614,7 @@ async def validate(cam):
 def gen():
     global camera_1,valider1
     
-    while valider:
+    while valider1:
         try:
             frame, status = camera_1.get_image()
             if status == cvb.WaitStatus.Ok:
