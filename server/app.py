@@ -612,17 +612,17 @@ async def validate(cam):
         
 def gen():
     global camera_1
-    while True:
-        frame, status = camera_1.get_image()
-        if status == cvb.WaitStatus.Ok:
-            frame = np.array(frame)
-            frame = cv2.resize(frame, (640, 480))
-            _, frame = cv2.imencode('.jpg', frame)
+    
+    frame, status = camera_1.get_image()
+    if status == cvb.WaitStatus.Ok:
+        frame = np.array(frame)
+        frame = cv2.resize(frame, (640, 480))
+        _, frame = cv2.imencode('.jpg', frame)
 
-            image = frame.tobytes()
+        image = frame.tobytes()
 
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
 
@@ -633,20 +633,20 @@ def gen():
 
 def gen1():
     global camera_2
-    while True:
-        frame, status = camera_2.get_image()
-        if status == cvb.WaitStatus.Ok:
-            frame = np.array(frame)
-            frame = cv2.resize(frame, (640, 480))
-            _, frame = cv2.imencode('.jpg', frame)
+    
+    frame, status = camera_2.get_image()
+    if status == cvb.WaitStatus.Ok:
+        frame = np.array(frame)
+        frame = cv2.resize(frame, (640, 480))
+        _, frame = cv2.imencode('.jpg', frame)
 
-            image = frame.tobytes()
+        image = frame.tobytes()
 
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 @app.get('/video_feed1')
-async def video_feed():
+def video_feed():
     global valider
 
     if valider:
@@ -657,7 +657,7 @@ async def video_feed():
 
 
 @app.get('/video_feed2')
-async def video_feed():
+def video_feed():
     global valider
     if valider:
         return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
