@@ -504,7 +504,19 @@ def gen():
 
 
 
+def gen1():
+    global camera_2, valider
+    if valider:
+        frame, status = camera_2.get_image()
+        if status == cvb.WaitStatus.Ok:
+            frame = np.array(frame)
+            frame = cv2.resize(frame, (640, 480))
+            _, frame = cv2.imencode('.jpg', frame)
 
+            image = frame.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
 
 
