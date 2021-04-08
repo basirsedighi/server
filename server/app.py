@@ -612,7 +612,7 @@ async def validate(cam):
         
         
 def gen():
-    global camera_1.valider1
+    global camera_1,valider1
     
     while valider:
         try:
@@ -679,7 +679,7 @@ async def video_feed():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -759,7 +759,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 toggleGPSControl(msg)
             
             elif(event == "live"):
-                valider = msg
+                valider1 = msg
+                valider2 =msg
                 
                 
 
