@@ -19,6 +19,7 @@ class ImageSave(Thread):
         self.isRunning = True
         self.name = name
         self.path = os.path.dirname(os.path.abspath(__file__))
+        print(self.path)
         #self.path = self.fixPath(self.path)
         self.date = self.getDate()
         self.drive = 'C:'
