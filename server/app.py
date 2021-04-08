@@ -48,7 +48,7 @@ from core.models.models import GpsData ,freq
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
-image_freq = 5
+image_freq = 20
 gps_freq =0
 storage = {}
 app = FastAPI()
@@ -418,7 +418,7 @@ def startPulse():
     isRunning2 = True
     isRunning3 = True
 
-    image_freq = 5
+    image_freq = 20
 
 
 
