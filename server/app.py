@@ -649,21 +649,19 @@ def gen1():
 def video_feed():
     global valider
 
-    if valider:
-        return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
     
-    else:
-        return "done"
+    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+    
+    
 
 
 @app.get('/video_feed2')
 def video_feed():
     global valider
-    if valider:
-        return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
     
-    else:
-        return "done"
+    return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
+    
+   
 
 
 

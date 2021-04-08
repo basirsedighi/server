@@ -10,6 +10,7 @@ class Camera:
         self.device = None
         self.stream = None
         self.config_path ="core/config/conf1.gcs"
+        self.tempimg = None
         
 
 
