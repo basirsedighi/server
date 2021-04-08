@@ -612,7 +612,7 @@ async def validate(cam):
         
 def gen():
     global camera_1, valider
-    if valider:
+    while valider:
         frame, status = camera_1.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
@@ -633,7 +633,7 @@ def gen():
 
 def gen1():
     global camera_2, valider
-    if valider:
+    while valider:
         frame, status = camera_2.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
