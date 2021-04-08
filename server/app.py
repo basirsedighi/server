@@ -611,8 +611,8 @@ async def validate(cam):
         
         
 def gen():
-    global camera_1, valider
-    while valider:
+    global camera_1
+    while True:
         frame, status = camera_1.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
@@ -632,8 +632,8 @@ def gen():
 
 
 def gen1():
-    global camera_2, valider
-    while valider:
+    global camera_2
+    while True:
         frame, status = camera_2.get_image()
         if status == cvb.WaitStatus.Ok:
             frame = np.array(frame)
@@ -647,18 +647,29 @@ def gen1():
 
 @app.get('/video_feed1')
 def video_feed():
-    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+    global valider
+
+    if valider:
+        return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+    
+    else:
+        return "done"
 
 
 @app.get('/video_feed2')
 def video_feed():
-    return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
+    global valider
+    if valider:
+        return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
+    
+    else:
+        return "done"
 
 
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -736,6 +747,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event == "toggleGps"):
                 toggleGPSControl(msg)
+            
+            elif(event == "live"):
+                valider = msg
+                
                 
 
     except WebSocketDisconnect as e:  # WebSocketDisconnect
