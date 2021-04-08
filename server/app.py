@@ -613,16 +613,21 @@ async def validate(cam):
 def gen():
     global camera_1
     
-    frame, status = camera_1.get_image()
-    if status == cvb.WaitStatus.Ok:
-        frame = np.array(frame)
-        frame = cv2.resize(frame, (640, 480))
-        _, frame = cv2.imencode('.jpg', frame)
+    while True:
+        try:
+            frame, status = camera_1.get_image()
+            if status == cvb.WaitStatus.Ok:
+                frame = np.array(frame)
+                frame = cv2.resize(frame, (640, 480))
+                _, frame = cv2.imencode('.jpg', frame)
 
-        image = frame.tobytes()
+                image = frame.tobytes()
 
-        yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+        
+        except Exception as e:
+            print(e)
 
 
 
@@ -633,18 +638,23 @@ def gen():
 
 def gen1():
     global camera_2
-    
-    frame, status = camera_2.get_image()
-    if status == cvb.WaitStatus.Ok:
-        print("generator")
-        frame = np.array(frame)
-        frame = cv2.resize(frame, (640, 480))
-        _, frame = cv2.imencode('.jpg', frame)
 
-        image = frame.tobytes()
+    while True:
 
-        yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+        try:
+            frame, status = camera_2.get_image()
+            if status == cvb.WaitStatus.Ok:
+                print("generator")
+                frame = np.array(frame)
+                frame = cv2.resize(frame, (640, 480))
+                _, frame = cv2.imencode('.jpg', frame)
+
+                image = frame.tobytes()
+
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+        except Exception as e:
+            print(e)
 
 @app.get('/video_feed1')
 async def video_feed():
