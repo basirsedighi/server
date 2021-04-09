@@ -69,6 +69,7 @@ class gpsHandler(Thread):
                                     try:
 
                                         msg = pynmea2.parse(line)
+                                        print(msg)
                                     except:
                                         pass
                                     
@@ -80,7 +81,7 @@ class gpsHandler(Thread):
                                     else:
                                                                             
                                         self.data = message
-                                        print(self.data)
+                                        
                                     
 
                                         if(self.logging and self.data['new'] ==True):
