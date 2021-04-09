@@ -683,6 +683,18 @@ async def video_feed2():
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
     
    
+@app.get('/live')
+def live():
+    frame, status = camera.get_image()
+    if status == cvb.WaitStatus.Ok:
+
+        b64 = cvbImage_b64(frame)
+
+        raw_data = {"event": "snapshot", "data": b64}
+
+        data = json.dumps(raw_data)
+
+        return data
 
 
 
