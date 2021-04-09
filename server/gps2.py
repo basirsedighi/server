@@ -80,6 +80,7 @@ class gpsHandler(Thread):
                                     else:
                                                                             
                                         self.data = message
+                                        print(self.data)
                                     
 
                                         if(self.logging and self.data['new'] ==True):
