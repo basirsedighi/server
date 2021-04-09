@@ -651,34 +651,21 @@ def gen1():
                 print("generator2")
                 frame = np.array(frame)
                 frame = cv2.resize(frame, (640, 480))
-                _, frame = cv2.imencode('.png', frame)
+                _, frame = cv2.imencode('.jpg', frame)
 
                 image = frame.tobytes()
 
-                return (image)
-
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
         except Exception as e:
             print(e)
 
 @app.get('/video_feed1')
 async def video_feed1():
-    global valider,camera_2
-
-    frame, status = camera2.get_image()
-
-    if status == cvb.WaitStatus.Ok:
-        
+    global valider
 
     
-
-        b64 = cvbImage_b64(frame)
-
-        raw_data = {"event": "snapshot", "data": b64}
-
-        data = json.dumps(raw_data)
-
-    
-    return data
+    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
     
     
 
@@ -686,7 +673,7 @@ async def video_feed1():
 
 
 
-
+    
 
 
 @app.get('/video_feed2')
