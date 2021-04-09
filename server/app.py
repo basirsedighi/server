@@ -523,6 +523,8 @@ async def loadConfig():
     try:
         camera_1.loadConfig()
         camera_2.loadConfig()
+        await initCameraA()
+        await initCameraB()
         
         config_loaded = True
     except:
