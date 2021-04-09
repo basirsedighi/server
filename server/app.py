@@ -656,6 +656,7 @@ def gen1():
                 image = frame.tobytes()
 
                 return (image)
+                
         except Exception as e:
             print(e)
 
