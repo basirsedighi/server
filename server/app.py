@@ -693,9 +693,9 @@ def live():
 
         raw_data = {"event": "snapshot", "data": b64}
 
-        data = json.dumps(raw_data)
+        
 
-        return data
+        return raw_data
 
 
 
