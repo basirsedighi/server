@@ -651,12 +651,11 @@ def gen1():
                 print("generator2")
                 frame = np.array(frame)
                 frame = cv2.resize(frame, (640, 480))
-                _, frame = cv2.imencode('.jpg', frame)
+                _, frame = cv2.imencode('.png', frame)
 
                 image = frame.tobytes()
 
-                yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+                yield BytesIO(image)
         except Exception as e:
             print(e)
 
@@ -665,7 +664,7 @@ async def video_feed1():
     global valider
 
     
-    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+    return StreamingResponse(gen1(), media_type="image/png")
     
     
 
