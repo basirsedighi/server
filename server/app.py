@@ -670,6 +670,12 @@ async def video_feed1():
     
 
 
+
+
+
+
+
+
 @app.get('/video_feed2')
 async def video_feed2():
     global valider
