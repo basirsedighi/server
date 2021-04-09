@@ -662,19 +662,20 @@ def gen1():
 
 @app.get('/video_feed1')
 async def video_feed1():
-    global valider
+    global valider,camera_2
 
-    frame, status = camera.get_image()
-        if status == cvb.WaitStatus.Ok:
-            
+    frame, status = camera2.get_image()
 
+    if status == cvb.WaitStatus.Ok:
         
 
-            b64 = cvbImage_b64(frame)
+    
 
-            raw_data = {"event": "snapshot", "data": b64}
+        b64 = cvbImage_b64(frame)
 
-            data = json.dumps(raw_data)
+        raw_data = {"event": "snapshot", "data": b64}
+
+        data = json.dumps(raw_data)
 
     
     return data
