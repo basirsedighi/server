@@ -41,7 +41,7 @@ class gpsHandler(Thread):
 
                 for port in ports:
                 # try to open serial port
-                    #sys.stderr.write('Trying port %s\n' % port)
+                    sys.stderr.write('Trying port %s\n' % port)
                     try:
                 # try to read a line of data from the serial port and parse
                         with serial.Serial(port, 115200, timeout=1) as ser:
@@ -108,7 +108,7 @@ class gpsHandler(Thread):
                                 
 
                     except Exception as e:
-                        #sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
+                        sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
                         self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                     except KeyboardInterrupt as e:
                         pass
