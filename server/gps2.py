@@ -69,7 +69,7 @@ class gpsHandler(Thread):
                                     try:
 
                                         msg = pynmea2.parse(line)
-                                        print(msg)
+                                        #print(msg)
                                     except:
                                         pass
                                     
