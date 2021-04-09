@@ -685,7 +685,8 @@ async def video_feed2():
    
 @app.get('/live')
 def live():
-    frame, status = camera.get_image()
+    global camera_1
+    frame, status = camera_1.get_image()
     if status == cvb.WaitStatus.Ok:
 
         b64 = cvbImage_b64(frame)
