@@ -662,20 +662,25 @@ def video_feed2():
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
     
-   
-@app.get('/live')
-def live():
+
+
+def videofeed():
     global camera_1
     frame, status = camera_1.get_image()
     if status == cvb.WaitStatus.Ok:
 
         b64 = cvbImage_b64(frame)
 
-        raw_data = {"event": "snapshot", "data": b64}
+      return  raw_data = {"event": "snapshot", "data": b64}
 
+
+
+@app.get('/live')
+def live():
+    
         
 
-        return raw_data
+        return StreamingResponse(videofeed())
 
 
 
