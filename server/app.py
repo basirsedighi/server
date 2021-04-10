@@ -665,22 +665,26 @@ def video_feed2():
 
 
 def videofeed():
+    
     global camera_1
     frame, status = camera_1.get_image()
     if status == cvb.WaitStatus.Ok:
 
         b64 = cvbImage_b64(frame)
 
-      return  raw_data = {"event": "snapshot", "data": b64}
+        raw_data = {"event": "snapshot", "data": b64}
+
+        yield raw_data
 
 
 
 @app.get('/live')
 def live():
+
     
         
 
-        return StreamingResponse(videofeed())
+    return StreamingResponse(videofeed())
 
 
 
