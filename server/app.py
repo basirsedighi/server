@@ -523,8 +523,7 @@ async def loadConfig():
     try:
         camera_1.loadConfig()
         camera_2.loadConfig()
-        await initCameraA()
-        await initCameraB()
+       
         
         config_loaded = True
     except:
@@ -661,7 +660,7 @@ def gen1():
             print(e)
 
 @app.get('/video_feed1')
-async def video_feed1():
+def video_feed1():
     global valider
 
     
@@ -677,7 +676,7 @@ async def video_feed1():
 
 
 @app.get('/video_feed2')
-async def video_feed2():
+def video_feed2():
     global valider
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
@@ -798,7 +797,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 @app.on_event("startup")
 async def startup():
 
-    # Prime the push notification generator
+    await loadConfig()
     print("startup")
 
 
