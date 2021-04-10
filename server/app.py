@@ -472,25 +472,6 @@ def storageLeft(storages):
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
             
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-    
-
    
 
 
@@ -722,6 +703,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 if not config_loaded:
                     await loadConfig()
+                    await initCameraA()
+                    await initCameraB()
                 
                 else:
 
