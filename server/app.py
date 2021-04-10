@@ -589,9 +589,7 @@ async def validate(cam):
         print(e)
         
 
-    finally:
-      await manager.broadcast(json.dumps({"event":"validerfailed","data":"feeeels"}))
-        
+   
         
 def gen():
     global camera_1,valider1
@@ -665,8 +663,8 @@ def video_feed2():
 
 
 def videofeed():
-    
     global camera_1
+    
     frame, status = camera_1.get_image()
     if status == cvb.WaitStatus.Ok:
 
