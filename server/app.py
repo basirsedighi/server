@@ -595,21 +595,23 @@ def gen():
     global camera_1,valider1
     
     while 1:
-        try:
-            frame, status = camera_1.get_image()
-            if status == cvb.WaitStatus.Ok:
-                print("generator1")
-                frame = np.array(frame)
-                frame = cv2.resize(frame, (640, 480))
-                _, frame = cv2.imencode('.jpg', frame)
 
-                image = frame.tobytes()
+        if valider1:
+            try:
+                frame, status = camera_1.get_image()
+                if status == cvb.WaitStatus.Ok:
+                    print("generator1")
+                    frame = np.array(frame)
+                    frame = cv2.resize(frame, (640, 480))
+                    _, frame = cv2.imencode('.jpg', frame)
 
-                yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
-        
-        except Exception as e:
-            print(e)
+                    image = frame.tobytes()
+
+                    yield (b'--frame\r\n'
+                            b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+            
+            except Exception as e:
+                print(e)
 
 
 
@@ -623,20 +625,22 @@ def gen1():
 
     while 1:
 
-        try:
-            frame, status = camera_2.get_image()
-            if status == cvb.WaitStatus.Ok:
-                print("generator2")
-                frame = np.array(frame)
-                frame = cv2.resize(frame, (640, 480))
-                _, frame = cv2.imencode('.jpg', frame)
+        if valider2:
 
-                image = frame.tobytes()
+            try:
+                frame, status = camera_2.get_image()
+                if status == cvb.WaitStatus.Ok:
+                    print("generator2")
+                    frame = np.array(frame)
+                    frame = cv2.resize(frame, (640, 480))
+                    _, frame = cv2.imencode('.jpg', frame)
 
-                yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
-        except Exception as e:
-            print(e)
+                    image = frame.tobytes()
+
+                    yield (b'--frame\r\n'
+                            b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+            except Exception as e:
+                print(e)
 
 @app.get('/video_feed1')
 def video_feed1():
