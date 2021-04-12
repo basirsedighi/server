@@ -861,7 +861,7 @@ def shutdown_event():
 def main(arg):
     global debug,gps
 
-    gps.debug(arg)
+    gps.setDebug(arg)
 
     uvicorn.run(app, host="localhost", port=8000)
 
