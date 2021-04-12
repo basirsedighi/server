@@ -387,9 +387,10 @@ def startC():
 
 
 async def abortStream():
-    global camera_1,camera_2, abort,gps,start_Puls,image_freq
+    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl
     print("stopping stream")
     #toggleGPSControl()
+    gpsControl = False
     image_freq = 0
 
    
