@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import cv2
+    
 path = "C:/Users/tor_9/Documents/csv/"
 header_list = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong']
 df = pd.read_csv(path+'k1time.csv', names = header_list)
