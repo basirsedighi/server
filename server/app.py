@@ -822,6 +822,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 valider1 = msg
                 valider2 =msg
             
+            elif(event == "debug"):
+                gps.setDebug(msg)
+
+            
             elif(event == "pause"):
                 pause()
 
@@ -859,20 +863,13 @@ def shutdown_event():
 
 
 def main(arg):
-    global debug,gps
-
-    gps.setDebug(arg)
+   
 
     uvicorn.run(app, host="localhost", port=8000)
 
 
 if __name__ == "__main__":
-    debug = False
-    for arg in sys.argv[1:]:
-        if arg == "debug":
-            debug = True
-            print(debug)
-
+  
     main(debug)
     
 
