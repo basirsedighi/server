@@ -138,7 +138,7 @@ class gpsHandler(Thread):
         return datetime.today().strftime('%Y-%m-%d')
     
 
-    def debug(self,value):
+    def setDebug(self,value):
 
         self.debug = value
 
