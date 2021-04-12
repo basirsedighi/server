@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class freq(BaseModel):
-    fps = int
+    fps:int
 
 class GpsData(BaseModel):
     velocity: str
