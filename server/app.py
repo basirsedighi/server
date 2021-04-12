@@ -628,6 +628,9 @@ def gen():
             
             except Exception as e:
                 print(e)
+        
+        else:
+            break
 
 
 
@@ -656,6 +659,8 @@ def gen1():
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
             except Exception as e:
                 print(e)
+        else:
+            break
 
 @app.get('/video_feed1')
 def video_feed1():

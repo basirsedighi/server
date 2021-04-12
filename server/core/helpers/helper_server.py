@@ -101,7 +101,7 @@ def checkStorageAllDrives():
 
 
 def most_free_space():
-    
+    onedrive={}
     useableDrives = {}
     drives = checkStorageAllDrives()
     drives = drives['drives']
