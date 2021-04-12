@@ -793,6 +793,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 valider2 =msg
             
             elif(event == "pause"):
+                pause()
+
 
                 
                 
