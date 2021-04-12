@@ -839,9 +839,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-
+    print("[startup] loading config")
     await loadConfig()
-    print("startup")
+    
 
 
 @app.on_event("shutdown")
@@ -858,11 +858,13 @@ def shutdown_event():
 
 
 def main():
-    
+
     uvicorn.run(app, host="localhost", port=8000)
 
 
 if __name__ == "__main__":
+    for arg in sys.argv[1:]:
+        print arg
     main()
     
 
