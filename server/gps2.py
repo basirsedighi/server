@@ -38,7 +38,7 @@ class gpsHandler(Thread):
                 ports = self.scan_ports()
                 if len(ports) == 0:
                     if self.debug:
-                        sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
+                        sys.stderr.write('No ports found, waiting 5 seconds...press Ctrl-C to quit...\n')
                     time.sleep(5)
                     continue
 
@@ -140,6 +140,7 @@ class gpsHandler(Thread):
     
 
     def setDebug(self,value):
+        print(value)
 
         self.debug = value
 
