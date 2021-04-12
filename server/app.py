@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from typing import List
 import cv2
 from fastapi import FastAPI,Request
@@ -408,8 +409,9 @@ def startC():
 async def abortStream():
     global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl
     print("stopping stream")
-    #toggleGPSControl()
-    gpsControl = False
+    toggleGPSControl(False)
+
+    
     image_freq = 0
 
    
@@ -424,20 +426,20 @@ async def abortStream():
 async def start_acquisition():
     global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
     print("Starting stream")
-    #toggleGPSControl()
+    #toggleGPSControl(True)
     abort=False
     image_freq = 0
     
     
-    gps.toggleLogging()
+   
     
     
    
     
 def startPulse():
-    global image_freq,isRunning1,isRunning2,isRunning3,started
+    global image_freq,isRunning1,isRunning2,isRunning3,started,gps
     
-
+    gps.toggleLogging()
     isRunning1 = True
     isRunning2 = True
     isRunning3 = True
@@ -447,6 +449,8 @@ def startPulse():
     image_freq = 20
 
 def pause():
+    global isRunning1,isRunning2,isRunning3,gps
+    gps.toggleLogging()
     isRunning1 = False
     isRunning2 = False
     isRunning3 = False
@@ -853,8 +857,14 @@ def shutdown_event():
 
 
 
-if __name__ == "__main__":
+def main():
+    
     uvicorn.run(app, host="localhost", port=8000)
+
+
+if __name__ == "__main__":
+    main()
+    
 
 
     #169.254.108.159
