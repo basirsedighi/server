@@ -26,6 +26,7 @@ class gpsHandler(Thread):
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
         self.date = self.getDate()
+        self.serial = None
     
     def run(self):
 
@@ -46,21 +47,21 @@ class gpsHandler(Thread):
                 # try to read a line of data from the serial port and parse
                         with serial.Serial(port, 115200, timeout=1) as ser:
 
-                            sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+                            self.serial = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
                 # 'warm up' with reading some input
                             for i in range(10):
-                                sio.readline()
+                                self.serial.readline()
                             # try to parse (will throw an exception if input is not valid NMEA)
                             pynmea2.parse(ser.readline().decode('utf-8', errors='replace'))
 
-               
-  
+                            self.initGPS()
+
                             while True:
                                 
                                 
                                 
-                                line = sio.readline()
+                                line = self.serial.readline()
                                 
 
                                 if not line=="":
@@ -116,7 +117,7 @@ class gpsHandler(Thread):
                         pass
                         sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
 
-                sys.stderr.write('Scanned all ports, waiting 10 seconds...\n')
+                sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
                 self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                 time.sleep(5)
         except KeyboardInterrupt:
@@ -199,8 +200,75 @@ class gpsHandler(Thread):
     def toggleLogging(self):
         self.logging = not self.logging
 
+    def send(self, cmd):
+        # self.gps.write_line(cmd)
+        try :
+            self.serial.write(cmd.encode())
+        except:
+            print('Not Connected To GPS')
+            self.serial.close()
+        
+        time.sleep(3)
+        
+        num = self.serial.inWaiting()
+        # try:
+        #     print(self.gps.read(num).decode())
+        # except:
+        #     print(self.gps.read(num))
+        print(self.serial.read(num))
     
-    
+    def initGPS(self):
+        self.send('SetNMEAOutput, Stream1+Stream2+Stream7+Stream8, none, none, off\r\n')
+        self.send('SetGPIOFunctionality, GP1, Output, none, LevelLow\r\n')
+        self.send('SetGPIOFunctionality, GP2, Output, none, LevelHigh\r\n')
+        self.send('SetGPIOFunctionality, GP3, Output, none, LevelHigh\r\n')
+        self.send('setDataInOut, COM1,DC1,DC2\r\n')
+        self.send('setDataInOut, COM3,DC2,DC1\r\n')
+        self.send('#PSPO,1\n')
+        self.send('SSSSSSSSSS\r\n')
+        self.send('setDataInOut, COM1, CMD, SBF+NMEA\r\n')
+        self.send('SSSSSSSSSS\r\n')
+        self.send('SetSBFOutput,Stream1+Stream2+Stream3+Stream4+Stream5,none,none,off\r\n')
+        self.send('setPVTMode, Rover, all\r\n')
+        self.send('sem,+PVT,10\r\n')
+        self.send('setDataInOut, COM1, CMD, SBF\r\n')
+        self.send('setGeoidUndulation, auto\r\n')
+        self.send('setSmoothingInterval,all,100,1\r\n')
+        self.send('setRAIMLevels,on,-4,-4,-3\r\n')
+        self.send('setPVTMode, Rover, all\r\n')
+        self.send('setFixReliability, RTK, 0.2, 4.40\r\n')
+        self.send('setDiffCorrUsage,,,auto,0\r\n')
+        self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
+        self.send('setDataInOut, COM2,DC1,DC2\r\n')
+        self.send('setDataInOut, COM3,DC2,DC1\r\n')
+        self.send('+++\r\n')
+        self.send('AT\r\n')
+        self.send('+++\r\n')
+        self.send('AT\r\n')
+        self.send('+++\r\n')
+        self.send('ATE1\r\n')
+        self.send('AT+MGEER=2\r\n')
+        self.send('AT+CMEE=2\r\n')
+        self.send('AT+CBST?\r\n')
+        self.send('AT+CPIN?\r\n')
+        self.send('AT+CSQ\r\n')
+        self.send('AT+MIPCALL?\r\n')
+        self.send('AT+MIPCALL=1,"telenor","",""\r\n')
+        self.send('AT+MIPOPEN?\r\n')
+        self.send('AT+MIPODM=1,1200,"159.162.103.14",2101,0\r\n')
+        self.send('GET /CPOSHREF HTTP/1.0\r\n')
+        self.send('User-Agent: NTRIP Altus\r\n')
+        self.send('Authorization: Basic NTgwMDAwNzEzNTMzOkdKRVJERTEzMDU=\r\n')
+        self.send('Accept: */*\r\n')
+        self.send('Connection: close\r\n')
+        self.send('\r\n')
+        self.send('\r\n')
+        self.send('SSSSSSSSSS\r\n')
+        self.send('setDataInOut, COM3, CMD, SBF+NMEA\r\n')
+        self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
+        self.send('SetNMEAOutput, Stream1, COM2, GGA, sec1\r\n')
+        self.send('SetNMEAOutput, Stream7, COM3, GSV+GSA, sec1\r\n')
+        self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, sec1\r\n')
   
     def scan_ports(self):
 
