@@ -190,7 +190,7 @@ async def change(freq:freq):
     global image_freq
  
 
-    image_freq = freq
+    image_freq = freq.fps
 
     return {"fps":image_freq}
 
