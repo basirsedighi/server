@@ -157,7 +157,10 @@ async def getData():
 
 
 
-
+def getStates():
+    global started
+    
+    states = {"started":started,"config":config_loaded}
 
 
 @app.post('/gpserror')
@@ -412,14 +415,27 @@ async def start_acquisition():
    
     
 def startPulse():
-    global image_freq,isRunning1,isRunning2,isRunning3
+    global image_freq,isRunning1,isRunning2,isRunning3,started
     
 
     isRunning1 = True
     isRunning2 = True
     isRunning3 = True
+    started = True
+
 
     image_freq = 20
+
+def pause():
+    isRunning1 = False
+    isRunning2 = False
+    isRunning3 = False
+
+
+# def resume():
+#     isRunning1 = True
+#     isRunning2 = True
+#     isRunning3 = True
 
 
 
@@ -600,7 +616,6 @@ def gen():
             try:
                 frame, status = camera_1.get_image()
                 if status == cvb.WaitStatus.Ok:
-                    print("generator1")
                     frame = np.array(frame)
                     frame = cv2.resize(frame, (640, 480))
                     _, frame = cv2.imencode('.jpg', frame)
@@ -630,7 +645,6 @@ def gen1():
             try:
                 frame, status = camera_2.get_image()
                 if status == cvb.WaitStatus.Ok:
-                    print("generator2")
                     frame = np.array(frame)
                     frame = cv2.resize(frame, (640, 480))
                     _, frame = cv2.imencode('.jpg', frame)
@@ -702,11 +716,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             event = data['event']
             msg = data['data']
 
-            print(event)
+            
 
             if(event == "onConnection"):
 
                 await manager.broadcast(json.dumps({"connection": "connected"}))
+                states = getStates()
                 
 
         
@@ -776,6 +791,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "live"):
                 valider1 = msg
                 valider2 =msg
+            
+            elif(event == "pause"):
+
                 
                 
 
