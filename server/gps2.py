@@ -136,6 +136,13 @@ class gpsHandler(Thread):
     def getDate(self):
 
         return datetime.today().strftime('%Y-%m-%d')
+    
+
+    def debug(self,value):
+
+        self.debug = value
+
+
     def getTimeStamp(self):
 
         now = time.time()
