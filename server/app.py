@@ -168,7 +168,7 @@ async def getData():
 #   Open a csv file and appends coordinates in lists
 #   return a list with the latitude coordinates and a list with longitude coordinates
 @app.get('/gpscoordinates')
-def getgpscoordinates()
+def getgpscoordinates():
     # Open gps csv file and make a csv reader object 
     with open(path +'k1time.csv', newline='') as csvgps:
         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
