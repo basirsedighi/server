@@ -44,7 +44,8 @@ class gpsHandler(Thread):
 
                 for port in ports:
                 # try to open serial port
-                    #sys.stderr.write('Trying port %s\n' % port)
+                    if self.debug:
+                        sys.stderr.write('Trying port %s\n' % port)
                     try:
                 # try to read a line of data from the serial port and parse
                         with serial.Serial(port, 115200, timeout=1) as ser:
