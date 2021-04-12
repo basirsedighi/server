@@ -120,8 +120,11 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:4200",
+    "http://localhost:8000",
     "http://10.22.182.47:4200",
-    "http://10.22.182.47"
+    "http://10.22.182.47",
+    "http://localhost:8000/changeFps",
+
 
 ]
 
