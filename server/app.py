@@ -738,6 +738,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                     await loadConfig()
                     await initCameraA()
                     await initCameraB()
+                   
                 
                 else:
 
