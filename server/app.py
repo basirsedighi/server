@@ -192,6 +192,8 @@ async def change(freq:freq):
 
     image_freq = freq
 
+    return image_freq
+
 
 
 
