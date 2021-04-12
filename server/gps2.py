@@ -19,7 +19,7 @@ class GPS_QUALITY(enum.Enum):
 class gpsHandler(Thread):
     def __init__(self):
         Thread.__init__(self)
-
+        self.debug = False
         self.GpsDataUrl ="http://localhost:8000/gpsPost"
         self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,"millis":0}
         self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,'millis':0}
@@ -37,7 +37,7 @@ class gpsHandler(Thread):
             while True:
                 ports = self.scan_ports()
                 if len(ports) == 0:
-                    #sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
+                    if self.debug:sys.stderr.write('No ports found, waiting 10 seconds...press Ctrl-C to quit...\n')
                     time.sleep(5)
                     continue
 
@@ -112,13 +112,13 @@ class gpsHandler(Thread):
                                 
 
                     except Exception as e:
-                        #sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
+                        if self.debug: sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
                         self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                     except KeyboardInterrupt as e:
                         pass
                         sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
 
-                sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
+                if self.debug: sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
                 self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                 time.sleep(5)
         except KeyboardInterrupt:

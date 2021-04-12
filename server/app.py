@@ -51,13 +51,14 @@ from core.models.models import GpsData ,freq
 manager = ConnectionManager()
 image_freq = 20
 gps_freq =0
+debug = False
 storage = {}
 app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(4)
-gps = gpsHandler()
+gps = gpsHandler(debug)
 imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
@@ -857,15 +858,21 @@ def shutdown_event():
 
 
 
-def main():
+def main(arg):
+    global debug
+
+    debug = arg
 
     uvicorn.run(app, host="localhost", port=8000)
 
 
 if __name__ == "__main__":
+    debug = False
     for arg in sys.argv[1:]:
-        print(arg)
-    main()
+        if arg == "debug":
+            debug = True
+
+    main(debug)
     
 
 
