@@ -17,7 +17,7 @@ class GPS_QUALITY(enum.Enum):
    BAD = 0
 
 class gpsHandler(Thread):
-    def __init__(self):
+    def __init__(self,debug):
         Thread.__init__(self)
         self.debug = False
         self.GpsDataUrl ="http://localhost:8000/gpsPost"
