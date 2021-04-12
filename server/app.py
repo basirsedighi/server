@@ -534,8 +534,7 @@ async def loadConfig():
 
     finally:
 
-        await manager.broadcast(json.dumps({"event": "initB", "data": cameraStatus}))
-        await manager.broadcast(json.dumps({"event": "initA", "data": cameraStatus}))
+        
         await manager.broadcast(json.dumps({"event": "loadConfig", "data": status}))
 
  
