@@ -25,7 +25,7 @@ import pynmea2
 import math
 import cvb
 import uvicorn
-
+import csv
 
 from core.models import models
 import time
@@ -89,6 +89,13 @@ gpsControl = False
 
 #manage socket connections
 manager = ConnectionManager()
+
+#   Variables and lists for the gps coordinates 
+#   lists
+longlitudelist = []
+latitudelist = []
+#   variables
+path = 'C:/Users/tor_9/Documents/csv'
 
 #creates new folder for saving imaging
 #createFolder()
@@ -154,9 +161,19 @@ async def getData():
    
     return gps_status
 
-
-
-
+#   Open a csv file and appends coordinates in lists
+#   return a list with the latitude coordinates and a list with longitude coordinates
+@app.get('/gpscoordinates')
+def getgpscoordinates()
+    # Open gps csv file and make a csv reader object 
+    with open(path +'k1time.csv', newline='') as csvgps:
+        gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+        for row in gpsreader:
+            #  make a list for each column in the csv file
+            latitudelist.append[4]
+            longlitudelist.append[5]
+        
+    return latitudelist, longlitudelist
 
 
 @app.post('/gpserror')

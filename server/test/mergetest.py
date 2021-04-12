@@ -4,6 +4,7 @@ from bisect import bisect_left
 import collections
 
 path = "C:/Users/tor_9/Documents/csv/"
+#---start for variables and lists for merging csv---#
 
 #----lists----#
 
@@ -26,6 +27,7 @@ cleanlonglist = []
 cleanlatlist = []
 cleanfixlist = []
 cleanspeedlist = []
+accelereation = []
 #newgps = []
 #newcoordinatelist = []
 filledgpslist = []
@@ -43,6 +45,7 @@ dublicateindexlist = []
 dublicateindexvaluelist = []
 newindexlist = []
 
+timedifferencelist = []
 #   values for iterating
 cleanlength = 0
 picrow = 0
@@ -54,12 +57,17 @@ expand = 0
 
 before = None
 after = None
-#----Functions----#
+
+#---end for variables and lists for merging csv---#
 
 
+#------------------------------------------#
 
+#----start of functions for csv merging----#
 
+#------------------------------------------#
 
+#----end of functions for csv merging----#
 #  finds the closest time between image list and gps list
 #  return list of index
 def take_closest(myList, myNumber):
@@ -88,37 +96,42 @@ def calculateindexposition(gpsmillislist, picmillislist):
         closesttime, position = take_closest(picmillislist, n)
         if position != 0:
             position -= 1
-        indexlist.append(position)    
+        
+        indexlist.append(position) 
+      
     return indexlist
 
 #  find and remove dublicates from index list
+#   TO DO: velge duplicate som er nærmest pictime
 #   return a list of positions were dublicates were removed
 def findandremovedublicates(wholeindexlist):
+    
     for n in range(len(wholeindexlist)-1):    
         points = wholeindexlist[n+1] - wholeindexlist[n]         
-        if points == 0:            
+        if points == 0:
+                     
             dublicateindexvalue = wholeindexlist[n]
             dublicateindexlist.append(n)
             dublicateindexvaluelist.append(dublicateindexvalue)
 
     for n in dublicateindexvaluelist:
         wholeindexlist.remove(n)
-
+   
     return wholeindexlist, dublicateindexlist
 
 #   finds and remove overlapping values from the gps value list
 #   return list of coordinates without points overalapping
-def findandremovefromlistbyindex(gpslist, dublicateindexlist):
+def findandremovefromlistbyindex(valuelist, dublicateindexlist):
     overlappingpointlist.clear() 
       
     for n in dublicateindexlist: 
              
-        overlappingpointlist.append(gpslist[n])
+        overlappingpointlist.append(valuelist[n])
     
     for n in overlappingpointlist:
-        gpslist.remove(n)
+        valuelist.remove(n)
     
-    return gpslist
+    return valuelist
 #  make new gps list with read gps coordinates and calculated gps coordinates 
 #  returns a list with read and calculated coordinates 
 
@@ -139,6 +152,70 @@ def generatePointsBetween(position1, position2, pointsbetween):
     
     return newgps
 
+#   get time difference between picture taken and coordinate read
+#   return time difference list
+def gettimedifference(gpstimelist, pictimelist, indextimelist):
+    i = 0
+    
+    timediff = [] 
+    for n in indextimelist:
+        diff = gpstimelist[i] - pictimelist[n]
+        timediff.append(diff)
+        i += 1
+        
+    
+    return timediff
+
+
+
+#   get constant acceleration for each read gps coordinate
+#   return a list of acceleration
+def getaccelerationlist(gpsspeedlist, gpstimelist):
+    
+    accelerationlist = []
+    for n in range(len(gpsspeedlist)-1):           
+        acceleration = (float(gpsspeedlist[n+1]) - float(gpsspeedlist[n])) / (float(gpstimelist[n+1]) - float(gpstimelist[n]))
+        #print(n)
+        #print(str(gpsspeedlist[n+1])+' - '+str(gpsspeedlist[n])+' / '+str(gpstimelist[n+1])+' - '+str(gpstimelist[n]))
+        #print('acc: '+str(acceleration)+' diff: '+str(n))
+        accelerationlist.append(acceleration)
+    return accelerationlist
+        
+
+
+#   modifies coordinates based on time difference between picture taken and coordinate read,
+#   speed, and constant acceleration
+#   return list of modified coordinates
+def modifycoordinatesbasedontimedifference(timedifflist, coordiantelist,speed, accelerationlist):
+    print(len(timedifflist))
+    print(len(coordiantelist))
+    print(len(accelerationlist))
+    shiftedcoord = []
+    i = 0
+    for n in range(len(coordiantelist)-1):
+        time = float(timedifflist[n]/1000) # ms til sekunder
+        #print(time)
+
+
+        if timedifflist[n] < 0:
+            shifted = coordiantelist[n] + speed[n] * abs(time) + (accelerationlist[n] * (time**2))/2
+        elif timedifflist[n] > 0:
+            shifted = coordiantelist[n] + speed[n] * abs(time) - (accelerationlist[n] * (time**2))/2
+        print(shifted)
+        print(coordiantelist[n])
+        shiftedcoord.append(shifted)
+
+
+
+#   Calculate coordinates between to points based on speed, time and acceleration 
+#   x = x0 + v0*t + 0.5*at^2
+#   return list with read and calculated coordinates
+def gengpspoints(position1, position2, speed1, speed2, time1, time2, pointsbetween):
+
+    acceleration = (speed1 - speed2) / (position1 - position2)  #   finds constant acceleration 
+    timestep = (time1 - time2)/pointsbetween
+
+
 def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
     newcoordinatelist = []
     #  making a list for easier generating of gps coordinates
@@ -155,7 +232,18 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
     
     return newcoordinatelist
     
+#----------------------------------------#
 
+#----end of functions for csv merging----#
+
+#----------------------------------------#
+
+
+#-------------------------------------------#
+
+#---beginning of program for csv merging---# 
+
+#-------------------------------------------#
 
 # Open image csv file and make a csv reader object 
 with open(path +'pictest.csv', newline='') as csvpic:
@@ -164,64 +252,56 @@ with open(path +'pictest.csv', newline='') as csvpic:
         #  make a list for each column in the csv file
         picnumberlist.append(row[0])
         kameranumberlist.append(row[2])
-        millispiclist.append(int(row[3]))
-        if row[2] == '1':
-            millisk1list.append(int(row[3]))
+        millispiclist.append(float(row[3]))
+        
+        if row[2] == '1.00' or row[2] == 1:
+            millisk1list.append(float(row[3]))
      
 # Open gps csv file and make a csv reader object 
-with open(path +'gpstest.csv', newline='') as csvgps:
+with open(path +'backuo.csv', newline='') as csvgps:
     gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
     for row in gpsreader:
         #  make a list for each column in the csv file
         fixlist.append(row[1])
-        speedlist.append(row[2])
+        speedlist.append(float(row[2]))
         latlist.append(float(row[4]))
         longlist.append(float(row[5]))
-        millisgpslist.append(int(row[6])) 
+        millisgpslist.append(float(row[6])) 
 
 
-
+print('millis: '+ str(len(millisk1list)))
+print('lat: '+ str(len(latlist)))
+#print(millisgpslist)
 indexlist = calculateindexposition(millisgpslist, millisk1list)
 
-
+print('indexlist len: '+str(len(indexlist)))
 index, dub = findandremovedublicates(indexlist)
-
-#  Test
-#print(len(index))
-#print(len(latlist))
-#print(len(longlist))
-#print('latlist: '+str(len(latlist)))
+print('index: '+str(len(index)))
+print('dub: '+str(len(dub)))
 cleanlatlist = findandremovefromlistbyindex(latlist, dub)
 cleanlonglist = findandremovefromlistbyindex(longlist, dub)
 cleanmillisgpslist = findandremovefromlistbyindex(millisgpslist, dub)
 cleanspeedlist = findandremovefromlistbyindex(speedlist, dub)
 cleanfixlist = findandremovefromlistbyindex(fixlist, dub)
+print('fix: '+str(len(cleanfixlist)))
+timedifferencelist = gettimedifference(cleanmillisgpslist, millisk1list, index)
 
-#print('clean: '+str(len(cleanlatlist)))
-#print('latlist: '+str(len(latlist)))
-#print(cleanlatlist)
-#print('#################latitude################')
+accelereation = getaccelerationlist(cleanspeedlist, cleanmillisgpslist)
+
+#modifycoordinatesbasedontimedifference(timedifferencelist, cleanlatlist,cleanspeedlist, accelereation)
+print('clat'+str(len(cleanlatlist)))
 expandedlatitudelist = makenewcoordinatelist(cleanlatlist, index)
 
-# print('#################longitude################')
+
 expandedlongitudelist = makenewcoordinatelist(cleanlonglist, index)
 
-# print('explat: '+str(len(expandedlatitudelist)))
 
-# print('explong: '+str(len(expandedlongitudelist)))
-#print(expandedlongitudelist)
-#print(len(millisk1list))
-
-
-# print('test:' '\n')
-# print('k1: '+str(len(millisk1list)))
 
 
 with open(path+ 'k1time.csv','w', newline='') as k1test:
     fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong']
     k1writer = csv.DictWriter(k1test, fieldnames=fieldnames) 
-    print(len(cleanlatlist))
-    print(len(expandedlongitudelist))
+    
     for n in millisk1list: 
         #print('index: '+str(indexlist[indexnumber])+' ,k1row: '+str(k1row)+' gpsrow: '+str(gpsrow)+' lenght: '+str(len(cleanlatlist)))
         # print ('indexnumber'+ str(indexnumber))
@@ -229,7 +309,7 @@ with open(path+ 'k1time.csv','w', newline='') as k1test:
         # print('index[indexnumber]'+ str(index[indexnumber]))
         if not(indexnumber >= len(indexlist)):            
             if index[indexnumber] == k1row and gpsrow <= (len(cleanlatlist)-1): 
-                #print(gpsrow)
+                
                 k1writer.writerow({'gpsmillis': cleanmillisgpslist[gpsrow],'readlat':cleanlatlist[gpsrow],
                  'readlong':cleanlonglist[gpsrow], 'picmillis': n, 'extendedlat':expandedlatitudelist[expand],
                 'extendedlong':expandedlongitudelist[expand]})
@@ -247,64 +327,13 @@ with open(path+ 'k1time.csv','w', newline='') as k1test:
             k1writer.writerow({'picmillis': n, 'extendedlat':expandedlatitudelist[expand-1],
             'extendedlong':expandedlongitudelist[expand-1]})
             
+#-------------------------------------------#
 
+#---end of program for csv merging---# 
+
+#-------------------------------------------#
 
   
 
         
-
-# with open(path+ 'test.csv','w', newline='') as csvtest:
-     
-#     fieldnames = ['picnumber','kamera', 'picmillis', 'gpsmillis','testmillis','diff','long', 'lat','fix','speed']
-#     testwriter = csv.DictWriter(csvtest, fieldnames=fieldnames)    
-#     for n in millispiclist:  
-            
-            
-#             if before == after:
-#                 indexnumber +=1                            
-#                 test = millisgpslist[gpsrow]
-#                 gpsrow += 1
-#                 diff = abs(int(millis) - int(test))
-#             else:
-#                 test = ''
-#                 diff = ''
-            
-#             testwriter.writerow({'picnumber':picnumberlist[picrow],'kamera':kameranumberlist[picrow] ,'picmillis':n,
-#              'gpsmillis':millis,'testmillis': test,'diff':diff , 'long': longlist[gpsrow], 'lat': latlist[gpsrow],
-#               'fix':fixlist[gpsrow], 'speed': speedlist[gpsrow]})
-#             gpsrow += 1
-#         else:
-#             testwriter.writerow({'picnumber':picnumberlist[picrow],'kamera':kameranumberlist[picrow] ,'picmillis': n, 'gpsmillis': '', 'long': '', 'lat': ''})        
-#         #print('pic: '+str(picrow))
-#         picrow +=1
-        
-
-
-#for n in millisgpslist:  
-#     x = min(millispiclist, key=lambda x:abs(x-int(n)))  
-#     print(x)
-
-
-# for n in millisgpslist:      
-#     closesttime, position = take_closest(millisk1list, n)
-#     diff = closesttime-n
-#     if position != 0:
-#         position -= 1
-    #print('diff: '+str(diff)+' ,picindex: '+ str(position)+' ,gpsindex: '+ str(millisgpslist.index(n)) )
-    #indexlist.append(position)
-    #print(closesttime-n)
-#print(indexlist)
-
-
-
-
-
-    
-    
-
-
-
-    
-
- 
 
