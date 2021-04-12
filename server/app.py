@@ -744,6 +744,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = json.loads(data)
             event = data['event']
             msg = data['data']
+            print(event)
 
             
 
