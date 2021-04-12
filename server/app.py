@@ -456,7 +456,7 @@ def toggleGPSControl(value):
 
 @app.get('/storage')
 async def getStorage():
-    global storage,imagesave
+    global storage,imagesave,started
 
     storages =checkStorageAllDrives()
     
@@ -466,7 +466,7 @@ async def getStorage():
     payload = estimateStorageTime(storages,10)
 
     total = payload['total']['free']
-    if int(total)<10:
+    if int(total)<10 and started:
         await abortStream()
         
     
