@@ -842,9 +842,10 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event():
-    global imagesave, closeServer
+    global imagesave, closeServer,gps
 
     imagesave.raise_exception()
+    gps.raise_exception()
     imagesave.join()
     gps.join()
 
