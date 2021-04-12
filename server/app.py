@@ -844,6 +844,8 @@ async def startup():
 def shutdown_event():
     global imagesave, closeServer,gps
 
+    print("shitting down server")
+
     imagesave.raise_exception()
     gps.raise_exception()
     imagesave.join()
