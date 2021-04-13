@@ -51,6 +51,7 @@ class gpsHandler(Thread):
                         with serial.Serial(port, 115200, timeout=10) as ser:
 
                             self.serial = ser
+                            self.read = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
                               #sends commands to gps
                             self.initGPS()
                 # 'warm up' with reading some input
@@ -67,7 +68,7 @@ class gpsHandler(Thread):
                                 
                                 
                                 
-                                line = self.serial.readline().decode('ascii', errors='replace')
+                                line = self.read.readline().decode('ascii', errors='replace')
                                 
 
                                 if not line=="":
