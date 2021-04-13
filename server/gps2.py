@@ -171,8 +171,10 @@ class gpsHandler(Thread):
 
         
         if(msg.sentence_type =="RMC"):
-            print("RMC received")
-            print(msg)
+            if self.debug:
+
+                print("RMC received")
+                print(msg)
            
             if msg.status =="A":
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
@@ -186,8 +188,10 @@ class gpsHandler(Thread):
 
 
         if(msg.sentence_type=="GGA"):
-            print("GGA received")
-            print(msg)
+            if self.debug:
+
+                print("GGA received")
+                print(msg)
 
            
             
