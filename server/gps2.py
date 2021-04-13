@@ -73,7 +73,7 @@ class gpsHandler(Thread):
                                 if not line=="":
                                     
                                     line = self.__trimLine(line)
-                                    print(line)
+                                    #print(line)
                                     try:
 
                                         msg = pynmea2.parse(line)
