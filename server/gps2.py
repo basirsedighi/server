@@ -165,10 +165,11 @@ class gpsHandler(Thread):
         fix_quality = 0
         hdop = 5
         velocity = 0
+        sys.stderr.write(now)
+
         
         if(msg.sentence_type =="RMC"):
-            print("validity")
-            print(msg.status)
+           
             if msg.status =="A":
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
