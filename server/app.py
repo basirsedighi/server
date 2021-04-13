@@ -421,6 +421,7 @@ async def abortStream():
     global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
     print("stopping stream")
     toggleGPSControl(False)
+    gps.toggleLogging(False)
 
     
     image_freq = 0
@@ -448,7 +449,7 @@ async def start_acquisition():
 def startPulse():
     global image_freq,isRunning1,isRunning2,isRunning3,started,gps
     
-    gps.toggleLogging()
+    gps.toggleLogging(True)
     isRunning1 = True
     isRunning2 = True
     isRunning3 = True
@@ -459,7 +460,7 @@ def startPulse():
 
 def pause():
     global isRunning1,isRunning2,isRunning3,gps,image_freq
-    gps.toggleLogging()
+    gps.toggleLogging(False)
     toggleGPSControl(False)
     image_freq =0
     # isRunning1 = False

@@ -230,8 +230,9 @@ class gpsHandler(Thread):
         return gpsQuality
     
 
-    def toggleLogging(self):
-        self.logging = not self.logging
+    def toggleLogging(self,value):
+        print("logging: "+value)
+        self.logging = value
 
     def send(self, cmd):
         # self.gps.write_line(cmd)
