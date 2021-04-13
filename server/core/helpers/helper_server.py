@@ -181,12 +181,14 @@ def createFolder():
 
 
 async def createImageFolder(tripName):
+
+    date = getDate()
     
     if not path.exists('log/'+str(date)):
 
 
         os.makedirs('log/'+str(date)) 
-    date = getDate()
+    
 
     bestDrive = most_free_space()
     if bestDrive:
