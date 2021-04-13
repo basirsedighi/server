@@ -351,7 +351,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning3, image_lock, imageQueue, abort.stopStream3
+    global camera_3, isRunning3, image_lock, imageQueue, abort,stopStream3
     
 
     
