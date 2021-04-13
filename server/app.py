@@ -839,6 +839,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event == "pause"):
                 pause()
+            
+            elif(event =="merge"):
+                print("merging")
 
 
                 
