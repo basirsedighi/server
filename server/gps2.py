@@ -130,7 +130,7 @@ class gpsHandler(Thread):
                 self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
                 time.sleep(5)
         except KeyboardInterrupt:
-            g
+            self.serial.close()
             #sys.stderr.write('Ctrl-C pressed, exiting port scanner\n')
 
     def getData(self):
