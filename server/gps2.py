@@ -220,7 +220,7 @@ class gpsHandler(Thread):
             self.serial.write(cmd.encode())
         except:
             sys.stderr.write('Not Connected To GPS')
-            self.serial.close()
+            #self.serial.close()
         
         time.sleep(3)
         
