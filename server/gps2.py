@@ -21,8 +21,8 @@ class gpsHandler(Thread):
         Thread.__init__(self)
         self.debug = debug
         self.GpsDataUrl ="http://localhost:8000/gpsPost"
-        self.message  ={"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,"millis":0}
-        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":"","new":False,'millis':0}
+        self.message  ={"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,"millis":0}
+        self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,'millis':0}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
@@ -121,13 +121,13 @@ class gpsHandler(Thread):
 
                     except Exception as e:
                         if self.debug: sys.stderr.write('Error reading serial port %s: %s\n' % (type(e).__name__, e))
-                        self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
+                        self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":""}
                     except KeyboardInterrupt as e:
                         pass
                         sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
 
                 if self.debug: sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
-                self.data = {"quality":0,"velocity":0,"timestamp":"","lat":"","lon":""}
+                self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":""}
                 time.sleep(5)
         except KeyboardInterrupt:
             self.serial.close()
@@ -166,6 +166,7 @@ class gpsHandler(Thread):
         fix_quality = 0
         hdop = 5
         velocity = 0
+        gpstime = ""
         
 
         
@@ -176,9 +177,10 @@ class gpsHandler(Thread):
             if msg.status =="A":
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
+                gpstime = msg.timestamp
            
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
+            self.message.update({"velocity":str(velocity),"timestamp":str(now),"gpsTime":str(gpstime),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
             return self.message 
       
 
