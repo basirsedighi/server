@@ -875,7 +875,7 @@ def shutdown_event():
     gps.raise_exception()
     imagesave.join()
     gps.join()
-    os.system('sudo kill -9 `sudo lsof -t -i:portnummer'')
+    os.system('sudo kill -9 `sudo lsof -t -i:8000')
 
 
 
