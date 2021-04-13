@@ -54,7 +54,8 @@ class gpsHandler(Thread):
 
                 # 'warm up' with reading some input
                             for i in range(10):
-                                self.serial.readline()
+                                data = self.serial.readline()
+                                print(data)
                             # try to parse (will throw an exception if input is not valid NMEA)
                             pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
 
