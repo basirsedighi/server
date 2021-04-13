@@ -164,6 +164,7 @@ class gpsHandler(Thread):
         hdop = 5
         
         if(msg.sentence_type =="RMC"):
+            print("spd over ground")
             print(msg.spd_over_grnd)
 
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
