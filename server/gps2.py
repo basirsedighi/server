@@ -184,7 +184,8 @@ class gpsHandler(Thread):
 
 
         if(msg.sentence_type=="GGA"):
-            
+            print("GGA received")
+            print(msg)
 
            
             
