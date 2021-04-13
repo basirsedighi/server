@@ -67,7 +67,7 @@ class gpsHandler(Thread):
                                 
                                 
                                 print("reading line")
-                                line = self.serial.readline().decode()
+                                line = self.serial.readline().decode('ascii', errors='replace')
                                 
 
                                 if not line=="":
