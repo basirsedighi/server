@@ -63,8 +63,8 @@ class ImageSave(Thread):
                            self.drive = newDrive['name']
                         
                         
-                        image.save(self.drive+"/"+
-                        "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
+                        # image.save(self.drive+"/"+
+                        # "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
 
                         
                         with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+".csv",'a',newline='')as csvfile:
