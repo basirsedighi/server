@@ -225,7 +225,7 @@ async def change(freq:freq):
 @app.get('/start1')
 def startA():
 
-    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning,stopStream1
+    global camera_1, isRunning1, imagesave, imageQueue, abort,isRunning,stopStream1,gps
     index = 0
     test  =0
     
@@ -272,11 +272,13 @@ def startA():
                 pass
 
     isRunning1=False
-    stopStream1 =False        
+    stopStream1 =False 
+    gps.toggleLogging()
+          
     print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
 
-    return "stream 1 has stopped"
+    return {"message": "stream 1 has stopped"}
     
 
 
@@ -345,7 +347,7 @@ def startB():
 
     
 
-    return "stream2 has stopped"
+    return {"message": "stream 2 has stopped"}
     # start bildetaking
 
 @app.get('/start3')
@@ -411,7 +413,7 @@ def startC():
 
     
 
-    return "stream2 has stopped"
+    return {"message": "stream 3 has stopped"}
     # start bildetaking
 
 
@@ -426,14 +428,7 @@ async def abortStream():
     stopStream1 =True
     stopStream2 =True
     stopStream3 =True
-
    
-
-
-    
-   
-    
-    gps.toggleLogging()
 
 
 async def start_acquisition():
