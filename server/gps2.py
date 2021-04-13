@@ -48,7 +48,7 @@ class gpsHandler(Thread):
                         sys.stderr.write('Trying port %s\n' % port)
                     try:
                 # try to read a line of data from the serial port and parse
-                        with serial.Serial(port, 115200, timeout=10) as ser:
+                        with serial.Serial(port, 115200, timeout=1) as ser:
 
                             self.serial = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
