@@ -30,7 +30,6 @@ class ImageSave(Thread):
         test = path.split("/")
         test.pop()
         newPath = '/'.join(test)
-        print(newPath)
         return newPath
 
     def run(self):
