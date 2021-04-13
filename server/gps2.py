@@ -68,7 +68,7 @@ class gpsHandler(Thread):
                                 
                                 print("reading line")
                                 line = self.serial.readline().decode('ascii', errors='replace')
-                                
+                                print(line)
 
                                 if not line=="":
                                     
@@ -164,6 +164,7 @@ class gpsHandler(Thread):
         hdop = 5
         
         if(msg.sentence_type =="RMC"):
+            print(msg.spd_over_grnd)
 
             velocity = self.__knotsToKmh(msg.spd_over_grnd)
             velocity = self.__kmhToMs(velocity)
