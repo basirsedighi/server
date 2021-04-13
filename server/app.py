@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from typing import List
 import cv2
 from fastapi import FastAPI,Request
@@ -50,13 +51,19 @@ from core.models.models import GpsData ,freq
 manager = ConnectionManager()
 image_freq = 20
 gps_freq =0
+debug = False
 storage = {}
 app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(4)
-gps = gpsHandler()
+
+stopStream1 = False
+stopStream2 = False
+stopStream3 = False
+
+gps = gpsHandler(debug)
 imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
@@ -168,7 +175,7 @@ async def getData():
 #   Open a csv file and appends coordinates in lists
 #   return a list with the latitude coordinates and a list with longitude coordinates
 @app.get('/gpscoordinates')
-def getgpscoordinates()
+def getgpscoordinates():
     # Open gps csv file and make a csv reader object 
     with open(path +'k1time.csv', newline='') as csvgps:
         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
@@ -218,7 +225,7 @@ async def change(freq:freq):
 @app.get('/start1')
 def startA():
 
-    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning
+    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning,stopStream1
     index = 0
     test  =0
     
@@ -249,7 +256,7 @@ def startA():
                     print("stream 1 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning1:
+                elif status == cvb.WaitStatus.Timeout and stopStream1:
                     print("stream 1 timeout")
                     break
 
@@ -264,7 +271,8 @@ def startA():
                 print(e)
                 pass
 
-    isRunning1=False        
+    isRunning1=False
+    stopStream1 =False        
     print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
 
@@ -277,7 +285,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning2, image_lock, imageQueue, abort
+    global camera_2, isRunning2, image_lock, imageQueue, abort,stopStream2
     
 
     
@@ -315,7 +323,7 @@ def startB():
                     print("stream 2 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                elif status == cvb.WaitStatus.Timeout and stopStream2:
                     print("stream 2 timeout")
                     break
 
@@ -331,6 +339,7 @@ def startB():
           
 
     isRunning2=False
+    stopStream2 =False
     camera_2.stopStream()
     print("stream 2 stopped: "+str(index))
 
@@ -342,7 +351,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning3, image_lock, imageQueue, abort
+    global camera_3, isRunning3, image_lock, imageQueue, abort,stopStream3
     
 
     
@@ -380,7 +389,7 @@ def startC():
                     print("stream 3 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                elif status == cvb.WaitStatus.Timeout and stopStream3:
                     print("stream 3 timeout")
                     break
 
@@ -396,6 +405,7 @@ def startC():
           
 
     isRunning3=False
+    stopStream3 =False
     camera_3.stopStream()
     print("stream 3 stopped: "+str(index))
 
@@ -406,11 +416,16 @@ def startC():
 
 
 async def abortStream():
-    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl
+    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
     print("stopping stream")
-    #toggleGPSControl()
-    gpsControl = False
+    toggleGPSControl(False)
+
+    
     image_freq = 0
+
+    stopStream1 =True
+    stopStream2 =True
+    stopStream3 =True
 
    
 
@@ -424,20 +439,20 @@ async def abortStream():
 async def start_acquisition():
     global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
     print("Starting stream")
-    #toggleGPSControl()
+    #toggleGPSControl(True)
     abort=False
     image_freq = 0
     
     
-    gps.toggleLogging()
+   
     
     
    
     
 def startPulse():
-    global image_freq,isRunning1,isRunning2,isRunning3,started
+    global image_freq,isRunning1,isRunning2,isRunning3,started,gps
     
-
+    gps.toggleLogging()
     isRunning1 = True
     isRunning2 = True
     isRunning3 = True
@@ -447,9 +462,14 @@ def startPulse():
     image_freq = 20
 
 def pause():
-    isRunning1 = False
-    isRunning2 = False
-    isRunning3 = False
+    global isRunning1,isRunning2,isRunning3,gps,image_freq
+    gps.toggleLogging()
+    toggleGPSControl(False)
+    image_freq =0
+    # isRunning1 = False
+    # isRunning2 = False
+    # isRunning3 = False
+    
 
 
 # def resume():
@@ -739,6 +759,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = json.loads(data)
             event = data['event']
             msg = data['data']
+            print(event)
 
             
 
@@ -817,6 +838,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 valider1 = msg
                 valider2 =msg
             
+            elif(event == "debug"):
+                gps.setDebug(msg)
+
+            
             elif(event == "pause"):
                 pause()
 
@@ -835,23 +860,35 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-
+    print("[startup] loading config")
     await loadConfig()
-    print("startup")
+    
 
 
 @app.on_event("shutdown")
 def shutdown_event():
-    global imagesave, closeServer
+    global imagesave, closeServer,gps
+
+    print("shutting down server")
 
     imagesave.raise_exception()
+    gps.raise_exception()
     imagesave.join()
     gps.join()
+    os.system('sudo kill -9 `sudo lsof -t -i:8000')
 
+
+
+def main(arg):
+   
+
+    uvicorn.run(app, host="localhost", port=8000)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+  
+    main(debug)
+    
 
 
     #169.254.108.159
