@@ -185,32 +185,31 @@ async def createImageFolder(tripName):
     date = getDate()
 
     bestDrive = most_free_space()
-    drive = bestDrive['name']
-    print(drive)
+    if bestDrive:
+        drive = bestDrive['name']
+        print(drive)
 
-
-
-    
-    
-    if not path.exists(drive+"/"+"bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
-       
-        os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
+        if not path.exists(drive+"/"+"bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1"):
         
-    
-    if not path.exists(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
-    
+            os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera1")
+            
         
-        os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+        if not path.exists(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2"):
+        
+            
+            os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
 
+        
+
+        if not path.exists('log/'+str(date)):
+
+
+            os.makedirs('log/'+str(date)) 
+
+
+        return drive
     
-
-    if not path.exists('log/'+str(date)):
-
-
-        os.makedirs('log/'+str(date)) 
-
-
-    return drive
+    else: return "failed"
 
 def estimateStorageTime(storages,fps):
     # 20 bilder/sek

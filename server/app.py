@@ -787,9 +787,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 imagesave.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
-                imagesave.setDrive(drive_in_use)
-                await start_acquisition()
-                await manager.broadcast(json.dumps({"event": "starting"}))
+                if drive_in_use =="failed":
+                    await manager.broadcast(json.dumps({"event": "error","data":"no drives"}))
+
+                else:
+                    imagesave.setDrive(drive_in_use)
+                    await start_acquisition()
+                    await manager.broadcast(json.dumps({"event": "starting"}))
                 
                 
                 
