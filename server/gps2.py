@@ -162,6 +162,7 @@ class gpsHandler(Thread):
         milliseconds = int(time.time() * 1000)
         fix_quality = 0
         hdop = 5
+        velocity = 0
         
         if(msg.sentence_type =="RMC"):
             print("validity")
@@ -169,8 +170,7 @@ class gpsHandler(Thread):
             if msg.status =="A":
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
-            else:
-                velocity =0
+           
         
             self.message.update({"velocity":str(velocity),"timestamp":str(now),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
             return self.message 
