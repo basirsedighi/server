@@ -273,7 +273,7 @@ def startA():
 
     isRunning1=False
     stopStream1 =False 
-    gps.toggleLogging()
+    gps.toggleLogging(False)
           
     print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
