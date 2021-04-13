@@ -247,7 +247,7 @@ def startA():
 
                 if status == cvb.WaitStatus.Ok:
                     timeStamp = int(time.time() * 1000) #getTimeStamp()
-                    
+                
                     data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp}
                     imageQueue.put(data)
                     index = index +1
