@@ -51,7 +51,8 @@ class gpsHandler(Thread):
                         with serial.Serial(port, 115200, timeout=1) as ser:
 
                             self.serial = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
-
+                              #sends commands to gps
+                            self.initGPS()
                 # 'warm up' with reading some input
                             for i in range(10):
                                 data = self.serial.readline()
@@ -59,8 +60,7 @@ class gpsHandler(Thread):
                             # try to parse (will throw an exception if input is not valid NMEA)
                             pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
 
-                            #sends commands to gps
-                            self.initGPS()
+                          
 
                             while True:
                                 
