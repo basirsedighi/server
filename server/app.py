@@ -58,6 +58,11 @@ image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(4)
+
+stopStream1 = False
+stopStream2 = False
+stopStream3 = False
+
 gps = gpsHandler(debug)
 imageQueue = queue.Queue()
 imagesave = ImageSave(imageQueue,"saving thread")
@@ -220,7 +225,7 @@ async def change(freq:freq):
 @app.get('/start1')
 def startA():
 
-    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning
+    global camera_1, isRunning1, image_lock, imageQueue, abort,isRunning,stopStream1
     index = 0
     test  =0
     
@@ -251,7 +256,7 @@ def startA():
                     print("stream 1 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning1:
+                elif status == cvb.WaitStatus.Timeout and stopStream1:
                     print("stream 1 timeout")
                     break
 
@@ -266,7 +271,8 @@ def startA():
                 print(e)
                 pass
 
-    isRunning1=False        
+    isRunning1=False
+    stopStream1 =False        
     print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
 
@@ -279,7 +285,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning2, image_lock, imageQueue, abort
+    global camera_2, isRunning2, image_lock, imageQueue, abort.stopStream2
     
 
     
@@ -317,7 +323,7 @@ def startB():
                     print("stream 2 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                elif status == cvb.WaitStatus.Timeout and stopStream2:
                     print("stream 2 timeout")
                     break
 
@@ -333,6 +339,7 @@ def startB():
           
 
     isRunning2=False
+    stopStream2 =False
     camera_2.stopStream()
     print("stream 2 stopped: "+str(index))
 
@@ -344,7 +351,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning3, image_lock, imageQueue, abort
+    global camera_3, isRunning3, image_lock, imageQueue, abort.stopStream3
     
 
     
@@ -382,7 +389,7 @@ def startC():
                     print("stream 3 abort")
                     break
 
-                elif status == cvb.WaitStatus.Timeout and isRunning2:
+                elif status == cvb.WaitStatus.Timeout and stopStream3:
                     print("stream 3 timeout")
                     break
 
@@ -398,6 +405,7 @@ def startC():
           
 
     isRunning3=False
+    stopStream3 =False
     camera_3.stopStream()
     print("stream 3 stopped: "+str(index))
 
@@ -408,12 +416,16 @@ def startC():
 
 
 async def abortStream():
-    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl
+    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
     print("stopping stream")
     toggleGPSControl(False)
 
     
     image_freq = 0
+
+    stopStream1 =True
+    stopStream2 =True
+    stopStream3 =True
 
    
 
@@ -450,11 +462,14 @@ def startPulse():
     image_freq = 20
 
 def pause():
-    global isRunning1,isRunning2,isRunning3,gps
+    global isRunning1,isRunning2,isRunning3,gps,image_freq
     gps.toggleLogging()
-    isRunning1 = False
-    isRunning2 = False
-    isRunning3 = False
+    toggleGPSControl(False)
+    image_freq =0
+    # isRunning1 = False
+    # isRunning2 = False
+    # isRunning3 = False
+    
 
 
 # def resume():
