@@ -3,7 +3,7 @@ from collections import defaultdict
 from bisect import bisect_left
 import collections
 
-path = "C:/Users/tor_9/Documents/csv/"
+path = "C:/Users/tor_9/Documents/csv/"  #   The path to the csv documents
 #---start for variables and lists for merging csv---#
 
 #----lists----#
@@ -27,6 +27,11 @@ cleanlonglist = []
 cleanlatlist = []
 cleanfixlist = []
 cleanspeedlist = []
+
+#   Modified coordinate list
+modyfiedlatlist = []
+modyfiedlonglist = []
+
 accelereation = []
 #newgps = []
 #newcoordinatelist = []
@@ -34,6 +39,9 @@ filledgpslist = []
 overlappingpointlist = []
 expandedlongitudelist = []
 expandedlatitudelist = []
+
+expandedmodifiedlongitudelist = []
+expandedmodifiedlatitudelist = []
 #   gps dictionary
 
 #   index lists
@@ -116,20 +124,18 @@ def findandremovedublicates(wholeindexlist):
 
     for n in dublicateindexvaluelist:
         wholeindexlist.remove(n)
-   
+    
     return wholeindexlist, dublicateindexlist
 
 #   finds and remove overlapping values from the gps value list
 #   return list of coordinates without points overalapping
 def findandremovefromlistbyindex(valuelist, dublicateindexlist):
-    overlappingpointlist.clear() 
-      
-    for n in dublicateindexlist: 
-             
-        overlappingpointlist.append(valuelist[n])
-    
-    for n in overlappingpointlist:
-        valuelist.remove(n)
+     
+    for n in dublicateindexlist:               
+        del valuelist[n]
+        i = 1
+        
+
     
     return valuelist
 #  make new gps list with read gps coordinates and calculated gps coordinates 
@@ -186,7 +192,7 @@ def getaccelerationlist(gpsspeedlist, gpstimelist):
 #   modifies coordinates based on time difference between picture taken and coordinate read,
 #   speed, and constant acceleration
 #   return list of modified coordinates
-def modifycoordinatesbasedontimedifference(timedifflist, coordiantelist,speed, accelerationlist):
+def modifycoordinatesbasedontimedifference(timedifflist, coordiantelist, speed, accelerationlist):
     print(len(timedifflist))
     print(len(coordiantelist))
     print(len(accelerationlist))
@@ -250,15 +256,18 @@ with open(path +'pictest.csv', newline='') as csvpic:
     picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
     for row in picreader:
         #  make a list for each column in the csv file
-        picnumberlist.append(row[0])
-        kameranumberlist.append(row[2])
-        millispiclist.append(float(row[3]))
+        #picnumberlist.append(row[0])
+        #kameranumberlist.append(row[2])
+        #millispiclist.append(float(row[3]))
         
-        if row[2] == '1.00' or row[2] == 1:
+        if row[2] == '1.00' or row[2] == '1':
+            picnumberlist.append(row[0])
+            kameranumberlist.append(row[2])
             millisk1list.append(float(row[3]))
+            
      
 # Open gps csv file and make a csv reader object 
-with open(path +'backuo.csv', newline='') as csvgps:
+with open(path +'gps.csv', newline='') as csvgps:
     gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
     for row in gpsreader:
         #  make a list for each column in the csv file
@@ -277,29 +286,40 @@ indexlist = calculateindexposition(millisgpslist, millisk1list)
 print('indexlist len: '+str(len(indexlist)))
 index, dub = findandremovedublicates(indexlist)
 print('index: '+str(len(index)))
-print('dub: '+str(len(dub)))
+print('dub: '+str(dub))
+dub.reverse()   #   reversing the dublicate list, resulting removing from top of list.
+
+#   Removing dublicates from lists
 cleanlatlist = findandremovefromlistbyindex(latlist, dub)
 cleanlonglist = findandremovefromlistbyindex(longlist, dub)
 cleanmillisgpslist = findandremovefromlistbyindex(millisgpslist, dub)
 cleanspeedlist = findandremovefromlistbyindex(speedlist, dub)
 cleanfixlist = findandremovefromlistbyindex(fixlist, dub)
-print('fix: '+str(len(cleanfixlist)))
+
 timedifferencelist = gettimedifference(cleanmillisgpslist, millisk1list, index)
 
 accelereation = getaccelerationlist(cleanspeedlist, cleanmillisgpslist)
 
-#modifycoordinatesbasedontimedifference(timedifferencelist, cleanlatlist,cleanspeedlist, accelereation)
-print('clat'+str(len(cleanlatlist)))
+#   Modifies cleaned latitude and longitude list
+modyfiedlatlist = modifycoordinatesbasedontimedifference(timedifferencelist, cleanlatlist,cleanspeedlist, accelereation)
+modyfiedlonglist = modifycoordinatesbasedontimedifference(timedifferencelist, cleanlonglist,cleanspeedlist, accelereation)
+
+#   Expand cleaned latitude and longitude list
 expandedlatitudelist = makenewcoordinatelist(cleanlatlist, index)
-
-
 expandedlongitudelist = makenewcoordinatelist(cleanlonglist, index)
 
+#   Expand modified latitude and longitude list
+expandedmodifiedlatitudelist = makenewcoordinatelist(cleanlatlist, index)
+expandedmodifiedlongitudelist = makenewcoordinatelist(cleanlonglist, index)
 
+print('exmodlong: '+ str(len(expandedmodifiedlongitudelist)))
+print('exmodlat: '+ str(len(expandedmodifiedlatitudelist)))
+print('exlat: '+ str(len(expandedlatitudelist)))
+print('exlong: '+ str(len(expandedlongitudelist)))
 
 
 with open(path+ 'k1time.csv','w', newline='') as k1test:
-    fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong']
+    fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
     k1writer = csv.DictWriter(k1test, fieldnames=fieldnames) 
     
     for n in millisk1list: 
@@ -312,20 +332,23 @@ with open(path+ 'k1time.csv','w', newline='') as k1test:
                 
                 k1writer.writerow({'gpsmillis': cleanmillisgpslist[gpsrow],'readlat':cleanlatlist[gpsrow],
                  'readlong':cleanlonglist[gpsrow], 'picmillis': n, 'extendedlat':expandedlatitudelist[expand],
-                'extendedlong':expandedlongitudelist[expand]})
+                'extendedlong':expandedlongitudelist[expand], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand]
+                , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand]})
                 gpsrow += 1            
                 indexnumber +=1
                 expand += 1
             elif k1row < len(expandedlatitudelist):
                 k1writer.writerow({'picmillis': n, 'extendedlat':expandedlatitudelist[expand],
-                'extendedlong':expandedlongitudelist[expand]})
+                'extendedlong':expandedlongitudelist[expand], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand]
+                , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand]})
                 expand += 1
             else:
                 k1writer.writerow({'picmillis': n})
             k1row += 1
         else:
             k1writer.writerow({'picmillis': n, 'extendedlat':expandedlatitudelist[expand-1],
-            'extendedlong':expandedlongitudelist[expand-1]})
+            'extendedlong':expandedlongitudelist[expand-1], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand-1]
+            , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand-1]})
             
 #-------------------------------------------#
 
