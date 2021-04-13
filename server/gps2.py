@@ -58,7 +58,7 @@ class gpsHandler(Thread):
                                 data = ser.readline()
                                 print(data)
                             # try to parse (will throw an exception if input is not valid NMEA)
-                            pynmea2.parse(ser.readline().decode('utf-8', errors='replace'))
+                            pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
 
                           
 
