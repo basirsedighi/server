@@ -25,6 +25,7 @@ class gpsHandler(Thread):
         self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,'millis':0}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
+        print(self.path)
         self.tripName =""
         self.date = self.getDate()
         self.serial = None

@@ -735,13 +735,8 @@ def videofeed():
 
 
 
-@app.get('/live')
-def live():
-
+def merge_CSV_files():
     
-        
-
-    return StreamingResponse(videofeed())
 
 
 
@@ -847,7 +842,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 pause()
             
             elif(event =="merge"):
-                print("merging")
+                merge_CSV_files()
 
 
                 
