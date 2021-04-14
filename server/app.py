@@ -855,6 +855,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event =="merge"):
                 startfps()
+                await initCameraA()
+                await initCameraB()
+                   
                 merge_CSV_files()
 
 
