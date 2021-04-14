@@ -252,7 +252,7 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
 #-------------------------------------------#
 def merge(path):
     # Open image csv file and make a csv reader object 
-    with open(path +'images.csv', newline='') as csvpic:
+    with open(path +'/images.csv', newline='') as csvpic:
         picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
         for row in picreader:
             #  make a list for each column in the csv file
@@ -267,7 +267,7 @@ def merge(path):
                 
         
     # Open gps csv file and make a csv reader object 
-    with open(path +'gps.csv', newline='') as csvgps:
+    with open(path +'/gps.csv', newline='') as csvgps:
         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
         for row in gpsreader:
             #  make a list for each column in the csv file
