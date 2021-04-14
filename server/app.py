@@ -744,6 +744,12 @@ def merge_CSV_files():
     print("merging")
 
 
+def startfps():
+    global image_freq
+
+    image_freq = 5
+
+
 
 
 @app.websocket("/stream/{client_id}")
@@ -848,6 +854,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 pause()
             
             elif(event =="merge"):
+                startfps()
                 merge_CSV_files()
 
 
