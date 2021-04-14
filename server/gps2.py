@@ -9,6 +9,8 @@ import io
 import os
 import csv
 os.system('sudo chmod a+rw /dev/ttyUSB2')
+os.system('sudo chmod a+rw /dev/ttyUSB1')
+os.system('sudo chmod a+rw /dev/ttyUSB0')
 
 class GPS_QUALITY(enum.Enum):
    BEST = 3
