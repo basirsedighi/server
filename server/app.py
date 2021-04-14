@@ -202,7 +202,11 @@ async def fps():
         fps = image_freq
     
     else:
-        fps = gps_freq
+
+        if gps_freq >2:
+            fps = gps_freq
+        
+        else: fps =0
 
      
 
@@ -883,7 +887,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="192.168.10.153", port=8000)
 
 
 if __name__ == "__main__":
