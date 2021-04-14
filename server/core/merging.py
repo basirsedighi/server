@@ -3,7 +3,7 @@ from collections import defaultdict
 from bisect import bisect_left
 import collections
 
-path = os.path.dirname(os.path.abspath(__file__)) #   The absoulte path to the csv documents
+
 #---start for variables and lists for merging csv---#
 
 #----lists----#
