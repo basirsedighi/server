@@ -722,6 +722,7 @@ def gen1():
                 frame, status = camera_2.get_image()
                 if status == cvb.WaitStatus.Ok:
                     frame = np.array(frame)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame = cv2.resize(frame, (640, 480))
                     _, frame = cv2.imencode('.jpg', frame)
 
