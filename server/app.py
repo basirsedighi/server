@@ -58,7 +58,7 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
-camera_3 = Camera(4)
+camera_3 = Camera(2)
 tempTrip =""
 
 stopStream1 = False
@@ -555,6 +555,10 @@ async def initCameraA():
     finally:
         
         await manager.broadcast(json.dumps({"event": "initA", "data": status}))
+
+async def loadConfigA():
+    global camera_1
+
 
 
 async def loadConfig():
