@@ -97,7 +97,7 @@ class gpsHandler(Thread):
                                     
 
                                         if(self.logging and self.data['new'] ==True):
-                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
+                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
                                 
 
                                                 fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon","millis"]

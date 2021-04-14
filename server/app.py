@@ -741,8 +741,9 @@ def videofeed():
 
 
 def merge_CSV_files():
+    print("gfdgd")
     
-    print("merging")
+    
 
 
 def startfps():

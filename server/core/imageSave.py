@@ -66,7 +66,7 @@ class ImageSave(Thread):
                         "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
 
                         
-                        with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+".csv",'a',newline='')as csvfile:
+                        with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images".csv",'a',newline='')as csvfile:
                             
 
                             fieldnames = ['index', 'tripname', "camera","timestamp","date"]
