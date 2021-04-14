@@ -176,17 +176,40 @@ async def getData():
 
 #   Open a csv file and appends coordinates in lists
 #   return a list with the latitude coordinates and a list with longitude coordinates
-@app.get('/gpscoordinates')
+@app.get('/GetCoordinates')
 def getgpscoordinates():
-    # Open gps csv file and make a csv reader object 
-    with open(path +'k1time.csv', newline='') as csvgps:
-        gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
-        for row in gpsreader:
-            #  make a list for each column in the csv file
-            latitudelist.append[4]
-            longlitudelist.append[5]
+    mainlist =[]
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    path = absolute_path+"/log/"
+
+    folders= os.listdir(path)
+
+    for folder in folders:
+        subFolders = os.listdir(absolute_path+"/log/"+folder)
+
+        for subFolder in subFolders:
+
+            with open(path+"/"+folder+"/"+subFolder+"/" +'merge.csv', newline='') as csvgps:
+                gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+                for row in gpsreader:
+                    #  make a list for each column in the csv file
+                    latitudelist.append[3]
+                    longlitudelist.append[4]
+                
+                cordlist = [latitudelist,longlitudelist]
+            
+            mainlist.append(cordlist)
         
-    return latitudelist, longlitudelist
+    return {"list":mainlist}
+
+
+
+    
+        
+
+    
+  
 
 
 @app.post('/gpserror')
@@ -556,8 +579,7 @@ async def initCameraA():
         
         await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
-async def loadConfigA():
-    global camera_1
+
 
 
 
