@@ -187,10 +187,12 @@ def getgpscoordinates():
 
     for folder in folders:
         subFolders = os.listdir(absolute_path+"/log/"+folder)
+        print(folder)
 
         for subFolder in subFolders:
+            print(subFolder)
 
-            with open(path+"/"+folder+"/"+subFolder+"/" +'merge.csv', newline='') as csvgps:
+            with open(path+folder+"/"+subFolder+"/" +'gps.csv', newline='') as csvgps:
                 gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
                 for row in gpsreader:
                     #  make a list for each column in the csv file
