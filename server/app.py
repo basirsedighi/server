@@ -198,8 +198,8 @@ def getgpscoordinates():
                 gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
                 for row in gpsreader:
                     #  make a list for each column in the csv file
-                    latitudelist.append[3]
-                    longlitudelist.append[4]
+                    latitudelist.append(row[3])
+                    longlitudelist.append(row[4])
                 
                 cordlist = [latitudelist,longlitudelist]
             
