@@ -629,7 +629,7 @@ async def initCameraB():
         
 
 async def initCameraC():
-    global camera_3
+    global camera_3,config_loaded
     status = "ok"
 
     try:
@@ -637,6 +637,8 @@ async def initCameraC():
         if not camera_3.isRunning():
 
             camera_3.start_stream()
+        
+        config_loaded = True
        
 
     except:
