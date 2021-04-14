@@ -21,14 +21,14 @@ class Camera:
             cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
 
 
-        # self.device_node_map = self.device.node_maps["Device"]
-        # self.device_node_map.load_settings(file_name=self.config_path)
+        self.device_node_map = self.device.node_maps["Device"]
+        self.device_node_map.load_settings(file_name=self.config_path)
 
 
 
     def init(self):
-        # self.device = cvb.DeviceFactory.open(os.path.join(
-        #     cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
+        self.device = cvb.DeviceFactory.open(os.path.join(
+            cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
 
 
         # self.device_node_map = self.device.node_maps["Device"]

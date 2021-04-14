@@ -820,7 +820,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "loadConfig"):
 
                 if not config_loaded:
-                    await loadConfig()
+                    #await loadConfig()
                     await initCameraA()
                     await initCameraB()
                    
@@ -919,8 +919,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
+    global camera_1,camera_2
     print("[startup] loading config")
-    await loadConfig()
+    camera_1.init()
+    camera_2.init()
     
 
 
