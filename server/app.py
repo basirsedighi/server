@@ -46,6 +46,7 @@ from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
+from core.merging import merge
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -58,6 +59,7 @@ image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(4)
+tempTrip =""
 
 stopStream1 = False
 stopStream2 = False
@@ -741,7 +743,16 @@ def videofeed():
 
 
 def merge_CSV_files():
-    print("gfdgd")
+    global tempTrip
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    path = absolute_path+"/log/"+date+"/"+tempTrip
+    merge(path)
+
+
+
+   
+    
     
     
 
@@ -756,7 +767,7 @@ def startfps():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -795,6 +806,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 
             elif(event == 'start'):
+                tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
