@@ -578,6 +578,7 @@ async def initCameraA():
             
             camera_1.start_stream()
 
+        config_loaded = True
 
     except:
         print("initializing of cmera failed")
@@ -628,6 +629,8 @@ async def initCameraB():
         if not camera_2.isRunning():
 
             camera_2.start_stream()
+        
+        
        
 
     except:
