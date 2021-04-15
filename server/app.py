@@ -975,7 +975,7 @@ async def startup():
     print("[startup] init cameras")
     camerasDiscovered = await discoverCameras()
     i =0
-    print("Cameras:"+ len(camerasDiscovered))
+    print("Cameras:"+ str(len(camerasDiscovered)))
     for device in camerasDiscovered:
         cameras[0].init()
         
