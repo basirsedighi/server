@@ -289,7 +289,7 @@ def merge(path):
     #print(millisgpslist)
     indexlist, closesttimelist = calculateindexposition(millisgpslist, millisk1list)
 
-    for n in range(100):
+    for n in range(10):
         print(closesttimelist[n])
 
     print('indexlist len: '+str(len(indexlist)))
