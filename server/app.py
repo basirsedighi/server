@@ -971,7 +971,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 pause()
             
             elif(event =="merge"):
-                startfps()
+                #startfps()
                 
                 await initCameraA()
                 await initCameraB()

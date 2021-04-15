@@ -74,7 +74,7 @@ class Camera:
 
     def get_image(self):
 
-        image, status = self.stream.wait_for(8000)
+        image, status = self.stream.wait_for(2000)
         return image, status
 
     def abortStream(self):
