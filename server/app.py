@@ -85,6 +85,7 @@ gps.start()
 gps_status = {}
 valider1 = True
 valider2 = True
+valider3 = True
 abort = False
 logging = False
 closeServer = False
@@ -738,6 +739,31 @@ def gen1():
         else:
             break
 
+
+def gen2():
+    global camera_3,valider3
+
+    while 1:
+
+        if valider3:
+
+            try:
+                frame, status = camera_3.get_image()
+                if status == cvb.WaitStatus.Ok:
+                    frame = np.array(frame)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frame = cv2.resize(frame, (640, 480))
+                    _, frame = cv2.imencode('.jpg', frame)
+
+                    image = frame.tobytes()
+
+                    yield (b'--frame\r\n'
+                            b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+            except Exception as e:
+                print(e)
+        else:
+            break
+
 @app.get('/video_feed1')
 def video_feed1():
     global valider
@@ -759,6 +785,13 @@ def video_feed2():
     global valider
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.get('/video_feed3')
+def video_feed3():
+    global valider
+    
+    return StreamingResponse(gen2(), media_type="multipart/x-mixed-replace; boundary=frame")
     
 
 
@@ -835,6 +868,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                     await manager.broadcast(json.dumps({"event": "initB", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
+                    await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
                 
 
@@ -894,6 +928,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "live"):
                 valider1 = msg
                 valider2 =msg
+                valider3 = msg
             
             elif(event == "debug"):
                 gps.setDebug(msg)
@@ -924,10 +959,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-    global camera_1,camera_2
+    global camera_1,camera_2,camera_3
     print("[startup] loading config")
     camera_1.init()
     camera_2.init()
+    camera_3.init()
     
 
 
