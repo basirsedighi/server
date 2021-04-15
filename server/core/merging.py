@@ -59,7 +59,7 @@ timedifferencelist = []
 cleanlength = 0
 picrow = 0
 gpsrow = 0
-indexnumber = 0
+
 k1row = 0
 expand = 0
 
@@ -330,6 +330,7 @@ def merge(path):
     with open(path+ 'merged.csv','w', newline='') as k1test:
         fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
         k1writer = csv.DictWriter(k1test, fieldnames=fieldnames) 
+        indexnumber =0
         
         for n in millisk1list: 
             #print('index: '+str(indexlist[indexnumber])+' ,k1row: '+str(k1row)+' gpsrow: '+str(gpsrow)+' lenght: '+str(len(cleanlatlist)))

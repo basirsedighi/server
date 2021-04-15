@@ -845,7 +845,10 @@ def merge_CSV_files():
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     path = absolute_path+"/log/"+date+"/"+tempTrip
-    merge(path)
+    try:
+        merge(path)
+    except Exception as e:
+        pass
 
 
 
