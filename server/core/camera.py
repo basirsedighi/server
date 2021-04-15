@@ -48,7 +48,7 @@ class Camera:
         try:
            
             self.device = device
-            test =self.device.read_property(cvb.DiscoveryProperties.UsbPortPath )
+            test =self.device.read_property(cvb.DiscoveryProperties.DeviceId )
 
             print(test)
        
