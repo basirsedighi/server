@@ -827,6 +827,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                     #await loadConfig()
                     await initCameraA()
                     await initCameraB()
+                    await initCameraC()
                    
                 
                 else:
@@ -868,7 +869,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "init"):
                 await initCameraA()
                 await initCameraB()
-                #await initCameraC()
+                await initCameraC()
                 
 
             elif(event == "stream"):
