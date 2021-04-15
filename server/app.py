@@ -595,8 +595,13 @@ async def loadConfig():
     status="Konfig vellykket"
     cameraStatus = "config_ok"
     try:
-        camera_1.loadConfig()
-        camera_2.loadConfig()
+        camerasDiscovered = await discoverCameras()
+        i =0
+        for device in camerasDiscovered:
+            cameras[0].loadConfig()
+
+            i=i+1
+       
        
         
         config_loaded = True
