@@ -973,11 +973,12 @@ async def startup():
 
     
 
-    if cameras ==3:
-        print("hallo")
-    else:
+    if cameras ==0:
         print("Just :" +str(cameras)+"--cameras was connected")
-        raise Exception("CONNECT ALL 3 CAMERAS")
+        raise Exception("CONNECT ALL CAMERAS")
+       
+    
+        
     
 
 
