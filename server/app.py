@@ -865,7 +865,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "loadConfig"):
 
                 if not config_loaded:
-                    await loadConfig()
+                    
                     await initCameraA()
                     await initCameraB()
                     await initCameraC()
