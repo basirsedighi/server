@@ -598,7 +598,7 @@ async def loadConfig():
         camerasDiscovered = await discoverCameras()
         i =0
         for device in camerasDiscovered:
-            cameras[0].loadConfig()
+            cameras[0].init()
 
             i=i+1
        
@@ -864,7 +864,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "loadConfig"):
 
                 if not config_loaded:
-                    #await loadConfig()
+                    await loadConfig()
                     await initCameraA()
                     await initCameraB()
                     await initCameraC()
