@@ -44,17 +44,18 @@ class Camera:
     
 
     def init2(self,device):
-         try:
+
+        try:
             self.device = device
 
 
-            # self.device_node_map = self.device.node_maps["Device"]
-            # self.device_node_map.load_settings(file_name=self.config_path)
+       
 
             self.stream = self.device.stream
             self.stream.start()
-        
+    
         except Exception as e:
+            
             print(e)
 
             
