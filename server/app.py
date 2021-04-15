@@ -668,6 +668,7 @@ async def initCameraC():
             
             else:
                 camera_3.init()
+                
             
             config_loaded = True
        
