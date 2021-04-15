@@ -645,7 +645,7 @@ async def initCameraC():
     status = "ok"
 
     try:
-        camera_3.init()
+        fcamera_3.init()
         if not camera_3.isRunning():
 
             camera_3.start_stream()
