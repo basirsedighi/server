@@ -629,7 +629,7 @@ async def loadConfig():
 async def initCameraB():
     global camera_2,cameras
     status = "ok"
-    if index_in_list(cameras, 1)
+    if index_in_list(cameras, 1):
 
         try:
             #camera_2.init()
