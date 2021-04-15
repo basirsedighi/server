@@ -46,9 +46,9 @@ class Camera:
     def init2(self,device):
 
         try:
-            cvb.DiscoveryProperties.DeviceAccessStatus
+           
             self.device = device
-            test =self.device.read_property(cvb.DiscoveryProperties.DeviceAccessStatus.UsbPortPath )
+            test =self.device.read_property(cvb.DiscoveryProperties.UsbPortPath )
 
             print(test)
        
