@@ -44,6 +44,11 @@ class Camera:
             print(e)
     
 
+
+    def getDevice(self):
+
+        return self.device
+
     def init2(self,device):
 
         try:
