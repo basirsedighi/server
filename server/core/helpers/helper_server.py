@@ -294,7 +294,7 @@ def folderConstructor():
 
 async def discoverCameras():
 
-    discover = cvb.DeviceFactory.discover_from_root()
+    discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
     
     return len(discover)
 
