@@ -32,6 +32,7 @@ cleanspeedlist = []
 modyfiedlatlist = []
 modyfiedlonglist = []
 
+closesttimelist = []
 accelereation = []
 #newgps = []
 #newcoordinatelist = []
@@ -100,14 +101,15 @@ def take_closest(myList, myNumber):
 #  compare time from pic list and gps list
 #   return 
 def calculateindexposition(gpsmillislist, picmillislist):
+    testlist = []
     for n in gpsmillislist:      
         closesttime, position = take_closest(picmillislist, n)
         if position != 0:
             position -= 1
-        
+        testlist.append(closesttime)
         indexlist.append(position) 
       
-    return indexlist
+    return indexlist, closesttimelist
 
 #  find and remove dublicates from index list
 #   TO DO: velge duplicate som er nærmest pictime
@@ -281,7 +283,10 @@ def merge(path):
     print('millis: '+ str(len(millisk1list)))
     print('lat: '+ str(len(latlist)))
     #print(millisgpslist)
-    indexlist = calculateindexposition(millisgpslist, millisk1list)
+    indexlist, closesttimelist = calculateindexposition(millisgpslist, millisk1list)
+    
+    for n in range(100)
+        print(closesttimelist[n])
 
     print('indexlist len: '+str(len(indexlist)))
     index, dub = findandremovedublicates(indexlist)
