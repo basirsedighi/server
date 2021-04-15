@@ -581,7 +581,7 @@ async def initCameraA():
         config_loaded = True
 
     except:
-        print("initializing of cmera failed")
+        print("initializing of camera 1 failed")
         status = "failed"
     finally:
         
@@ -599,7 +599,7 @@ async def loadConfig():
         camerasDiscovered = await discoverCameras()
         i =0
         for device in camerasDiscovered:
-            cameras[0].init()
+            cameras[i].init()
 
 
             i=i+1
@@ -634,7 +634,7 @@ async def initCameraB():
        
 
     except:
-        print("initializing of camera failed")
+        print("initializing of camera 2 failed")
         status = "failed"
     finally:
         await manager.broadcast(json.dumps({"event": "initB", "data": status}))
@@ -654,7 +654,7 @@ async def initCameraC():
        
 
     except:
-        print("initializing of camera failed")
+        print("initializing of camera 3 failed")
         status = "failed"
     finally:
         await manager.broadcast(json.dumps({"event": "initC", "data": status}))
