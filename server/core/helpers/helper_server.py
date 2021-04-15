@@ -204,6 +204,11 @@ async def createImageFolder(tripName):
         
             
             os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+        
+        if not path.exists(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera3"):
+        
+            
+            os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera3")
 
         
 
