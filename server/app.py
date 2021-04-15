@@ -963,7 +963,7 @@ async def startup():
     global camera_1,camera_2,camera_3
     print("[startup] init cameras")
     cameras = await discoverCameras()
-    print(cameras)
+    
 
     if cameras ==3:
         print("init A")
