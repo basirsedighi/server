@@ -573,10 +573,14 @@ async def initCameraA():
     try:
         #camera_1.init()
        
+        if camera_1.device is not None:
+
+            if not camera_1.isRunning():
+                
+                camera_1.start_stream()
         
-        if not camera_1.isRunning():
-            
-            camera_1.start_stream()
+        else:
+            camera_1.init()
 
         config_loaded = True
 
@@ -626,9 +630,13 @@ async def initCameraB():
 
     try:
         #camera_2.init()
-        if not camera_2.isRunning():
+        if camera_2.device is not None: 
+            if not camera_2.isRunning():
 
-            camera_2.start_stream()
+                camera_2.start_stream()
+        
+        else:
+            camera2.init()
         
         
        
@@ -646,9 +654,14 @@ async def initCameraC():
 
     try:
         #camera_3.init()
-        if not camera_3.isRunning():
+        if camera_3.device is not None:
 
-            camera_3.start_stream()
+            if not camera_3.isRunning():
+
+                camera_3.start_stream()
+        
+        else:
+            camera_3.init()
         
         config_loaded = True
        
