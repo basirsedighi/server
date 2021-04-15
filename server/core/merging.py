@@ -284,8 +284,8 @@ def merge(path):
     print('lat: '+ str(len(latlist)))
     #print(millisgpslist)
     indexlist, closesttimelist = calculateindexposition(millisgpslist, millisk1list)
-    
-    for n in range(100)
+
+    for n in range(100):
         print(closesttimelist[n])
 
     print('indexlist len: '+str(len(indexlist)))
