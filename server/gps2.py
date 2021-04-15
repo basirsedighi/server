@@ -55,7 +55,7 @@ class gpsHandler(Thread):
                             self.serial = ser
                             self.read = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
                               #sends commands to gps
-                            #self.initGPS()
+                            self.initGPS()
                 # 'warm up' with reading some input
                             for i in range(10):
                                 data = ser.readline()
