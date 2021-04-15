@@ -396,7 +396,7 @@ def startC():
    
     index = 0
     test =0
-    print("started camera 2") 
+    print("started camera 3") 
     print(time.time()*1000) 
     
     
