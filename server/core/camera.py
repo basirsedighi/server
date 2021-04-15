@@ -40,7 +40,8 @@ class Camera:
             self.stream.start()
         
         except Exception as e:
-            pass
+            print(e)
+            
 
     def start_stream(self):
 
