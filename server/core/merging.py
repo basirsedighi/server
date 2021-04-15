@@ -253,31 +253,35 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
 
 #-------------------------------------------#
 def merge(path):
-    # Open image csv file and make a csv reader object 
-    with open(path +'/images.csv', newline='') as csvpic:
-        picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
-        for row in picreader:
-            #  make a list for each column in the csv file
-            #picnumberlist.append(row[0])
-            #kameranumberlist.append(row[2])
-            #millispiclist.append(float(row[3]))
-            
-            if row[2] == '1.00' or row[2] == '1':
-                picnumberlist.append(row[0])
-                kameranumberlist.append(row[2])
-                millisk1list.append(float(row[3]))
+    try:
+        # Open image csv file and make a csv reader object 
+        with open(path +'/images.csv', newline='') as csvpic:
+            picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
+            for row in picreader:
+                #  make a list for each column in the csv file
+                #picnumberlist.append(row[0])
+                #kameranumberlist.append(row[2])
+                #millispiclist.append(float(row[3]))
                 
-        
-    # Open gps csv file and make a csv reader object 
-    with open(path +'/gps.csv', newline='') as csvgps:
-        gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
-        for row in gpsreader:
-            #  make a list for each column in the csv file
-            fixlist.append(row[1])
-            speedlist.append(float(row[2]))
-            latlist.append(float(row[4]))
-            longlist.append(float(row[5]))
-            millisgpslist.append(float(row[6])) 
+                if row[2] == '1.00' or row[2] == '1':
+                    picnumberlist.append(row[0])
+                    kameranumberlist.append(row[2])
+                    millisk1list.append(float(row[3]))
+                    
+            
+        # Open gps csv file and make a csv reader object 
+        with open(path +'/gps.csv', newline='') as csvgps:
+            gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+            for row in gpsreader:
+                #  make a list for each column in the csv file
+                fixlist.append(row[1])
+                speedlist.append(float(row[2]))
+                latlist.append(float(row[4]))
+                longlist.append(float(row[5]))
+                millisgpslist.append(float(row[6])) 
+    
+    except Exception as e:
+        print(e)
 
 
     print('millis: '+ str(len(millisk1list)))
