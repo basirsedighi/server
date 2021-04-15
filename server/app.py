@@ -235,10 +235,10 @@ async def fps():
     
     else:
 
-        if gps_freq >2:
-            fps = gps_freq
         
-        else: fps =0
+        fps = gps_freq
+        
+        
 
      
 
