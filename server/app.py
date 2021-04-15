@@ -961,10 +961,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 @app.on_event("startup")
 async def startup():
     global camera_1,camera_2,camera_3
-    print("[startup] loading config")
+    print("[startup] init cameras")
+    print("init A")
     camera_1.init()
+    print("init B")
     camera_2.init()
+    print("init C")
     camera_3.init()
+    print("init complete")
     
 
 
