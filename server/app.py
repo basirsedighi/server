@@ -591,7 +591,7 @@ async def initCameraA():
 
 
 async def loadConfig():
-    global camera_1,camera_2,config_loaded
+    global camera_1,camera_2,config_loaded,cameras
     status="Konfig vellykket"
     cameraStatus = "config_ok"
     try:
@@ -599,7 +599,7 @@ async def loadConfig():
         i =0
         for device in camerasDiscovered:
             cameras[0].init()
-            
+
 
             i=i+1
        
