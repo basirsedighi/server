@@ -977,7 +977,7 @@ async def startup():
     i =0
     print("Cameras:"+ str(len(camerasDiscovered)))
     for device in camerasDiscovered:
-        cameras[0].init()
+        cameras[i].init()
         
 
         i=i+1
