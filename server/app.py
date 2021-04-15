@@ -566,30 +566,32 @@ def storageLeft(storages):
 
 
 async def initCameraA():
-    global camera_1, abort
+    global camera_1, abort,cameras
     if abort:
         abort = False
     status = "ok"
-    try:
-        #camera_1.init()
-       
-        if camera_1.getDevice():
 
-            if not camera_1.isRunning():
-                
-                camera_1.start_stream()
+    if cameras[0]:
+        try:
+            #camera_1.init()
         
-        else:
-            camera_1.init()
+            if camera_1.getDevice():
 
-        config_loaded = True
+                if not camera_1.isRunning():
+                    
+                    camera_1.start_stream()
+            
+            else:
+                camera_1.init()
 
-    except:
-        print("initializing of camera 1 failed")
-        status = "failed"
-    finally:
-        
-        await manager.broadcast(json.dumps({"event": "initA", "data": status}))
+            config_loaded = True
+
+        except:
+            print("initializing of camera 1 failed")
+            status = "failed"
+        finally:
+            
+            await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
 
 
@@ -625,27 +627,28 @@ async def loadConfig():
  
 
 async def initCameraB():
-    global camera_2
+    global camera_2,cameras
     status = "ok"
+    if cameras[1]:
 
-    try:
-        #camera_2.init()
-        if camera_2.getDevice(): 
-            if not camera_2.isRunning():
+        try:
+            #camera_2.init()
+            if camera_2.getDevice(): 
+                if not camera_2.isRunning():
 
-                camera_2.start_stream()
+                    camera_2.start_stream()
+            
+            else:
+                camera2.init()
+            
+            
         
-        else:
-            camera2.init()
-        
-        
-       
 
-    except:
-        print("initializing of camera 2 failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "initB", "data": status}))
+        except:
+            print("initializing of camera 2 failed")
+            status = "failed"
+        finally:
+            await manager.broadcast(json.dumps({"event": "initB", "data": status}))
         
 
 async def initCameraC():
@@ -858,7 +861,7 @@ def startfps():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -881,7 +884,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "loadConfig"):
 
                 if not config_loaded:
-                    
+
+                    cameras = discoverCameras()
                     await initCameraA()
                     await initCameraB()
                     await initCameraC()
