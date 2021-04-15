@@ -65,15 +65,15 @@ class ImageSave(Thread):
                         image.save(self.drive+"/"+
                         "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
 
-                        
-                        with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv",'a',newline='')as csvfile:
-                            
+                        if camera ==1:
+                            with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv",'a',newline='')as csvfile:
+                                
 
-                            fieldnames = ['index', 'tripname', "camera","timestamp","date"]
-                            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                            
-                            row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":date})
-                            writer.writerow(row)
+                                fieldnames = ['index', 'tripname', "camera","timestamp","date"]
+                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":date})
+                                writer.writerow(row)
 
                     except Exception as e:
 
