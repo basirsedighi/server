@@ -967,9 +967,9 @@ async def startup():
     camerasDiscovered = await discoverCameras()
     i =0
     for device in camerasDiscovered:
-        cameras[0].init2(device)
+        cameras[0].init()
 
-        i = i+1
+        i=i+1
 
     
 
