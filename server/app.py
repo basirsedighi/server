@@ -571,7 +571,7 @@ async def initCameraA():
         abort = False
     status = "ok"
     try:
-        camera_1.init()
+        #camera_1.init()
        
         
         if not camera_1.isRunning():
@@ -618,7 +618,7 @@ async def initCameraB():
     status = "ok"
 
     try:
-        camera_2.init()
+        #camera_2.init()
         if not camera_2.isRunning():
 
             camera_2.start_stream()
@@ -636,7 +636,7 @@ async def initCameraC():
     status = "ok"
 
     try:
-        camera_3.init()
+        #camera_3.init()
         if not camera_3.isRunning():
 
             camera_3.start_stream()
