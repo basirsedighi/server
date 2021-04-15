@@ -649,28 +649,28 @@ async def initCameraB():
         
 
 async def initCameraC():
-    global camera_3,config_loaded
+    global camera_3,config_loaded,cameras
     status = "ok"
+    if cameras[2]:
+        try:
+            #camera_3.init()
+            if camera_3.device:
 
-    try:
-        #camera_3.init()
-        if camera_3.device:
+                if not camera_3.isRunning():
 
-            if not camera_3.isRunning():
-
-                camera_3.start_stream()
-        
-        else:
-            camera_3.init()
-        
-        config_loaded = True
+                    camera_3.start_stream()
+            
+            else:
+                camera_3.init()
+            
+            config_loaded = True
        
 
-    except:
-        print("initializing of camera 3 failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "initC", "data": status}))
+        except:
+            print("initializing of camera 3 failed")
+            status = "failed"
+        finally:
+            await manager.broadcast(json.dumps({"event": "initC", "data": status}))
 
 
 
