@@ -965,7 +965,7 @@ async def startup():
     cameras = await discoverCameras()
 
     if cameras ==3:
-         print("init A")
+        print("init A")
         camera_1.init()
         print("init B")
         camera_2.init()
