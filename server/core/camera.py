@@ -38,7 +38,7 @@ class Camera:
             # self.device_node_map.load_settings(file_name=self.config_path)
 
             self.stream = self.device.stream
-            self.stream.start()
+            #self.stream.start()
         
         except Exception as e:
             print(e)
