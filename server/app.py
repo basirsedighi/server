@@ -768,7 +768,7 @@ def gen2():
                     yield (b'--frame\r\n'
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
             except Exception as e:
-                print(e)
+                pass
         else:
             break
 
