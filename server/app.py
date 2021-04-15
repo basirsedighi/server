@@ -929,6 +929,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
             elif(event == "init"):
+                cameras = discoverCameras()
                 await initCameraA()
                 await initCameraB()
                 await initCameraC()
@@ -967,6 +968,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event =="merge"):
                 startfps()
+                cameras = discoverCameras()
                 await initCameraA()
                 await initCameraB()
                 await initCameraC()
