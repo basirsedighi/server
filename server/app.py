@@ -571,7 +571,7 @@ async def initCameraA():
         abort = False
     status = "ok"
 
-    if cameras[0]:
+    if index_in_list(cameras, 0):
         try:
             #camera_1.init()
         
@@ -629,7 +629,7 @@ async def loadConfig():
 async def initCameraB():
     global camera_2,cameras
     status = "ok"
-    if cameras[1]:
+    if index_in_list(cameras, 1)
 
         try:
             #camera_2.init()
@@ -650,11 +650,14 @@ async def initCameraB():
         finally:
             await manager.broadcast(json.dumps({"event": "initB", "data": status}))
         
+def index_in_list(a_list, index):
+        test = index < len(a_list)
+        return test
 
 async def initCameraC():
     global camera_3,config_loaded,cameras
     status = "ok"
-    if cameras[2]:
+    if index_in_list(cameras, 2):
         try:
             #camera_3.init()
             if camera_3.getDevice():
