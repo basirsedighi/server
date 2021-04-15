@@ -599,6 +599,7 @@ async def loadConfig():
         i =0
         for device in camerasDiscovered:
             cameras[0].init()
+            
 
             i=i+1
        
