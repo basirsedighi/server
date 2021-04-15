@@ -59,6 +59,8 @@ image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(2)
+
+cameras =[camera_1,camera_2,camera_3]
 tempTrip =""
 
 stopStream1 = False
@@ -960,19 +962,19 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-    global camera_1,camera_2,camera_3
+    global camera_1,camera_2,camera_3,cameras
     print("[startup] init cameras")
-    cameras = await discoverCameras()
+    camerasDiscovered = await discoverCameras()
+    i =0
+    for device in camerasDiscovered:
+        cameras[0].init2(device)
+
+        i = i+1
+
     
 
     if cameras ==3:
-        print("init A")
-        camera_1.init()
-        print("init B")
-        camera_2.init()
-        print("init C")
-        camera_3.init()
-        print("init complete")
+        print("hallo")
     else:
         print("Just :" +str(cameras)+"--cameras was connected")
         raise Exception("CONNECT ALL 3 CAMERAS")
