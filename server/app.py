@@ -889,7 +889,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 if not config_loaded:
 
-                    
+                    #print(len( await discoverCameras()))
                     await initCameraA()
                     await initCameraB()
                     await initCameraC()
