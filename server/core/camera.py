@@ -46,16 +46,18 @@ class Camera:
     def init2(self,device):
 
         try:
+            cvb.DiscoveryProperties.DeviceAccessStatus
             self.device = device
+            test =self.device.cvb.DiscoveryProperties.DeviceAccessStatus.UsbPortPath 
 
-
+            print(test)
        
 
             self.stream = self.device.stream
             self.stream.start()
     
         except Exception as e:
-            
+
             print(e)
 
             
