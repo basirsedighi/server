@@ -46,6 +46,7 @@ from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
+from core.merging import merge
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -57,7 +58,10 @@ app = FastAPI()
 image_lock = Lock()
 camera_1 = Camera(0)
 camera_2 = Camera(1)
-camera_3 = Camera(4)
+camera_3 = Camera(2)
+
+cameras =[camera_1,camera_2,camera_3]
+tempTrip =""
 
 stopStream1 = False
 stopStream2 = False
@@ -83,6 +87,7 @@ gps.start()
 gps_status = {}
 valider1 = True
 valider2 = True
+valider3 = True
 abort = False
 logging = False
 closeServer = False
@@ -174,17 +179,44 @@ async def getData():
 
 #   Open a csv file and appends coordinates in lists
 #   return a list with the latitude coordinates and a list with longitude coordinates
-@app.get('/gpscoordinates')
+@app.get('/GetCoordinates')
 def getgpscoordinates():
-    # Open gps csv file and make a csv reader object 
-    with open(path +'k1time.csv', newline='') as csvgps:
-        gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
-        for row in gpsreader:
-            #  make a list for each column in the csv file
-            latitudelist.append[4]
-            longlitudelist.append[5]
+    mainlist =[]
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    path = absolute_path+"/log/"
+
+    folders= os.listdir(path)
+
+    for folder in folders:
+        subFolders = os.listdir(absolute_path+"/log/"+folder)
+        print(folder)
+
+        for subFolder in subFolders:
+            print(subFolder)
+            latitudelist = []
+            longlitudelist =[]
+
+            with open(path+folder+"/"+subFolder+"/" +'gps.csv', newline='') as csvgps:
+                gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+                for row in gpsreader:
+                    #  make a list for each column in the csv file
+                    latitudelist.append(row[4])
+                    longlitudelist.append(row[5])
+                
+                cordlist = [latitudelist,longlitudelist]
+            
+            mainlist.append(cordlist)
         
-    return latitudelist, longlitudelist
+    return {"list":mainlist}
+
+
+
+    
+        
+
+    
+  
 
 
 @app.post('/gpserror')
@@ -203,10 +235,10 @@ async def fps():
     
     else:
 
-        if gps_freq >2:
-            fps = gps_freq
         
-        else: fps =0
+        fps = gps_freq
+        
+        
 
      
 
@@ -364,7 +396,7 @@ def startC():
    
     index = 0
     test =0
-    print("started camera 2") 
+    print("started camera 3") 
     print(time.time()*1000) 
     
     
@@ -534,34 +566,50 @@ def storageLeft(storages):
 
 
 async def initCameraA():
-    global camera_1, abort
+    global camera_1, abort,cameras
     if abort:
         abort = False
     status = "ok"
-    try:
-        camera_1.init()
-       
+
+    if index_in_list(cameras, 0):
+        try:
+            #camera_1.init()
         
-        if not camera_1.isRunning():
+            if camera_1.getDevice():
+
+                if not camera_1.isRunning():
+                    
+                    camera_1.start_stream()
             
-            camera_1.start_stream()
+            else:
+                camera_1.init()
+
+            config_loaded = True
+
+        except:
+            print("initializing of camera 1 failed")
+            status = "failed"
+        finally:
+            
+            await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
 
-    except:
-        print("initializing of cmera failed")
-        status = "failed"
-    finally:
-        
-        await manager.broadcast(json.dumps({"event": "initA", "data": status}))
+
 
 
 async def loadConfig():
-    global camera_1,camera_2,config_loaded
+    global camera_1,camera_2,config_loaded,cameras
     status="Konfig vellykket"
     cameraStatus = "config_ok"
     try:
-        camera_1.loadConfig()
-        camera_2.loadConfig()
+        camerasDiscovered = await discoverCameras()
+        i =0
+        for device in camerasDiscovered:
+            cameras[i].init()
+
+
+            i=i+1
+       
        
         
         config_loaded = True
@@ -579,39 +627,57 @@ async def loadConfig():
  
 
 async def initCameraB():
-    global camera_2
+    global camera_2,cameras
     status = "ok"
+    if index_in_list(cameras, 1):
 
-    try:
-        camera_2.init()
-        if not camera_2.isRunning():
+        try:
+            #camera_2.init()
+            if camera_2.getDevice(): 
+                if not camera_2.isRunning():
 
-            camera_2.start_stream()
-       
-
-    except:
-        print("initializing of camera failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "initB", "data": status}))
+                    camera_2.start_stream()
+            
+            else:
+                camera2.init()
+            
+            
         
 
+        except:
+            print("initializing of camera 2 failed")
+            status = "failed"
+        finally:
+            await manager.broadcast(json.dumps({"event": "initB", "data": status}))
+        
+def index_in_list(a_list, index):
+        test = index < len(a_list)
+        return test
+
 async def initCameraC():
-    global camera_3
+    global camera_3,config_loaded,cameras
     status = "ok"
+    if index_in_list(cameras, 2):
+        try:
+            #camera_3.init()
+            if camera_3.getDevice():
 
-    try:
-        camera_3.init()
-        if not camera_3.isRunning():
+                if not camera_3.isRunning():
 
-            camera_3.start_stream()
+                    camera_3.start_stream()
+            
+            else:
+                camera_3.init()
+                
+            
+            config_loaded = True
        
 
-    except:
-        print("initializing of camera failed")
-        status = "failed"
-    finally:
-        await manager.broadcast(json.dumps({"event": "initC", "data": status}))
+        except:
+            print("initializing of camera 3 failed")
+            status = "failed"
+        finally:
+            await manager.broadcast(json.dumps({"event": "initC", "data": status}))
 
 
 
@@ -658,6 +724,7 @@ def gen():
                 frame, status = camera_1.get_image()
                 if status == cvb.WaitStatus.Ok:
                     frame = np.array(frame)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame = cv2.resize(frame, (640, 480))
                     _, frame = cv2.imencode('.jpg', frame)
 
@@ -690,6 +757,7 @@ def gen1():
                 frame, status = camera_2.get_image()
                 if status == cvb.WaitStatus.Ok:
                     frame = np.array(frame)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame = cv2.resize(frame, (640, 480))
                     _, frame = cv2.imencode('.jpg', frame)
 
@@ -699,6 +767,31 @@ def gen1():
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
             except Exception as e:
                 print(e)
+        else:
+            break
+
+
+def gen2():
+    global camera_3,valider3
+
+    while 1:
+
+        if valider3:
+
+            try:
+                frame, status = camera_3.get_image()
+                if status == cvb.WaitStatus.Ok:
+                    frame = np.array(frame)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frame = cv2.resize(frame, (640, 480))
+                    _, frame = cv2.imencode('.jpg', frame)
+
+                    image = frame.tobytes()
+
+                    yield (b'--frame\r\n'
+                            b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+            except Exception as e:
+                pass
         else:
             break
 
@@ -723,6 +816,13 @@ def video_feed2():
     global valider
     
     return StreamingResponse(gen1(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.get('/video_feed3')
+def video_feed3():
+    global valider
+    
+    return StreamingResponse(gen2(), media_type="multipart/x-mixed-replace; boundary=frame")
     
 
 
@@ -741,7 +841,21 @@ def videofeed():
 
 
 def merge_CSV_files():
-    print("merging")
+    global tempTrip
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    path = absolute_path+"/log/"+date+"/"+tempTrip
+    try:
+        merge(path)
+    except Exception as e:
+        pass
+
+
+
+   
+    
+    
+    
 
 
 def startfps():
@@ -754,7 +868,7 @@ def startfps():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2
+    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -777,9 +891,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "loadConfig"):
 
                 if not config_loaded:
-                    await loadConfig()
+
+                    #print(len( await discoverCameras()))
                     await initCameraA()
                     await initCameraB()
+                    await initCameraC()
                    
                 
                 else:
@@ -787,12 +903,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                     await manager.broadcast(json.dumps({"event": "initB", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
+                    await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
                 
 
 
 
             elif(event == 'start'):
+                tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
@@ -818,9 +936,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
             elif(event == "init"):
+                
                 await initCameraA()
                 await initCameraB()
-                #await initCameraC()
+                await initCameraC()
                 
 
             elif(event == "stream"):
@@ -845,6 +964,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "live"):
                 valider1 = msg
                 valider2 =msg
+                valider3 = msg
             
             elif(event == "debug"):
                 gps.setDebug(msg)
@@ -855,8 +975,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event =="merge"):
                 startfps()
+                
                 await initCameraA()
                 await initCameraB()
+                await initCameraC()
                    
                 merge_CSV_files()
 
@@ -875,13 +997,30 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-    print("[startup] loading config")
-    await loadConfig()
+    global camera_1,camera_2,camera_3,cameras
+    print("[startup] init cameras")
+    camerasDiscovered = await discoverCameras()
+    i =0
+    print("Cameras:"+ str(len(camerasDiscovered)))
+    for device in camerasDiscovered:
+        cameras[i].init()
+        
+
+        i=i+1
+
+    
+
+    if cameras ==0:
+        print("Just :" +str(cameras)+"--cameras was connected")
+        raise Exception("CONNECT ALL CAMERAS")
+       
+    
+        
     
 
 
 @app.on_event("shutdown")
-def shutdown_event():
+def shutdown_event(): 
     global imagesave, closeServer,gps
 
     print("shutting down server")

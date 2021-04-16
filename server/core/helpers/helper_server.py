@@ -184,10 +184,10 @@ async def createImageFolder(tripName):
 
     date = getDate()
     
-    if not path.exists('log/'+str(date)):
+    if not path.exists('log/'+str(date)+"/"+str(tripName)):
 
 
-        os.makedirs('log/'+str(date)) 
+        os.makedirs('log/'+str(date)+"/"+str(tripName)) 
     
 
     bestDrive = most_free_space()
@@ -204,6 +204,11 @@ async def createImageFolder(tripName):
         
             
             os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera2")
+        
+        if not path.exists(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera3"):
+        
+            
+            os.makedirs(drive+"/bilder/"+str(date)+"/"+str(tripName)+"/"+"kamera3")
 
         
 
@@ -294,13 +299,9 @@ def folderConstructor():
 
 async def discoverCameras():
 
-    discover = cvb.DeviceFactory.discover_from_root()
-    mock_info = next(
-        (info for info in discover if "GenICam.vin" in info.access_token), None)
-    if mock_info is None:
+    discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
+    
 
-        raise RuntimeError("unable to find CVMock.vin")
-
-    print(mock_info.access_token)
+    return discover
 
 

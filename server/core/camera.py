@@ -9,7 +9,7 @@ class Camera:
         self.image = None
         self.device = None
         self.stream = None
-        self.config_path ="core/config/pulseConf.gcs"
+        self.config_path ="core/config/conf.gcs"
         self.tempimg = None
         
 
@@ -20,21 +20,53 @@ class Camera:
         self.device = cvb.DeviceFactory.open(os.path.join(
             cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
 
-
-        self.device_node_map = self.device.node_maps["Device"]
-        self.device_node_map.load_settings(file_name=self.config_path)
+        
+        self.stream = self.device.stream
+        # self.device_node_map = self.device.node_maps["Device"]
+        # self.device_node_map.load_settings(file_name=self.config_path)
 
 
 
     def init(self):
-        # self.device = cvb.DeviceFactory.open(os.path.join(
-        #     cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
+
+        try:
+            self.device = cvb.DeviceFactory.open(os.path.join(
+                cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
 
 
-        # self.device_node_map = self.device.node_maps["Device"]
-        # self.device_node_map.load_settings(file_name=self.config_path)
+            # self.device_node_map = self.device.node_maps["Device"]
+            # self.device_node_map.load_settings(file_name=self.config_path)
 
-        self.stream = self.device.stream
+            self.stream = self.device.stream
+            #self.stream.start()
+        
+        except Exception as e:
+            print(e)
+    
+
+
+    def getDevice(self):
+
+        return self.device
+
+    def init2(self,device):
+
+        try:
+           
+            self.device = device
+            test =self.device.read_property(cvb.DiscoveryProperties.DeviceId )
+
+            print(test)
+       
+
+            self.stream = self.device.stream
+            self.stream.start()
+    
+        except Exception as e:
+
+            print(e)
+
+            
 
     def start_stream(self):
 
@@ -42,7 +74,7 @@ class Camera:
 
     def get_image(self):
 
-        image, status = self.stream.wait_for(8000)
+        image, status = self.stream.wait_for(2000)
         return image, status
 
     def abortStream(self):

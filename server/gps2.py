@@ -55,7 +55,7 @@ class gpsHandler(Thread):
                             self.serial = ser
                             self.read = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
                               #sends commands to gps
-                            #self.initGPS()
+                            self.initGPS()
                 # 'warm up' with reading some input
                             for i in range(10):
                                 data = ser.readline()
@@ -97,14 +97,14 @@ class gpsHandler(Thread):
                                     
 
                                         if(self.logging and self.data['new'] ==True):
-                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"_gps"+".csv",'a',newline='')as csvfile:
+                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
                                 
 
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","lat","lon","millis"]
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","millis"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                                 #writer.writeheader()
                                                 
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
                                                 writer.writerow(row)
 
                                        
