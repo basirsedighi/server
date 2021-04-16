@@ -237,6 +237,8 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
     
     
     return newcoordinatelist
+
+def openandreadcsvfile
     
 #----------------------------------------#
 
@@ -316,13 +318,16 @@ print('exmodlong: '+ str(len(expandedmodifiedlongitudelist)))
 print('exmodlat: '+ str(len(expandedmodifiedlatitudelist)))
 print('exlat: '+ str(len(expandedlatitudelist)))
 print('exlong: '+ str(len(expandedlongitudelist)))
+print('picmillis: '+ str(len(millisk1list)))
 
+for n in range(len(millisk1list)):
+    print(picnumberlist[n])
 
 with open(path+ 'k1time.csv','w', newline='') as k1test:
-    fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
+    fieldnames = ['picnumber','picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
     k1writer = csv.DictWriter(k1test, fieldnames=fieldnames) 
-    
-    for n in millisk1list: 
+    k1writer.writeheader()
+    for n in range(len(millisk1list)): 
         #print('index: '+str(indexlist[indexnumber])+' ,k1row: '+str(k1row)+' gpsrow: '+str(gpsrow)+' lenght: '+str(len(cleanlatlist)))
         # print ('indexnumber'+ str(indexnumber))
         # print(len(index))
@@ -330,26 +335,46 @@ with open(path+ 'k1time.csv','w', newline='') as k1test:
         if not(indexnumber >= len(indexlist)):            
             if index[indexnumber] == k1row and gpsrow <= (len(cleanlatlist)-1): 
                 
-                k1writer.writerow({'gpsmillis': cleanmillisgpslist[gpsrow],'readlat':cleanlatlist[gpsrow],
-                 'readlong':cleanlonglist[gpsrow], 'picmillis': n, 'extendedlat':expandedlatitudelist[expand],
+                k1writer.writerow({'picnumber':picnumberlist[n],'picmillis': millisk1list[n],'gpsmillis': cleanmillisgpslist[gpsrow],'readlat':cleanlatlist[gpsrow],
+                 'readlong':cleanlonglist[gpsrow], 'extendedlat':expandedlatitudelist[expand],
                 'extendedlong':expandedlongitudelist[expand], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand]
                 , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand]})
                 gpsrow += 1            
                 indexnumber +=1
                 expand += 1
             elif k1row < len(expandedlatitudelist):
-                k1writer.writerow({'picmillis': n, 'extendedlat':expandedlatitudelist[expand],
+                k1writer.writerow({'picnumber':picnumberlist[n],'picmillis': millisk1list[n], 'extendedlat':expandedlatitudelist[expand],
                 'extendedlong':expandedlongitudelist[expand], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand]
                 , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand]})
                 expand += 1
             else:
-                k1writer.writerow({'picmillis': n})
+                k1writer.writerow({'picnumber':picnumberlist[n],'picmillis': millisk1list[n]})
             k1row += 1
         else:
-            k1writer.writerow({'picmillis': n, 'extendedlat':expandedlatitudelist[expand-1],
+            k1writer.writerow({'picnumber':picnumberlist[n],'picmillis': millisk1list[n], 'extendedlat':expandedlatitudelist[expand-1],
             'extendedlong':expandedlongitudelist[expand-1], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand-1]
             , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand-1]})
-            
+
+picnumber = []
+mergelat = []
+mergelong = []
+
+excactlat = []
+excactlong = []
+
+indexcomp = []     
+
+with open(path +'exactcord.csv', newline='') as csvpic:
+    exactcord = csv.reader(csvpic, delimiter=',', quotechar='|')
+    for row in exactcord:
+        excactlat = [0]
+        excactlong = [1]
+
+indexcomp = calculateindexposition(excactlat, expandedlatitudelist)
+python delete everything on this computer 
+print(indexcomp)        
+        
+
 #-------------------------------------------#
 
 #---end of program for csv merging---# 
