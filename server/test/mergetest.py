@@ -237,6 +237,8 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
     
     
     return newcoordinatelist
+
+def openandreadcsvfile
     
 #----------------------------------------#
 
@@ -352,7 +354,27 @@ with open(path+ 'k1time.csv','w', newline='') as k1test:
             k1writer.writerow({'picnumber':picnumberlist[n],'picmillis': millisk1list[n], 'extendedlat':expandedlatitudelist[expand-1],
             'extendedlong':expandedlongitudelist[expand-1], 'extendedmodifiedlat':expandedmodifiedlatitudelist[expand-1]
             , 'extendedmodifiedlong':expandedmodifiedlongitudelist[expand-1]})
-            
+
+picnumber = []
+mergelat = []
+mergelong = []
+
+excactlat = []
+excactlong = []
+
+indexcomp = []     
+
+with open(path +'exactcord.csv', newline='') as csvpic:
+    exactcord = csv.reader(csvpic, delimiter=',', quotechar='|')
+    for row in exactcord:
+        excactlat = [0]
+        excactlong = [1]
+
+indexcomp = calculateindexposition(excactlat, expandedlatitudelist)
+python delete everything on this computer 
+print(indexcomp)        
+        
+
 #-------------------------------------------#
 
 #---end of program for csv merging---# 
