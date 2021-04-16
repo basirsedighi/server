@@ -283,6 +283,7 @@ def startA():
 
                 if status == cvb.WaitStatus.Ok:
                     timeStamp = int(time.time() * 1000) #getTimeStamp()
+                    print(image.raw_timestamp)
                 
                     data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp}
                     imageQueue.put(data)
@@ -309,12 +310,9 @@ def startA():
 
     isRunning1=False
     stopStream1 =False 
-    gps.toggleLogging(False)
-          
-    print("stream 1 stopped: "+str(index))
     camera_1.stopStream()
 
-    return {"message": "stream 1 has stopped"}
+    return {"message": "stream 1 has stopped","images":str(index)}
     
 
 
@@ -323,7 +321,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning2, image_lock, imageQueue, abort,stopStream2
+    global camera_2, isRunning2, imageQueue, abort,stopStream2
     
 
     
@@ -351,6 +349,7 @@ def startB():
 
                 if status == cvb.WaitStatus.Ok:
                     timeStamp = int(time.time() * 1000)
+                    print(image.raw_timestamp)
 
                     data = {"image": image, "camera": 2, "index": index,"timeStamp":timeStamp}
 
@@ -379,17 +378,17 @@ def startB():
     isRunning2=False
     stopStream2 =False
     camera_2.stopStream()
-    print("stream 2 stopped: "+str(index))
+    
 
     
 
-    return {"message": "stream 2 has stopped"}
+    return {"message": "stream 2 has stopped","images":str(index)}
     # start bildetaking
 
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning3, image_lock, imageQueue, abort,stopStream3
+    global camera_3, isRunning3, imageQueue, abort,stopStream3
     
 
     
@@ -413,7 +412,7 @@ def startC():
 
             
 
-                #getTimeStamp()
+                
 
                 if status == cvb.WaitStatus.Ok:
                     timeStamp = int(time.time() * 1000)
@@ -446,11 +445,11 @@ def startC():
     isRunning3=False
     stopStream3 =False
     camera_3.stopStream()
-    print("stream 3 stopped: "+str(index))
+    
 
     
 
-    return {"message": "stream 3 has stopped"}
+    return {"message": "stream 3 has stopped","images":str(index)}
     # start bildetaking
 
 
@@ -842,7 +841,8 @@ def videofeed():
 
 
 def merge_CSV_files():
-    global tempTrip
+    global tempTrip,gps
+    gps.toggleLogging(False)
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     path = absolute_path+"/log/"+date+"/"+tempTrip
