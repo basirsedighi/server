@@ -417,6 +417,7 @@ def startC():
 
                 if status == cvb.WaitStatus.Ok:
                     timeStamp = int(time.time() * 1000)
+                    print(image.raw_timestamp)
 
                     data = {"image": image, "camera": 3, "index": index,"timeStamp":timeStamp}
 
