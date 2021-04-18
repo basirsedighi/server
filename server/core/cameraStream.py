@@ -101,15 +101,5 @@ class CameraStream():
             self.lastBufferImage = self.bufferImage
         return self.bufferImage
 
-    def folderConstructor(self):
-        #   Making a folder for the images
-        if not (path.exists(self.baseUrl + self.date)):
-            # setting up folder for pictures
-            os.mkdir(self.baseUrl+self.date)
-        else:
-            # List all files in a directory using os.listdir
-            basepath = self.baseUrl+self.date
-            for entry in os.listdir(basepath):
-                if os.path.isfile(os.path.join(basepath, entry)):
-                    self.list_of_images.append(entry)
-            self.image_name = len(self.list_of_images) + 1
+    def reset(self):
+        self.image_name = 0
