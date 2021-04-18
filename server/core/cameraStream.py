@@ -10,19 +10,17 @@ import time
 
 
 class CameraStream():
-    def __init__(self, camera, lock):
+    def __init__(self, camera, queue):
 
         self.camera = camera
-        self.lock = lock
-        self.tripId = uuid.uuid4()
+        self.imageQueue = queue
+        self.tripId = ""
         self.lastBufferImage = None
         self.bufferImage = None
         self.bufferImage_f = 100
         self.running = True
         self.port = camera.getPort()
-        self.baseUrl = "C:/Users/norby/Pictures/test/"
-        self.date = "02.08.1993"
-        self.image_name = 1
+        self.image_name = 0
         self.list_of_images = []
 
     def init(self):
@@ -50,42 +48,44 @@ class CameraStream():
             return status
 
     def stream(self):
-        i = 0
-        self.running = True
-        # self.folderConstructor()
-        timer = Timer()
-        # Generer ny mappe for lagring
-        path = "storage/{tripId}"
+      
 
-        while self.running:
-            try:
+        while True:
+            if running:
+                try:
 
-                image, status = self.camera.get_image()
+                    image, status = camera.get_image()
 
-                # time.sleep(0.5)
+                
 
-                # check if status is ok
-                if status == cvb.WaitStatus.Ok:
+                    #getTimeStamp()
 
-                    # # skriv metadata
-                    # # Lagre bilde
-                    image.save(self.baseUrl + self.date + '/'+'kamera'+str(self.port) +
-                               str(self.image_name)+'.jpg')
+                    if status == cvb.WaitStatus.Ok:
+                        timeStamp = int(time.time() * 1000)
+                        print(image.raw_timestamp)
 
-                    self.image_name += 1
+                        data = {"image": image, "camera": 1, "index": self.image_name,"timeStamp":timeStamp}
 
-                    # lagre bufferimage for sjekk av operatør
-                    if self.bufferImage_f == 100:
-                        self.bufferImage = image
-                        i = 0
+                        self.imageQueue.put(data)
+                        self.image_name = self.image_name +1
+                    
+                    elif status == cvb.WaitStatus.Abort :
+                        print("stream 2 abort")
+                        break
 
-                    i = i+1
+                    elif status == cvb.WaitStatus.Timeout and stopStream2:
+                        print("stream 2 timeout")
+                        break
 
-                else:
-                    print("failed")
-            except RuntimeError as e:
-                self.running = False
-                print(e)
+                
+            
+            
+
+            
+                except Exception as e:
+                    print(e)
+                    pass
+               
 
         self.camera.abortStream()
         print("stopped")

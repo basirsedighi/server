@@ -430,6 +430,9 @@ def startC():
                 elif status == cvb.WaitStatus.Timeout and stopStream3:
                     print("stream 3 timeout")
                     break
+                
+                elif status == cvb.WaitStatus.Timeout:
+                    print("timed out waiting for images")
 
                     
                 
@@ -449,7 +452,7 @@ def startC():
 
     
 
-    return {"message": "stream 3 has stopped","images":str(index)}
+    return {"message": "stream 3 has stopped","images_ok":str(index)}
     # start bildetaking
 
 
