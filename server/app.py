@@ -69,6 +69,7 @@ stopStream3 = False
 
 gps = gpsHandler(debug)
 imageQueue = queue.Queue(maxsize=0)
+imageQueue2 = queue.Queue(maxsize=0)
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
 
