@@ -63,6 +63,8 @@ camera_3 = Camera(2)
 cameras =[camera_1,camera_2,camera_3]
 tempTrip =""
 
+isConfigured =False
+
 stopStream1 = False
 stopStream2 = False
 stopStream3 = False
@@ -272,7 +274,7 @@ def startA():
 
     timer =Timer("stream1")
 
-    global camera_1, isRunning1, imagesave, imageQueue, abort,isRunning,stopStream1,gps,capturing
+    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing
     index = 0
     test  =0
     
@@ -405,7 +407,8 @@ def startB():
 
           
 
-    isRunning=False
+    
+
     stopStream2 =False
     camera_2.stopStream()
     
@@ -493,11 +496,11 @@ def startC():
 
 
 async def abortStream():
-    global camera_1,camera_2, abort,gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
+    global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
     print("stopping stream")
     toggleGPSControl(False)
     gps.toggleLogging(False)
-
+    
     
     image_freq = 0
 
@@ -509,7 +512,7 @@ async def abortStream():
 
 
 async def start_acquisition():
-    global isRunning1, isRunning2,camera_1,camera_2,gps,isRunning,abort,image_freq
+    global abort,image_freq
     print("Starting stream")
     #toggleGPSControl(True)
     abort=False
@@ -522,7 +525,7 @@ async def start_acquisition():
    
     
 def startPulse():
-    global image_freq,isRunning1,isRunning2,isRunning3,started,gps,capturing
+    global image_freq,started,gps,capturing
     
     gps.toggleLogging(True)
     isRunning = True
@@ -872,7 +875,9 @@ def videofeed():
 
 
 def merge_CSV_files():
-    global tempTrip,gps
+    global tempTrip,gps,isConfigured,isRunning
+    isConfigured= False
+    isRunning = False
     gps.toggleLogging(False)
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
@@ -891,7 +896,7 @@ def merge_CSV_files():
 
 
 def startfps():
-    global image_freq,capturing
+    global image_freq,capturing,isRunning,isConfigured
 
     capturing = False
 
@@ -901,12 +906,12 @@ def startfps():
 
 def getStates():
     global capturing,config_loaded
-    return {"capturing":capturing,"init_ok":config_loaded}
+    return {"capturing":capturing,"init_ok":config_loaded,"running":isRunning,"isConfigured":isConfigured}
 
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
+    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -922,12 +927,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             if(event == "onConnection"):
 
                 await manager.broadcast(json.dumps({"connection": "connected"}))
-                states = getStates()
+                
                 
 
         
             elif(event == "loadConfig"):
-
+                states = getStates()
                 if not config_loaded:
 
                     #print(len( await discoverCameras()))
@@ -943,11 +948,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                     await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
                     await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
+                    await manager.broadcast(json.dumps({"event": "states", "data": states}))
                 
 
 
 
             elif(event == 'start'):
+
+                isConfigured = True
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
                 #imagesave2.setTripName(str(msg))
@@ -1042,7 +1050,7 @@ async def startup():
     camerasDiscovered = await discoverCameras()
     i =0
     print("Cameras:"+ str(len(camerasDiscovered)))
-    for device in range(3):
+    for device in range(len(camerasDiscovered)):
         cameras[i].init()
         
 
