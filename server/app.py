@@ -70,6 +70,7 @@ stopStream3 = False
 gps = gpsHandler(debug)
 imageQueue = queue.Queue(maxsize=0)
 imageQueue2 = queue.Queue(maxsize=0)
+imagesave2=ImageSave(imageQueue2,"saving thread")
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
 
@@ -83,6 +84,8 @@ capturing =False
 #g = Gps('C:/Users/norby/Desktop')
 
 imagesave.daemon = True
+imagesave2.daemon = True
+#imagesave2.start()
 imagesave.start()
 gpsData ={}
 gps.daemon = True
@@ -555,28 +558,28 @@ def toggleGPSControl(value):
 
 @app.get('/storage')
 async def getStorage():
-    global storage,imagesave,started
+    global storage,started
 
-    # storages =checkStorageAllDrives()
+    storages =checkStorageAllDrives()
     
-    # storageLeft(storages)
+    storageLeft(storages)
 
     
-    # payload = estimateStorageTime(storages,10)
+    payload = estimateStorageTime(storages,10)
 
-    # total = payload['total']['free']
-    # if int(total)<10 and started:
-    #     #await abortStream()
-    #     pass
+    total = payload['total']['free']
+    if int(total)<10 and started:
+        #await abortStream()
+        pass
         
-    payload = {}
+    
 
     return payload
 
 # estimate hows
 
 def storageLeft(storages):
-    global drive_in_use,imagesave,storageLeft_in_use
+    global drive_in_use,imagesave,imagesave2,storageLeft_in_use
 
     drives = storages['drives']
 
@@ -587,6 +590,7 @@ def storageLeft(storages):
 
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
+            #imagesave2.setStorageLeft(int(drive['free']))
             
    
 
@@ -902,7 +906,7 @@ def getStates():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
+    global started,config_loaded,imagesave,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -946,6 +950,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == 'start'):
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
+                #imagesave2.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 if drive_in_use =="failed":
@@ -953,6 +958,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 
                 imagesave.setDrive(drive_in_use)
+                #imagesave2.setDrive(drive_in_use)
                 await start_acquisition()
                 await manager.broadcast(json.dumps({"event": "starting"}))
             
@@ -1055,15 +1061,17 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event(): 
-    global imagesave, closeServer,gps
+    global imagesave,imagesave2 ,closeServer,gps
 
     print("shutting down server")
 
     imagesave.raise_exception()
+    #imagesave2.raise_exception()
     gps.raise_exception()
     imagesave.join()
+    #imagesave2.join()
     gps.join()
-    os.system('sudo kill -9 `sudo lsof -t -i:8000')
+    
 
 
 
