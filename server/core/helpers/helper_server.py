@@ -73,30 +73,38 @@ def checkStorageAllDrives():
     #     path = '%s:' % d    
     #     if os.path.exists(path): # checks if path exists
     #         available_drives.append(path)  #  append the path from a drive to a list
-    
-    directory_contents = os.listdir("/media/rekkverk")
-    for item in directory_contents:
-        available_drives.append("/media/rekkverk/"+str(item))
+
+    nested_storage= {'drives':{} }
+    try:
+        directory_contents = os.listdir("/media/rekkverk")
+        for item in directory_contents:
+            available_drives.append("/media/rekkverk/"+str(item))
+            
+            
+            
         
-        
-        
-    test = ["/media/rekkverk/8fa8497a-6758-4780-8e00-63feac8f857a"]
 
 
-    nested_storage= {'drives':{} } #  Initializing a dictionary
+        nested_storage= {'drives':{} } #  Initializing a dictionary
 
-    number= 1 # Variable for 
-    for i in available_drives:  #  Iterating through all drives
+        number= 1 # Variable for 
+        for i in available_drives:  #  Iterating through all drives
+            
+            total, used, free = shutil.disk_usage(i) # Return disk usage statistics about the given path as a named tuple with the attributes total, used and free
+            
+            dictname = "hd"+ str(number)
+            nested_storage['drives'].update ({dictname:{ "name": i,"total": "%d" % (total // (2**30))
+            , "used": "%d" % (used // (2**30)), "free": "%d" % (free // (2**30))}})  #  Appends a dictionary containing storage info(harddrive) into a nested dictionary.
+            number += 1
+
+
         
-        total, used, free = shutil.disk_usage(i) # Return disk usage statistics about the given path as a named tuple with the attributes total, used and free
-        
-        dictname = "hd"+ str(number)
-        nested_storage['drives'].update ({dictname:{ "name": i,"total": "%d" % (total // (2**30))
-        , "used": "%d" % (used // (2**30)), "free": "%d" % (free // (2**30))}})  #  Appends a dictionary containing storage info(harddrive) into a nested dictionary.
-        number += 1
+    except:
+        pass
 
+    finally:
+        return nested_storage
 
-    return nested_storage
 
 
 
@@ -299,7 +307,7 @@ def folderConstructor():
 
 async def discoverCameras():
 
-    discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
+    discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreGevSD)
     
 
     return discover

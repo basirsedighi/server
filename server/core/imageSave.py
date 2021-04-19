@@ -27,7 +27,7 @@ class ImageSave(Thread):
 
 
     def fixPath(self,path):
-        test = path.split("/")
+        test = path.split('\\')
         test.pop()
         newPath = '/'.join(test)
         return newPath
@@ -72,7 +72,7 @@ class ImageSave(Thread):
                                 fieldnames = ['index', 'tripname', "camera","timestamp","date"]
                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                 
-                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":date})
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":self.getTimeStamp(timestamp)})
                                 writer.writerow(row)
 
                     except Exception as e:
@@ -114,12 +114,12 @@ class ImageSave(Thread):
 
 
 
-    def getTimeStamp(self):
+    def getTimeStamp(self,now):
 
-        now = time.time()
+        
 
         timenow = datetime.today().strftime('%H:%M:%S')
-        milliseconds = '%03d' % int((now - int(now)) * 1000)
+        milliseconds = '%03d' % int((now - int(now)))
         return str(timenow) +":"+ str(milliseconds)
 
     def createFolder(self):

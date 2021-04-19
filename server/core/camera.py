@@ -38,6 +38,8 @@ class Camera:
             # self.device_node_map.load_settings(file_name=self.config_path)
 
             self.stream = self.device.stream
+            self.stream.acquisition_interface =1
+            print(self.stream.is_indexed)
             #self.stream.start()
         
         except Exception as e:
@@ -74,7 +76,7 @@ class Camera:
 
     def get_image(self):
 
-        image, status = self.stream.wait_for(1000)
+        image, status = self.stream.wait_for(4000)
         return image, status
 
     def abortStream(self):
