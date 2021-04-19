@@ -238,7 +238,7 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
     
     return newcoordinatelist
 
-def openandreadcsvfile
+
     
 #----------------------------------------#
 
@@ -254,18 +254,15 @@ def openandreadcsvfile
 #-------------------------------------------#
 
 # Open image csv file and make a csv reader object 
-with open(path +'pictest.csv', newline='') as csvpic:
+with open(path +'images.csv', newline='') as csvpic:
     picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
     for row in picreader:
         #  make a list for each column in the csv file
-        #picnumberlist.append(row[0])
-        #kameranumberlist.append(row[2])
-        #millispiclist.append(float(row[3]))
+        picnumberlist.append(row[0])        
+        millisk1list.append(float(row[3]))
         
-        if row[2] == '1.00' or row[2] == '1':
-            picnumberlist.append(row[0])
-            kameranumberlist.append(row[2])
-            millisk1list.append(float(row[3]))
+        
+            
             
      
 # Open gps csv file and make a csv reader object 
@@ -364,15 +361,15 @@ excactlong = []
 
 indexcomp = []     
 
-with open(path +'exactcord.csv', newline='') as csvpic:
-    exactcord = csv.reader(csvpic, delimiter=',', quotechar='|')
-    for row in exactcord:
-        excactlat = [0]
-        excactlong = [1]
+# with open(path +'exactcord.csv', newline='') as csvpic:
+#     exactcord = csv.reader(csvpic, delimiter=',', quotechar='|')
+#     for row in exactcord:
+#         excactlat = [0]
+#         excactlong = [1]
 
-indexcomp = calculateindexposition(excactlat, expandedlatitudelist)
-python delete everything on this computer 
-print(indexcomp)        
+# indexcomp = calculateindexposition(excactlat, expandedlatitudelist)
+
+       
         
 
 #-------------------------------------------#
