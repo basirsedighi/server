@@ -190,6 +190,7 @@ async def getData():
 @app.get('/GetCoordinates')
 def getgpscoordinates():
     mainlist =[]
+    tripnamelist =[]
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     path = absolute_path+"/log/"
@@ -216,10 +217,10 @@ def getgpscoordinates():
                 
                 
                 cordlist =list(zip(latitudelist,longlitudelist))
-            tripname = i[0]
-            mainlist.append(cordlist,tripname)
+            tripnamelist.append(i[0])
+            mainlist.append(cordlist)
         
-    return {"list":mainlist}
+    return {"lists":mainlist,"names":tripnamelist}
 
 
 
@@ -1086,7 +1087,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="192.168.10.153", port=8000)
 
 
 if __name__ == "__main__":
