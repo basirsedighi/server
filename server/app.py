@@ -217,9 +217,9 @@ def getgpscoordinates():
                 
                 cordlist =list(zip(latitudelist,longlitudelist))
             tripname = i[0]
-            mainlist.append(cordlist)
+            mainlist.append(cordlist,tripname)
         
-    return {"list":mainlist,"name":tripname}
+    return {"list":mainlist}
 
 
 
