@@ -273,9 +273,10 @@ def merge(path):
                 #  make a list for each column in the csv file
                 fixlist.append(row[1])
                 speedlist.append(float(row[2]))
-                latlist.append(float(row[4]))
-                longlist.append(float(row[5]))
-                millisgpslist.append(float(row[6])) 
+                millisgpslist.append(float(row[4])) 
+                latlist.append(float(row[5]))
+                longlist.append(float(row[6]))
+                
     
     except Exception as e:
         print(e)
