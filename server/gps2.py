@@ -153,6 +153,14 @@ class gpsHandler(Thread):
 
         self.debug = value
 
+    def convertDatetime(dt):
+        now = datetime.datetime.now()
+        x = datetime.datetime(now.year, now.month, now.day,now.hour,dt.minute,dt.seconds,dt.microsecond)
+
+        timestamp = datetime.datetime.timestamp(x)
+        
+
+        return int(timestamp*1000)
 
     def getTimeStamp(self):
 
@@ -182,6 +190,7 @@ class gpsHandler(Thread):
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
                 gpstime = msg.timestamp
+                gpstime = convertDatetime(gpstime)
            
         
             self.message.update({"velocity":str(velocity),"timestamp":str(now),"gpsTime":str(gpstime),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
