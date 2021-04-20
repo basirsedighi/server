@@ -325,7 +325,7 @@ def merge(path):
     print('exlong: '+ str(len(expandedlongitudelist)))
 
 
-    with open(path+ 'merged.csv','w', newline='') as k1test:
+    with open(path+ '/merged.csv','w', newline='') as k1test:
         fieldnames = ['picmillis', 'gpsmillis','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
         k1writer = csv.DictWriter(k1test, fieldnames=fieldnames) 
         indexnumber =0
