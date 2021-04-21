@@ -207,8 +207,8 @@ def modifycoordinatesbasedontimedifference(timedifflist, coordiantelist, speed, 
             shifted = coordiantelist[n] + speed[n] * abs(time) + (accelerationlist[n] * (time**2))/2
         elif timedifflist[n] > 0:
             shifted = coordiantelist[n] + speed[n] * abs(time) - (accelerationlist[n] * (time**2))/2
-        print(shifted)
-        print(coordiantelist[n])
+        #print(shifted)
+        #print(coordiantelist[n])
         shiftedcoord.append(shifted)
 
 
@@ -254,7 +254,7 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
 #-------------------------------------------#
 
 # Open image csv file and make a csv reader object 
-with open(path +'images3.csv', newline='') as csvpic:
+with open(path +'images.csv', newline='') as csvpic:
     picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
     for row in picreader:
         #  make a list for each column in the csv file
@@ -266,7 +266,7 @@ with open(path +'images3.csv', newline='') as csvpic:
             
      
 # Open gps csv file and make a csv reader object 
-with open(path +'gps3.csv', newline='') as csvgps:
+with open(path +'gps.csv', newline='') as csvgps:
     gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
     for row in gpsreader:
         #  make a list for each column in the csv file
@@ -283,6 +283,7 @@ print('lat: '+ str(len(latlist)))
 indexlist = calculateindexposition(millisgpslist, millisk1list)
 
 print('indexlist len: '+str(len(indexlist)))
+print(indexlist)
 index, dub = findandremovedublicates(indexlist)
 print('index: '+str(len(index)))
 print('dub: '+str(dub))
@@ -317,11 +318,12 @@ print('exlat: '+ str(len(expandedlatitudelist)))
 print('exlong: '+ str(len(expandedlongitudelist)))
 print('picmillis: '+ str(len(millisk1list)))
 
-while len(expandedmodifiedlongitudelist) != len(millisk1list):    
-    expandedmodifiedlongitudelist.append('d')
-    expandedmodifiedlatitudelist.append('d')
-    expandedlatitudelist.append('d')
-    expandedlongitudelist.append('d')
+
+# while len(expandedmodifiedlongitudelist) != len(millisk1list):    
+#     expandedmodifiedlongitudelist.append('d')
+#     expandedmodifiedlatitudelist.append('d')
+#     expandedlatitudelist.append('d')
+#     expandedlongitudelist.append('d')
 print('exmodlong: '+ str(len(expandedmodifiedlongitudelist)))
 with open(path+ 'merge.csv','w', newline='') as k1test:
     fieldnames = ['picnumber','picmillis', 'gpsmillis','fix','speed','readlat', 'readlong', 'extendedlat','extendedlong', 'extendedmodifiedlat','extendedmodifiedlong']
@@ -368,14 +370,14 @@ indexcomp = []
 with open(path +'merge.csv', newline='') as csvpic:
     picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
     for row in picreader:
-        #  make a list for each column in the csv file
-        mergepicmilli.append(int(row[1]))        
-        mergegpsmilli.append(int(row[2]))  
+#         #  make a list for each column in the csv file
+        mergepicmilli.append((row[1]))        
+        mergegpsmilli.append((row[2]))  
         
-for n in range(len(mergepicmilli)-1):
-    tre = mergepicmilli[n] - mergegpsmilli[n]
-    print(tre)
-
+# for n in range(len(mergepicmilli)-1):
+#     tre = mergepicmilli[n] - mergegpsmilli[n]
+#     print(tre)
+print(mergegpsmilli)
 #-------------------------------------------#
 
 #---end of program for csv merging---# 
