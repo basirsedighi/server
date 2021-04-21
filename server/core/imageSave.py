@@ -21,22 +21,23 @@ class ImageSave(Thread):
         self.path = os.path.dirname(os.path.abspath(__file__))
         
         self.path = self.fixPath(self.path)
+        print(self.path)
         self.date = self.getDate()
         self.drive = 'C:'
         self.storageLeft = 50
 
 
     def fixPath(self,path):
-        test = path.split('\\')
+        test = path.split('/')
         test.pop()
         newPath = '/'.join(test)
         return newPath
 
     def run(self):
-        
+               
         
         date = self.getDate()
-       
+
         try:
             while True:
 
