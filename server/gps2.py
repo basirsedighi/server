@@ -55,7 +55,7 @@ class gpsHandler(Thread):
                             self.serial = ser
                             self.read = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
                               #sends commands to gps
-                            self.initGPS()
+                            #self.initGPS()
                 # 'warm up' with reading some input
                             for i in range(10):
                                 data = ser.readline()
@@ -153,11 +153,11 @@ class gpsHandler(Thread):
 
         self.debug = value
 
-    def convertDatetime(dt):
-        now = datetime.datetime.now()
-        x = datetime.datetime(now.year, now.month, now.day,now.hour,dt.minute,dt.seconds,dt.microsecond)
+    def convertDatetime(self,dt):
+        now = datetime.now()
+        x = datetime(now.year, now.month, now.day,now.hour,dt.minute,dt.second,dt.microsecond)
 
-        timestamp = datetime.datetime.timestamp(x)
+        timestamp = datetime.timestamp(x)
         
 
         return int(timestamp*1000)
@@ -190,7 +190,8 @@ class gpsHandler(Thread):
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
                 gpstime = msg.timestamp
-                gpstime = convertDatetime(gpstime)
+                
+                gpstime = self.convertDatetime(gpstime)
            
         
             self.message.update({"velocity":str(velocity),"timestamp":str(now),"gpsTime":str(gpstime),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
@@ -310,9 +311,9 @@ class gpsHandler(Thread):
         self.send('SSSSSSSSSS\r\n')
         self.send('setDataInOut, COM3, CMD, SBF+NMEA\r\n')
         self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
-        self.send('SetNMEAOutput, Stream1, COM2, GGA, sec1\r\n')
-        self.send('SetNMEAOutput, Stream7, COM3, GSV+GSA, sec1\r\n')
-        self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, sec1\r\n')
+        self.send('SetNMEAOutput, Stream1, COM2, GGA, msec100\r\n')
+        self.send('SetNMEAOutput, Stream7, COM3, GSV+GSA, msec100\r\n')
+        self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, msec100\r\n')
   
     def scan_ports(self):
 
