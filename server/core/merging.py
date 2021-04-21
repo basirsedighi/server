@@ -57,12 +57,7 @@ newindexlist = []
 
 timedifferencelist = []
 #   values for iterating
-cleanlength = 0
-picrow = 0
-gpsrow = 0
 
-k1row = 0
-expand = 0
 
 
 before = None
@@ -254,6 +249,12 @@ def makenewcoordinatelist(gpscoordinateslist,calculatedindexlist):
 
 #-------------------------------------------#
 def merge(path):
+    cleanlength = 0
+    picrow = 0
+    gpsrow = 0
+
+    k1row = 0
+    expand = 0
     try:
         # Open image csv file and make a csv reader object 
         with open(path +'/images.csv', newline='') as csvpic:
@@ -366,9 +367,3 @@ def merge(path):
 #-------------------------------------------#
 
   
-date ="2021-04-20"
-tempTrip= "bachelorvol2.2.3utenpuse"
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-path = absolute_path+"/log/"+date+"/"+tempTrip      
-
-merge(path)
