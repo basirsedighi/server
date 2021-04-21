@@ -515,6 +515,7 @@ async def abortStream():
 async def start_acquisition():
     global abort,image_freq
     print("Starting stream")
+    gps.toggleLogging(True)
     #toggleGPSControl(True)
     abort=False
     image_freq = 0
@@ -528,14 +529,14 @@ async def start_acquisition():
 def startPulse():
     global image_freq,started,gps,capturing
     
-    gps.toggleLogging(True)
+    
     isRunning = True
     
     started = True
     capturing = True
 
 
-    image_freq = 20
+    image_freq = 5
 
 def pause():
     global gps,image_freq,capturing
