@@ -4,12 +4,13 @@ import os
 def fixPath(path):
 
     test = path.split("\\")
-    if len(test)>0:
+    if len(test)>1:
 
         test.pop()
         newPath = '/'.join(test)
         return newPath
     else:
+        
         return path
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
