@@ -305,8 +305,9 @@ def startA():
 
 
 
+
                 if capturing:
-                    data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":cameraStamp}
+                    data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":newStamp}
                     imageQueue.put(data)
                     index = index +1
             
