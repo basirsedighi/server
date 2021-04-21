@@ -299,7 +299,11 @@ def startA():
                 timeStamp = int(time.time() * 1000) #getTimeStamp()
                 cameraStamp =image.raw_timestamp
 
-                diff = timestamp - cameraStamp
+                diff = abs(timestamp - cameraStamp)
+
+                newStamp = cameraStamp - diff
+
+
 
                 if capturing:
                     data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":cameraStamp}
