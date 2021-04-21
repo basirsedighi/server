@@ -279,10 +279,15 @@ def estimateStorageTime(storages,fps):
 
 def fixPath(path):
 
-    test = path.split('\\')
-    test.pop()
-    newPath = '/'.join(test)
-    return newPath
+    test = path.split("\\")
+    if len(test)>1:
+
+        
+        newPath = '/'.join(test)
+        return newPath
+    else:
+        
+        return path
 
 def getDate():
 

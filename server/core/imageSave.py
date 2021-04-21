@@ -28,11 +28,16 @@ class ImageSave(Thread):
 
 
     def fixPath(self,path):
-        test = path.split('/')
-        test.pop()
-        newPath = '/'.join(test)
-        return newPath
 
+            test = path.split("\\")
+            if len(test)>1:
+
+                test.pop()
+                newPath = '/'.join(test)
+                return newPath
+            else:
+                
+                return path
     def run(self):
                
         

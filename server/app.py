@@ -195,34 +195,36 @@ def getgpscoordinates():
     tripnamelist =[]
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
-    test = fixPath(absolute_path)
-    print(test)
+    absolute_path = fixPath(absolute_path)
+    
     path = absolute_path+"/log/"
 
     folders= os.listdir(path)
+    try:
+        for folder in folders:
+            subFolders = os.listdir(absolute_path+"/log/"+folder)
+            print(folder)
 
-    for folder in folders:
-        subFolders = os.listdir(absolute_path+"/log/"+folder)
-        print(folder)
+            for subFolder in subFolders:
+                print(subFolder)
+                latitudelist = []
+                longlitudelist =[]
 
-        for subFolder in subFolders:
-            print(subFolder)
-            latitudelist = []
-            longlitudelist =[]
-
-            with open(path+folder+"/"+subFolder+"/" +'gps.csv', newline='') as csvgps:
-                gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
-                i = next(gpsreader)
-                for row in gpsreader:
-                    #  make a list for each column in the csv file
+                with open(path+folder+"/"+subFolder+"/" +'gps.csv', newline='') as csvgps:
+                    gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+                    i = next(gpsreader)
+                    for row in gpsreader:
+                        #  make a list for each column in the csv file
+                        
+                        latitudelist.append(row[4])
+                        longlitudelist.append(row[5])
                     
-                    latitudelist.append(row[4])
-                    longlitudelist.append(row[5])
-                
-                
-                cordlist =list(zip(latitudelist,longlitudelist))
-            tripnamelist.append(i[0])
-            mainlist.append(cordlist)
+                    
+                    cordlist =list(zip(latitudelist,longlitudelist))
+                tripnamelist.append(i[0])
+                mainlist.append(cordlist)
+    except Exception as e:
+        pass
         
     return {"lists":mainlist,"names":tripnamelist}
 
@@ -1054,6 +1056,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event == "debug"):
                 gps.setDebug(msg)
+                debug= msg
             
             elif(event == "guru"):
                 guruMode = msg
