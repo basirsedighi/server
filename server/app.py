@@ -61,6 +61,7 @@ camera_2 = Camera(1)
 camera_3 = Camera(2)
 
 cameras =[camera_1,camera_2,camera_3]
+camerasDetected =[]
 tempTrip =""
 
 isConfigured =False
@@ -194,6 +195,8 @@ def getgpscoordinates():
     tripnamelist =[]
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
+    test = fixPath(absolute_path)
+    print(test)
     path = absolute_path+"/log/"
 
     folders= os.listdir(path)
@@ -619,12 +622,12 @@ def storageLeft(storages):
 
 
 async def initCameraA():
-    global camera_1, abort,cameras
+    global camera_1, abort,cameras,camerasDetected
     if abort:
         abort = False
     status = "ok"
 
-    if index_in_list(cameras, 0):
+    if index_in_list(camerasDetected, 0):
         try:
             #camera_1.init()
         
@@ -651,7 +654,7 @@ async def initCameraA():
 
 
 async def loadConfig():
-    global camera_1,camera_2,config_loaded,cameras
+    global camera_1,camera_2,config_loaded,cameras,camerasDetected
     status="Konfig vellykket"
     cameraStatus = "config_ok"
     try:
@@ -680,9 +683,9 @@ async def loadConfig():
  
 
 async def initCameraB():
-    global camera_2,cameras
+    global camera_2,cameras,camerasDetected
     status = "ok"
-    if index_in_list(cameras, 1):
+    if index_in_list(camerasDetected, 1):
 
         try:
             #camera_2.init()
@@ -708,28 +711,37 @@ def index_in_list(a_list, index):
         return test
 
 async def initCameraC():
-    global camera_3,config_loaded,cameras
+    global camera_3,config_loaded,cameras,camerasDetected
     status = "ok"
-    if index_in_list(cameras, 2):
+
+    if index_in_list(camerasDetected, 2):
+        
         try:
+
+            
             #camera_3.init()
-            if camera_3.getDevice():
+            if camera_3.getDevice() is not None:
+                
+                
 
                 if not camera_3.isRunning():
 
                     camera_3.start_stream()
             
             else:
+                
                 camera_3.init()
                 
             
             config_loaded = True
        
 
-        except:
+        except Exception as e:
             print("initializing of camera 3 failed")
             status = "failed"
+            print(e)
         finally:
+            print("finally")
             await manager.broadcast(json.dumps({"event": "initC", "data": status}))
 
 
@@ -954,7 +966,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
         
             elif(event == "loadConfig"):
-                states = getStates()
+                
                 if not config_loaded:
 
                     #print(len( await discoverCameras()))
@@ -1006,10 +1018,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await manager.broadcast(json.dumps({"event": "stopping"}))
 
             elif(event == "init"):
-                
+
+              
                 await initCameraA()
+                print("A")
                 await initCameraB()
+                print("B")
                 await initCameraC()
+                print("C")
                 
 
             elif(event == "stream"):
@@ -1070,12 +1086,15 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 @app.on_event("startup")
 async def startup():
-    global camera_1,camera_2,camera_3,cameras
+    global camera_1,camera_2,camera_3,cameras,camerasDetected
     print("[startup] init cameras")
     camerasDiscovered = await discoverCameras()
     i =0
-    print("Cameras:"+ str(len(camerasDiscovered)))
-    for device in range(len(camerasDiscovered)):
+    detected =len(camerasDiscovered)
+    
+    print("Cameras:"+ str(detected))
+    for device in range(int(detected/2)):
+        camerasDetected.append(str(i))
         cameras[i].init()
         
 
@@ -1111,7 +1130,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="192.168.10.153", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
 
 
 if __name__ == "__main__":
@@ -1119,6 +1138,6 @@ if __name__ == "__main__":
     main(debug)
     
 
-
+    # isi 192.168.10.153
     #169.254.108.159
     #192.168.0.100

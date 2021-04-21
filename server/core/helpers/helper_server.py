@@ -277,6 +277,13 @@ def estimateStorageTime(storages,fps):
 
     return storages
 
+def fixPath(path):
+
+    test = path.split('\\')
+    test.pop()
+    newPath = '/'.join(test)
+    return newPath
+
 def getDate():
 
     return datetime.today().strftime('%Y-%m-%d')
@@ -311,5 +318,13 @@ async def discoverCameras():
     
 
     return discover
+
+
+async def discoverCamerasLength():
+
+    discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
+    
+
+    return len(discover)
 
 

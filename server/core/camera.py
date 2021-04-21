@@ -29,21 +29,20 @@ class Camera:
 
     def init(self):
 
-        try:
-            self.device = cvb.DeviceFactory.open(os.path.join(
-                cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
-
-
-            # self.device_node_map = self.device.node_maps["Device"]
-            # self.device_node_map.load_settings(file_name=self.config_path)
-
-            self.stream = self.device.stream
-            self.stream.acquisition_interface =1
-            print(self.stream.is_indexed)
-            #self.stream.start()
         
-        except Exception as e:
-            print(e)
+        self.device = cvb.DeviceFactory.open(os.path.join(
+            cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
+
+
+        # self.device_node_map = self.device.node_maps["Device"]
+        # self.device_node_map.load_settings(file_name=self.config_path)
+
+        self.stream = self.device.stream
+        self.stream.acquisition_interface =1
+        print(self.stream.is_indexed)
+        #self.stream.start()
+        
+       
     
 
 
