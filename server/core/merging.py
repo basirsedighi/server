@@ -2,6 +2,7 @@ import csv
 from collections import defaultdict
 from bisect import bisect_left
 import collections
+import os
 
 
 #---start for variables and lists for merging csv---#
@@ -365,6 +366,9 @@ def merge(path):
 #-------------------------------------------#
 
   
+date ="2021-04-20"
+tempTrip= "bachelorvol2.2.3utenpuse"
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+path = absolute_path+"/log/"+date+"/"+tempTrip      
 
-        
-
+merge(path)

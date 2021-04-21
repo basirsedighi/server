@@ -106,7 +106,7 @@ isRunning = False
 start_Puls = False
 drive_in_use ="C:"
 storageLeft_in_use = 50
-gpsControl = False
+gpsControl = True
 
 #manage socket connections
 manager = ConnectionManager()
@@ -298,6 +298,8 @@ def startA():
             if status == cvb.WaitStatus.Ok:
                 timeStamp = int(time.time() * 1000) #getTimeStamp()
                 cameraStamp =image.raw_timestamp
+
+                diff = timestamp - cameraStamp
 
                 if capturing:
                     data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":cameraStamp}
@@ -515,8 +517,9 @@ async def abortStream():
 async def start_acquisition():
     global abort,image_freq
     print("Starting stream")
+    toggleGPSControl(True)
     gps.toggleLogging(True)
-    #toggleGPSControl(True)
+    
     abort=False
     image_freq = 0
     
