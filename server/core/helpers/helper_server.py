@@ -46,8 +46,8 @@ def cvbImage_b64(frame):
     """
 
     image_np = cvb.as_array(frame, copy=False)
-    # image_rot = cv2.cv2.ROTATE_90_CLOCKWISE
-    image_np = cv2.resize(image_np, (640, 480))
+    image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+    image_np = cv2.resize(image_np, (1280, 720))
     _, frame = cv2.imencode('.jpg', image_np)
     im_bytes = frame.tobytes()
     im_b64 = base64.b64encode(im_bytes)

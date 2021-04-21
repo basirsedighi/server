@@ -82,6 +82,7 @@ temp_img_2 =None
 temp_img_3 =None
 
 capturing =False
+guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
@@ -227,7 +228,16 @@ def getgpscoordinates():
     
         
 
-    
+@app.get('/getStates')
+async def states():
+
+    states = getStates()
+
+
+
+    return states
+
+
   
 
 
@@ -507,7 +517,7 @@ async def abortStream():
     global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
     print("stopping stream")
     toggleGPSControl(False)
-    gps.toggleLogging(False)
+    
     
     
     image_freq = 0
@@ -538,7 +548,7 @@ def startPulse():
     global image_freq,started,gps,capturing
     
     
-    isRunning = True
+    
     
     started = True
     capturing = True
@@ -885,9 +895,9 @@ def videofeed():
 
 
 def merge_CSV_files():
-    global tempTrip,gps,isConfigured,isRunning
+    global tempTrip,gps,isConfigured,started
     isConfigured= False
-    isRunning = False
+    started = False
     gps.toggleLogging(False)
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
@@ -914,14 +924,16 @@ def startfps():
 
     image_freq = 5
 
+
+
 def getStates():
-    global capturing,config_loaded
-    return {"capturing":capturing,"init_ok":config_loaded,"running":isRunning,"isConfigured":isConfigured}
+    global capturing,config_loaded,started,isConfigured,gpsControl,guruMode,debug
+    return {"capturing":capturing,"init_ok":config_loaded,"running":started,"isConfigured":isConfigured,"gpsControl":gpsControl,"guruMode":guruMode,"debug":debug}
 
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras
+    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -1026,6 +1038,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event == "debug"):
                 gps.setDebug(msg)
+            
+            elif(event == "guru"):
+                guruMode = msg
 
             
             elif(event == "pause"):
