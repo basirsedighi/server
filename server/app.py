@@ -327,7 +327,7 @@ def startA():
                 
                 
                     
-
+                
                 cameraStamp = int(image.raw_timestamp/1000)
                 
                 
@@ -348,7 +348,7 @@ def startA():
                         newstamp =  starttime+ (cameraStamp-firstCameraStamp)
                         
                         
-
+                
                         data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":newstamp}
                         imageQueue.put(data)
                         index = index +1
@@ -356,7 +356,6 @@ def startA():
                     if index ==0:   
                         starttime = timeStamp
                         firstCameraStamp = cameraStamp
-                        print({"first camera":firstCameraStamp,"starttime":starttime})
                         index = index +1
                 
                 
