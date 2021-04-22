@@ -96,7 +96,10 @@ class Camera:
         self.stream = None
 
     def stopStream(self):
-        self.stream.stop()
+        try:
+            self.stream.stop()
+        except Exception as e:
+            pass
 
     def getPort(self):
         return self.port

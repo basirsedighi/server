@@ -232,7 +232,31 @@ def getgpscoordinates():
 
 
     
-        
+def log(data):
+    global tempTrip
+
+    
+    
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    fixPath(absolute_path)
+    path = absolute_path+"/log/"+date+"/"+tempTrip
+
+# Open gps csv file and make a csv reader object 
+    with open(path +'/log.csv','a', newline='') as csvgps:
+
+        fieldnames = ['stream','images']
+        writer = csv.DictWriter(csvgps, fieldnames=fieldnames)
+    
+        writer.writerow({"stream":data['stream'],"images":data['results']['images_ok']})
+            
+
+
+
+
+
+
+
 
 @app.get('/getStates')
 async def states():
@@ -300,11 +324,11 @@ def merge():
 
 
 def emergencyStop():
-    global abort,image_freq,stopStream1,stopStream2,stopStream3
+    global abort,image_freq,stopStream1,stopStream2,stopStream3,capturing
     toggleGPSControl(False)
     abort =True
-    
-    
+    started =False
+    capturing =False
     image_freq = 0
 
     stopStream1 =True
@@ -1143,14 +1167,20 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 pause()
             
             elif(event =="reset"):
-                startfps()
-                
-                
-                   
+                startfps() 
                 resett()
             
             elif (event =="emergency"):
                 emergencyStop()
+            
+            elif(event=="log"):
+                log(msg)
+            
+            elif(event=="states"):
+
+                states = getStates()
+
+                await manager.broadcast(json.dumps({"event":"states","data":states}))
 
 
                 
