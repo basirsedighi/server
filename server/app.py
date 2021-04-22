@@ -283,7 +283,10 @@ async def change(freq:freq):
 
 
 
+def emergencyStop():
+    global abort
 
+    abort =True
 
 @app.get('/start1')
 def startA():
@@ -296,6 +299,14 @@ def startA():
     
     print("started camera 1")
     print(time.time()*1000)
+    starttime = 0
+    newstamp =0
+    clockReset = False
+    cameraStamp =3
+    lastCameraStamp =0
+    firstCameraStamp =0
+    camera_1.resetClock()
+                      
     while True:
 
         if abort:
@@ -305,26 +316,53 @@ def startA():
 
         
         try:
-            # timer.start()
+            
             image, status = camera_1.get_image()
+
+           
 
             
 
             if status == cvb.WaitStatus.Ok:
-                timeStamp = int(time.time() * 1000) #getTimeStamp()
-                cameraStamp =image.raw_timestamp
+                
+                
+                    
 
-                diff = abs(timestamp - cameraStamp)
+                cameraStamp = int(image.raw_timestamp/1000)
+                
+                
+                
+                timeStamp = int(time.time() * 1000)
 
-                newStamp = cameraStamp - diff
+               
 
 
 
 
                 if capturing:
-                    data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":newStamp}
-                    imageQueue.put(data)
-                    index = index +1
+                    
+                   
+
+                    
+                    if index >0:
+                        newstamp =  starttime+ (cameraStamp-firstCameraStamp)
+                        
+                        
+
+                        data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        imageQueue.put(data)
+                        index = index +1
+                    
+                    if index ==0:   
+                        starttime = timeStamp
+                        firstCameraStamp = cameraStamp
+                        print({"first camera":firstCameraStamp,"starttime":starttime})
+                        index = index +1
+                
+                
+                    
+            
+                
             
             elif status == cvb.WaitStatus.Abort:
                 print("stream 1 abort")
@@ -339,7 +377,7 @@ def startA():
             else:
                 test = test+1
             
-
+               
             # timer.stop()
 
                 
@@ -357,7 +395,7 @@ def startA():
     stopStream1 =False 
     camera_1.stopStream()
 
-    return {"message": "stream 1 has stopped","images_ok":str(index),"images":str(test)}
+    return {"message": "stream 1 has stopped","images_ok":str(index),"images":str(test),"startTime":starttime}
     
 
 
@@ -398,7 +436,7 @@ def startB():
 
                 if capturing:
 
-                    data = {"image": image, "camera": 2, "index": index,"timeStamp":""}
+                    data = {"image": image, "camera": 2, "index": index,"timeStamp":"","cameraStamp":""}
 
                     imageQueue.put(data)
                     index = index +1
@@ -444,7 +482,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing
+    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected
     
 
     
@@ -454,62 +492,62 @@ def startC():
     print("started camera 3") 
     print(time.time()*1000) 
     
-    
-    while True:
-        if abort:
-            break
-
-       
-
-        
-        # timer.start()
-        try:
-            image, status = camera_3.get_image()
+    if len(camerasDetected) >2:
+        while True:
+            if abort:
+                break
 
         
 
             
+            # timer.start()
+            try:
+                image, status = camera_3.get_image()
 
-            if status == cvb.WaitStatus.Ok:
-                #timeStamp = int(time.time() * 1000)
-                
-                if capturing:
-                    data = {"image": image, "camera": 3, "index": index,"timeStamp":""}
-
-                    imageQueue.put(data)
-                    index = index +1
             
-            elif status == cvb.WaitStatus.Abort :
-                print("stream 3 abort")
-                break
-
-            elif status == cvb.WaitStatus.Timeout and stopStream3:
-                print("stream 3 timeout")
-                break
-            
-            elif status == cvb.WaitStatus.Timeout:
-                print("timed out waiting for images")
-            
-            else:
-                test = test+1
-            
-
-            # timer.stop()
 
                 
-            
-            
 
-            
-        except Exception as e:
-            print(e)
-            pass
+                if status == cvb.WaitStatus.Ok:
+                    #timeStamp = int(time.time() * 1000)
+                    
+                    if capturing:
+                        data = {"image": image, "camera": 3, "index": index,"timeStamp":"","cameraStamp":""}
+
+                        imageQueue.put(data)
+                        index = index +1
+                
+                elif status == cvb.WaitStatus.Abort :
+                    print("stream 3 abort")
+                    break
+
+                elif status == cvb.WaitStatus.Timeout and stopStream3:
+                    print("stream 3 timeout")
+                    break
+                
+                elif status == cvb.WaitStatus.Timeout:
+                    print("timed out waiting for images")
+                
+                else:
+                    test = test+1
+                
+
+                # timer.stop()
+
+                    
+                
+                
+
+                
+            except Exception as e:
+                print(e)
+                pass
 
           
 
  
-    stopStream3 =False
-    camera_3.stopStream()
+        stopStream3 =False
+        camera_3.stopStream()
     
 
     
@@ -629,27 +667,30 @@ async def initCameraA():
         abort = False
     status = "ok"
 
-    if index_in_list(camerasDetected, 0):
-        try:
-            #camera_1.init()
-        
-            if camera_1.getDevice():
 
-                if not camera_1.isRunning():
-                    
-                    camera_1.start_stream()
-            
-            else:
+    try:
+        #camera_1.init()
+    
+        if camera_1.getDevice() is not None:
+
+            if not camera_1.isRunning():
+                
+                camera_1.start_stream()
+        
+        else:
+
+            if len(camerasDetected)>0:
                 camera_1.init()
 
-            config_loaded = True
+        config_loaded = True
 
-        except:
-            print("initializing of camera 1 failed")
-            status = "failed"
-        finally:
-            
-            await manager.broadcast(json.dumps({"event": "initA", "data": status}))
+    except Exception as e:
+        print(e)
+        print("initializing of camera 1 failed")
+        status = "failed"
+    finally:
+        
+        await manager.broadcast(json.dumps({"event": "initA", "data": status}))
 
 
 
@@ -687,64 +728,73 @@ async def loadConfig():
 async def initCameraB():
     global camera_2,cameras,camerasDetected
     status = "ok"
-    if index_in_list(camerasDetected, 1):
+   
 
-        try:
-            #camera_2.init()
-            if camera_2.getDevice(): 
-                if not camera_2.isRunning():
+    try:
+        #camera_2.init()
+        if camera_2.getDevice() is not None: 
+            if not camera_2.isRunning():
 
-                    camera_2.start_stream()
-            
-            else:
-                camera2.init()
-            
-            
+                camera_2.start_stream()
         
+        else:
 
-        except:
-            print("initializing of camera 2 failed")
-            status = "failed"
-        finally:
-            await manager.broadcast(json.dumps({"event": "initB", "data": status}))
+            if len(camerasDetected)>1:
+
+                camera_2.init()
+        
+        
+    
+
+    except Exception as e:
+        print(e)
+        print("initializing of camera 2 failed")
+        status = "failed"
+    finally:
+        
+        await manager.broadcast(json.dumps({"event": "initB", "data": status}))
         
 def index_in_list(a_list, index):
         test = index < len(a_list)
         return test
 
 async def initCameraC():
-    global camera_3,config_loaded,cameras,camerasDetected
+    global camera_3,config_loaded,camerasDetected
     status = "ok"
-
-    if index_in_list(camerasDetected, 2):
+    
+    
+    
+    
         
-        try:
+    try:
 
+        
+        #camera_3.init()
+        if camera_3.getDevice() is not None:
             
-            #camera_3.init()
-            if camera_3.getDevice() is not None:
-                
-                
-
-                if not camera_3.isRunning():
-
-                    camera_3.start_stream()
             
-            else:
-                
+
+            if not camera_3.isRunning():
+
+                camera_3.start_stream()
+        
+        else:
+            
+           if len(camerasDetected)>2:
                 camera_3.init()
-                
             
-            config_loaded = True
-       
+        
+        
+    
 
-        except Exception as e:
-            print("initializing of camera 3 failed")
-            status = "failed"
-            print(e)
-        finally:
-            print("finally")
-            await manager.broadcast(json.dumps({"event": "initC", "data": status}))
+    except Exception as e:
+        print("initializing of camera 3 failed")
+        status = "failed"
+        print(e)
+    finally:
+        
+        
+        await manager.broadcast(json.dumps({"event": "initC", "data": status}))
 
 
 
@@ -779,7 +829,13 @@ async def validate(cam):
         print(e)
         
 
-   
+@app.get('/stopFeed')
+async def stoplive():
+    global valider1
+
+    valider1 = False
+
+    
         
 def gen():
     global camera_1,valider1
@@ -799,14 +855,15 @@ def gen():
 
                     yield (b'--frame\r\n'
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+                
+                
+                    
             
             except Exception as e:
                 pass
                
         
-        else:
-            break
-
+        
 
 
     
@@ -815,11 +872,11 @@ def gen():
 
 
 def gen1():
-    global camera_2,valider2
+    global camera_2,valider1
 
     while 1:
 
-        if valider2:
+        if valider1:
 
             try:
                 frame, status = camera_2.get_image()
@@ -833,18 +890,20 @@ def gen1():
 
                     yield (b'--frame\r\n'
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+                
+                
             except Exception as e:
                 pass
-        else:
-            break
-
+       
 
 def gen2():
-    global camera_3,valider3
+    global camera_3,valider1
 
     while 1:
 
-        if valider3:
+        if valider1:
+
+            
 
             try:
                 frame, status = camera_3.get_image()
@@ -858,10 +917,11 @@ def gen2():
 
                     yield (b'--frame\r\n'
                             b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+                
+                
             except Exception as e:
                 pass
-        else:
-            break
+        
 
 @app.get('/video_feed1')
 def video_feed1():
@@ -917,7 +977,8 @@ def merge_CSV_files():
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     path = absolute_path+"/log/"+date+"/"+tempTrip
     try:
-        merge(path)
+        pass
+        #merge(path)
     except Exception as e:
         pass
 
@@ -937,6 +998,9 @@ def startfps():
 
 
     image_freq = 5
+
+
+   
 
 
 
@@ -969,22 +1033,18 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         
             elif(event == "loadConfig"):
                 
-                if not config_loaded:
-
+               
+                    
                     #print(len( await discoverCameras()))
                     await initCameraA()
+                    print("A")
                     await initCameraB()
+                    print("B")
                     await initCameraC()
-                   
+                    print("C")
                 
-                else:
-
-
-                    await manager.broadcast(json.dumps({"event": "initB", "data": "config_ok"}))
-                    await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
-                    await manager.broadcast(json.dumps({"event": "initA", "data": "config_ok"}))
-                    await manager.broadcast(json.dumps({"event": "loadConfig", "data": "ok"}))
-                    await manager.broadcast(json.dumps({"event": "states", "data": states}))
+                
+                   
                 
 
 
@@ -1021,7 +1081,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
             elif(event == "init"):
 
-              
+                
                 await initCameraA()
                 print("A")
                 await initCameraB()
@@ -1051,8 +1111,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif(event == "live"):
                 valider1 = msg
-                valider2 =msg
-                valider3 = msg
+                
             
             elif(event == "debug"):
                 gps.setDebug(msg)
@@ -1073,6 +1132,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 await initCameraC()
                    
                 merge_CSV_files()
+            
+            elif (event =="emergency"):
+                emergencyStop()
 
 
                 
@@ -1091,7 +1153,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 async def startup():
     global camera_1,camera_2,camera_3,cameras,camerasDetected
     print("[startup] init cameras")
-    camerasDiscovered = await discoverCameras()
+    camerasDiscovered =  discoverCameras()
     i =0
     detected =len(camerasDiscovered)
     

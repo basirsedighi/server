@@ -59,6 +59,7 @@ class ImageSave(Thread):
                     camera = data['camera']
                     index = data['index']
                     timestamp = data['timeStamp']
+                    cameraStamp =data['cameraStamp']
 
                     
                     try:
@@ -67,10 +68,11 @@ class ImageSave(Thread):
                            newDrive = most_free_space()
                            self.drive = newDrive['name']
                         
-                        
-                        image.save(self.drive+"/"+
-                        "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
-
+                        try:
+                            image.save(self.drive+"/"+
+                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
+                        except Exception:
+                            pass
                         if camera ==1:
                             with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv",'a',newline='')as csvfile:
                                 
@@ -78,7 +80,7 @@ class ImageSave(Thread):
                                 fieldnames = ['index', 'tripname', "camera","timestamp","date"]
                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                 
-                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":self.getTimeStamp(timestamp)})
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":cameraStamp})
                                 writer.writerow(row)
 
                     except Exception as e:
