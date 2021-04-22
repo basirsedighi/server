@@ -1,10 +1,22 @@
-import os
-from core.merging import merge
+from core.timer import Timer
+
+import time
+
+timer = Timer("hahaha")
 
 
-date ="2021-04-20"
-tempTrip= "bachelorvol2.2.3utenpuse"
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-path = absolute_path+"/log/"+date+"/"+tempTrip      
 
-merge(path)
+
+a = list(range(100000))
+b = list(range(100000))
+
+
+timer.start()
+for i in a:
+    pass
+    for j in b:
+        pass
+
+    b.pop(0)    
+
+timer.stop()

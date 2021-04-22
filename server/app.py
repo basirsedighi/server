@@ -47,6 +47,7 @@ from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
 from core.merging import merge
+from merging2 import merge2
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -282,11 +283,36 @@ async def change(freq:freq):
     return {"fps":image_freq}
 
 
+@app.get('/merge')
+def merge():
+    global tempTrip
+    
+    date = getDate()
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    fixPath(absolute_path)
+    path = absolute_path+"/log/"+date+"/"+tempTrip
+
+    result = merge2(path)
+
+    payload = {"event":"merging","result":result}
+    return payload
+
+
 
 def emergencyStop():
-    global abort
-
+    global abort,image_freq,stopStream1,stopStream2,stopStream3
+    toggleGPSControl(False)
     abort =True
+    
+    
+    image_freq = 0
+
+    stopStream1 =True
+    stopStream2 =True
+    stopStream3 =True
+    #abort = True
+
+    
 
 @app.get('/start1')
 def startA():
@@ -967,19 +993,12 @@ def videofeed():
 
 
 
-def merge_CSV_files():
+def resett():
     global tempTrip,gps,isConfigured,started
     isConfigured= False
     started = False
     gps.toggleLogging(False)
-    date = getDate()
-    absolute_path = os.path.dirname(os.path.abspath(__file__))
-    path = absolute_path+"/log/"+date+"/"+tempTrip
-    try:
-        pass
-        #merge(path)
-    except Exception as e:
-        pass
+  
 
 
 
@@ -1123,14 +1142,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "pause"):
                 pause()
             
-            elif(event =="merge"):
+            elif(event =="reset"):
                 startfps()
                 
-                await initCameraA()
-                await initCameraB()
-                await initCameraC()
+                
                    
-                merge_CSV_files()
+                resett()
             
             elif (event =="emergency"):
                 emergencyStop()
