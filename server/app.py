@@ -61,6 +61,7 @@ camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(2)
 
+
 cameras =[camera_1,camera_2,camera_3]
 camerasDetected =[]
 tempTrip =""
@@ -1209,7 +1210,7 @@ async def startup():
     detected =len(camerasDiscovered)
     
     print("Cameras:"+ str(detected))
-    for device in range(int(detected/2)):
+    for device in range(int(detected)):
         camerasDetected.append(str(i))
         cameras[i].init()
         
