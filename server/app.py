@@ -217,8 +217,8 @@ def getgpscoordinates():
                     for row in gpsreader:
                         #  make a list for each column in the csv file
                         
-                        latitudelist.append(row[4])
-                        longlitudelist.append(row[5])
+                        latitudelist.append(row[5])
+                        longlitudelist.append(row[6])
                     
                     
                     cordlist =list(zip(latitudelist,longlitudelist))
@@ -1026,7 +1026,10 @@ def resett():
 
 
 
-   
+def initGPS():
+    global gps
+    gps.initGPS()
+
     
     
     
@@ -1162,6 +1165,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event == "guru"):
                 guruMode = msg
 
+            elif(event=="initGPS"):
+                initGPS()
             
             elif(event == "pause"):
                 pause()

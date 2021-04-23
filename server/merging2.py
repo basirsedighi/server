@@ -20,6 +20,7 @@ def merge2(path):
     gpsmilli=[]
     latList = []
     longList =[]
+    speedList=[]
 
 
     timer = Timer("hallo")
@@ -46,8 +47,9 @@ def merge2(path):
                 gpsmilli.append(float(row[4]))
                 latList.append(float(row[5]))
                 longList.append(float(row[6]))
+                speedList.append(float(row[2]))
 
-                
+            
 
         test = gpsmilli.copy()
 
@@ -55,8 +57,7 @@ def merge2(path):
         moveindex =0
         timer.start()
 
-        print(len(gpsmilli))
-        print(len(picmilli))
+       
         for pic in picmilli:
 
             diffList=[]
@@ -66,12 +67,12 @@ def merge2(path):
                 diffList.append(abs(gps-pic))
                 
                 
-            
-            test.pop(0)
+           
+            #test.pop(0)
             min_value = min(diffList)
             minvalue.append(min_value)
             index = diffList.index(min_value)
-            index = moveindex+index
+            # index = moveindex+index
             indexlist.append(index)
             moveindex +=1
 
@@ -79,18 +80,22 @@ def merge2(path):
         timer.stop()
 
 
-
-
+        print(indexlist)
+        
         # Open gps csv file and make a csv reader object 
         with open(path +'/newlist.csv','w', newline='') as csvgps:
 
-            fieldnames = ['picmilli', 'gpsmilli',"lat","long"]
+            fieldnames = ['index','picmilli', 'gpsmilli',"lat","long","speed"]
             writer = csv.DictWriter(csvgps, fieldnames=fieldnames)
             for i in range(len(picmilli)):
-                writer.writerow({"picmilli":picmilli[i],"gpsmilli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]]})
+                try:
+                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]]})
+                except IndexError:
+                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":"","lat":"","long":"","speed":""})
             
 
     except Exception as e:
+        print(e)
 
         status = "error"
     
@@ -102,3 +107,12 @@ def merge2(path):
 
 
 
+
+
+date = "2021-04-23"
+tempTrip= "oljhuhu"
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+fixPath(absolute_path)
+path = absolute_path+"/log/"+date+"/"+tempTrip
+
+result = merge2(path)

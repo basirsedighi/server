@@ -22,14 +22,14 @@ class gpsHandler(Thread):
     def __init__(self,debug):
         Thread.__init__(self)
         self.debug = debug
-        self.GpsDataUrl ="http://localhost:8000/gpsPost"
-        self.message  ={"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,"millis":0}
-        self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,'millis':0}
+        self.message  ={"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,"millis":0}
+        self.data = {"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,'millis':0}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
         self.date = self.getDate()
         self.serial = None
+
     
     def run(self):
 
@@ -100,11 +100,11 @@ class gpsHandler(Thread):
                                             with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
                                 
 
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","millis"]
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","satelites"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                                 #writer.writeheader()
                                                 
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"millis":self.data['millis']})
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['millis']})
                                                 writer.writerow(row)
 
                                        
@@ -191,11 +191,17 @@ class gpsHandler(Thread):
                 velocity = self.__kmhToMs(velocity)
                 gpstime = msg.timestamp
                 
-                gpstime = self.convertDatetime(gpstime)
+                
+                gpstimes = self.convertDatetime(gpstime)
            
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(now),"gpsTime":str(gpstime),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"millis":milliseconds})
-            return self.message 
+            self.message.update({"velocity":str(velocity),"timestamp":str(gpstime),"gpsTime":str(gpstimes),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True})
+            return self.message
+        
+
+        if(msg.sentence_type=="ZDA"):
+
+            print(msg)
       
 
 
@@ -206,7 +212,7 @@ class gpsHandler(Thread):
                 print(msg)
 
            
-            
+            satelites = msg.num_sats
             fix_quality = int(msg.gps_qual)
 
             try:
@@ -217,7 +223,7 @@ class gpsHandler(Thread):
         
             quality = self.getGpsQuality(fix_quality,hdop)
             
-            self.message.update({"quality":int(quality),"new":False})
+            self.message.update({"quality":int(quality),"satelites":satelites,"new":False})
             return self.message   
 
             
@@ -311,9 +317,8 @@ class gpsHandler(Thread):
         self.send('SSSSSSSSSS\r\n')
         self.send('setDataInOut, COM3, CMD, SBF+NMEA\r\n')
         self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
-        self.send('SetNMEAOutput, Stream1, COM2, GGA, msec100\r\n')
-        self.send('SetNMEAOutput, Stream7, COM3, GSV+GSA, msec100\r\n')
-        self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, msec100\r\n')
+        self.send('SetNMEAOutput, Stream1, COM2, GGA+RMC, msec40\r\n')
+        
   
     def scan_ports(self):
 

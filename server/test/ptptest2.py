@@ -3,7 +3,8 @@ import struct
 import sys
 
 message = 'sync'.encode()
-multicast_group = ('224.64.16.1', 3956)
+message2 = 'delay'.encode()
+multicast_group = ('224.3.29.71', 319)
 
 # Create the datagram socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -14,7 +15,7 @@ sock.settimeout(10)
 
 # Set the time-to-live for messages to 1 so they do not go past the
 # local network segment.
-ttl = struct.pack('b', 2)
+ttl = struct.pack('b', 1)
 sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
 
 try:
@@ -22,14 +23,17 @@ try:
     # Send data to the multicast group
     print('sending "%s"' % message)
     sent = sock.sendto(message, multicast_group)
+    #sent2 = sock.sendto(message2, multicast_group)
 
     # Look for responses from all recipients
     while True:
 
         print('waiting to receive')
         try:
-            data, server = sock.recvfrom(16)
-        except socket.timeout:
+            data, server = sock.recv(1024)
+        except socket.timeout as e:
+            print(e)
+
             print('timed out, no more responses')
             break
         else:
