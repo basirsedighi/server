@@ -109,10 +109,10 @@ def merge2(path):
 
 
 
-date = "2021-04-23"
-tempTrip= "oljhuhu"
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-fixPath(absolute_path)
-path = absolute_path+"/log/"+date+"/"+tempTrip
+# date = "2021-04-23"
+# tempTrip= "oljhuhu"
+# absolute_path = os.path.dirname(os.path.abspath(__file__))
+# fixPath(absolute_path)
+# path = absolute_path+"/log/"+date+"/"+tempTrip
 
-result = merge2(path)
+# result = merge2(path)
