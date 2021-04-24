@@ -38,6 +38,7 @@ class ImageSave(Thread):
             else:
                 path = path.split("/")
                 path.pop()
+                path = '/'.join(path)
 
                 
                 return path
