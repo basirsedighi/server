@@ -325,9 +325,10 @@ def merge():
 
 
 def emergencyStop():
-    global abort,image_freq,stopStream1,stopStream2,stopStream3,capturing
+    global abort,image_freq,stopStream1,stopStream2,stopStream3,capturing,isConfigured
     toggleGPSControl(False)
     abort =True
+    isConfigured = False
     started =False
     capturing =False
     image_freq = 0
@@ -607,12 +608,12 @@ def startC():
 
 
 async def abortStream():
-    global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3
+    global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3,isConfigured
     print("stopping stream")
     toggleGPSControl(False)
     
     
-    
+    isConfigured = False
     image_freq = 0
 
     stopStream1 =True
@@ -627,6 +628,7 @@ async def start_acquisition():
     print("Starting stream")
     toggleGPSControl(True)
     gps.toggleLogging(True)
+    
     
     abort=False
     image_freq = 0
