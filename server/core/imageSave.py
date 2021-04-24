@@ -36,6 +36,9 @@ class ImageSave(Thread):
                 newPath = '/'.join(test)
                 return newPath
             else:
+                path = path.split("/")
+                path.pop()
+
                 
                 return path
     def run(self):
