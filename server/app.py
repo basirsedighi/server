@@ -402,7 +402,7 @@ def startA():
                    
 
                     
-                    if index >0:
+                    if index1 >0:
                         newstamp =  starttime+ (cameraStamp-firstCameraStamp)
                         
                         
