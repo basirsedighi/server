@@ -21,7 +21,7 @@ class ImageSave(Thread):
         self.path = os.path.dirname(os.path.abspath(__file__))
         
         self.path = self.fixPath(self.path)
-        print(self.path)
+        
         self.date = self.getDate()
         self.drive = 'C:'
         self.storageLeft = 50

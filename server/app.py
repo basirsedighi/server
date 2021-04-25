@@ -354,6 +354,7 @@ def startA():
     starttime = 0
     newstamp =0
     clockReset = False
+    error = "no ERROR"
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
@@ -439,14 +440,14 @@ def startA():
 
         except Exception as e :
 
-            print(e)
+            error = str(e)
             pass
 
    
     stopStream1 =False 
     camera_1.stopStream()
 
-    return {"message": "stream 1 has stopped","images_ok":str(index),"images":str(test),"startTime":starttime}
+    return {"message": "stream 1 has stopped","images_ok":str(index),"images":str(test),"error":error}
     
 
 
@@ -459,7 +460,7 @@ def startB():
     
     timer = Timer("stream2")
     
-   
+    error = "no error"
     index = 0
     test =0
     print("started camera 2") 
@@ -514,8 +515,8 @@ def startB():
 
             
         except Exception as e:
-            print(e)
-            pass
+            error = str(e)
+            break
 
           
 
@@ -527,7 +528,7 @@ def startB():
 
     
 
-    return {"message": "stream 2 has stopped","images_ok":str(index),"images":str(test)}
+    return {"message": "stream 2 has stopped","images_ok":str(index),"images":str(test),"error":error}
     # start bildetaking
 
 @app.get('/start3')
@@ -536,7 +537,7 @@ def startC():
     global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected
     
 
-    
+    error ="no error"
     timer = Timer("stream3")
     index = 0
     test =0
@@ -591,8 +592,8 @@ def startC():
 
                 
             except Exception as e:
-                print(e)
-                pass
+                error = str(e)
+                break
 
           
 
@@ -603,7 +604,7 @@ def startC():
 
     
 
-    return {"message": "stream 3 has stopped","images_ok":str(index),"images":str(test)}
+    return {"message": "stream 3 has stopped","images_ok":str(index),"images":str(test),"error":error}
     # start bildetaking
 
 
