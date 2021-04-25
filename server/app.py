@@ -1039,6 +1039,7 @@ def resett():
     isConfigured= False
     started = False
     gps.toggleLogging(False)
+    
   
 
 
@@ -1053,8 +1054,9 @@ def initGPS():
 
 
 def startfps():
-    global image_freq,capturing,isRunning,isConfigured
+    global image_freq,capturing,isRunning,isConfigured,gpsControl
 
+    toggleGPSControl(False)
     capturing = False
 
 
