@@ -411,7 +411,7 @@ def startA():
                         imageQueue.put(data)
                         index1 = index1 +1
                     
-                    if index ==0:   
+                    if index1 ==0:   
                         starttime = timeStamp
                         firstCameraStamp = cameraStamp
                         index1 = index1 +1
