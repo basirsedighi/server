@@ -61,6 +61,10 @@ camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(2)
 
+index1 =0
+index2 =0
+index3 =0
+
 
 cameras =[camera_1,camera_2,camera_3]
 camerasDetected =[]
@@ -150,11 +154,12 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:4200",
+    "http://localhost:3000",
     "http://localhost:8000",
     "http://10.22.182.47:4200",
-    "http://10.22.182.47",
+    "http://10.0.222.1",
     "http://localhost:8000/changeFps",
+    
 
 
 ]
@@ -345,8 +350,8 @@ def startA():
 
     timer =Timer("stream1")
 
-    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing
-    index = 0
+    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
+    index1 = 0
     test  =0
     
     print("started camera 1")
@@ -402,14 +407,14 @@ def startA():
                         
                         
                 
-                        data = {"image": image, "camera": 1, "index": index,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
                         imageQueue.put(data)
-                        index = index +1
+                        index1 = index1 +1
                     
                     if index ==0:   
                         starttime = timeStamp
                         firstCameraStamp = cameraStamp
-                        index = index +1
+                        index1 = index1 +1
                 
                 
                     
@@ -447,7 +452,7 @@ def startA():
     stopStream1 =False 
     camera_1.stopStream()
 
-    return {"message": "stream 1 has stopped","images_ok":str(index),"images":str(test),"error":error}
+    return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
     
 
 
@@ -456,12 +461,12 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing
+    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
     
     timer = Timer("stream2")
     
     error = "no error"
-    index = 0
+    index2 = 0
     test =0
     print("started camera 2") 
     print(time.time()*1000) 
@@ -488,10 +493,10 @@ def startB():
 
                 if capturing:
 
-                    data = {"image": image, "camera": 2, "index": index,"timeStamp":"","cameraStamp":""}
+                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
 
                     imageQueue.put(data)
-                    index = index +1
+                    index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
                 print("stream 2 abort")
@@ -528,18 +533,18 @@ def startB():
 
     
 
-    return {"message": "stream 2 has stopped","images_ok":str(index),"images":str(test),"error":error}
+    return {"message": "stream 2 has stopped","images_ok":str(index2),"images":str(test),"error":error}
     # start bildetaking
 
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected
+    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
     
 
     error ="no error"
     timer = Timer("stream3")
-    index = 0
+    index3 = 0
     test =0
     print("started camera 3") 
     print(time.time()*1000) 
@@ -564,10 +569,10 @@ def startC():
                     #timeStamp = int(time.time() * 1000)
                     
                     if capturing:
-                        data = {"image": image, "camera": 3, "index": index,"timeStamp":"","cameraStamp":""}
+                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
 
                         imageQueue.put(data)
-                        index = index +1
+                        index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
                     print("stream 3 abort")
@@ -604,7 +609,7 @@ def startC():
 
     
 
-    return {"message": "stream 3 has stopped","images_ok":str(index),"images":str(test),"error":error}
+    return {"message": "stream 3 has stopped","images_ok":str(index3),"images":str(test),"error":error}
     # start bildetaking
 
 
@@ -673,6 +678,14 @@ def toggleGPSControl(value):
     global gpsControl
 
     gpsControl =  value
+
+
+@app.get('/capturing')
+async def getCapturing():
+    global index1,index2,index3
+
+
+    return {"canera1":index1,"camera2":index2,"camera3":index3}
 
 
 @app.get('/storage')
