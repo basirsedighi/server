@@ -1193,6 +1193,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event =="reset"):
                 startfps() 
                 resett()
+                await manager.broadcast(json.dumps({"event":"stopped","data":""}))
             
             elif (event =="emergency"):
                 emergencyStop()
