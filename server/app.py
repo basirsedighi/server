@@ -1263,15 +1263,15 @@ def shutdown_event():
 
 
 
-def main(arg):
+# def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000)
+#     uvicorn.run(app, host="10.0.222.1", port=8000)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
   
-    main(debug)
+#     main(debug)
     
 
     # isi 192.168.10.153
