@@ -1267,7 +1267,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000)
+    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="info")
 
 
 if __name__ == "__main__":
