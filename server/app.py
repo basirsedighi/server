@@ -685,7 +685,7 @@ async def getCapturing():
     global index1,index2,index3
 
 
-    return {"canera1":index1,"camera2":index2,"camera3":index3}
+    return {"camera1":index1,"camera2":index2,"camera3":index3}
 
 
 @app.get('/storage')
