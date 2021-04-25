@@ -1,3 +1,4 @@
+#!/home/rekkverk/server/server/venv/bin/python3
 import numpy as np
 import sys
 from typing import List
