@@ -29,7 +29,7 @@ class ConnectionManager:
             print(e)
 
     async def disconnect(self, websocket: WebSocket):
-        # await websocket.close()
+        await websocket.close()
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
