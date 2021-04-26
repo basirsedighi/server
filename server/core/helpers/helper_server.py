@@ -191,7 +191,7 @@ def createFolder():
 async def createImageFolder(tripName):
     path = os.path.dirname(os.path.abspath(__file__))
         
-    path = fixPath(self.path)
+    path = fixPath(path)
 
     print(path)
 
