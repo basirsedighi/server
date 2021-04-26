@@ -85,7 +85,7 @@ def merge2(path):
         print(indexlist)
         
         # Open gps csv file and make a csv reader object 
-        with open(path +'/newlist.csv','w', newline='') as csvgps:
+        with open(path +'/merged.csv','w', newline='') as csvgps:
 
             fieldnames = ['index','Image milli', 'gps milli',"lat","long","speed","Quality"]
             writer = csv.DictWriter(csvgps, fieldnames=fieldnames)
