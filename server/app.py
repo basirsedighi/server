@@ -1222,7 +1222,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
         print("[WEBSOCKET] websocket disconnect")
 
-        await manager.disconnect(websocket)
+        #await manager.disconnect(websocket)
 
         
 
