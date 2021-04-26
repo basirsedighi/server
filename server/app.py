@@ -1201,6 +1201,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 startfps() 
                 resett()
                 await manager.broadcast(json.dumps({"event":"stopped","data":""}))
+                states = getStates()
+                await manager.broadcast(json.dumps({"event":"states","data":states}))
             
             elif (event =="emergency"):
                 emergencyStop()
