@@ -87,14 +87,14 @@ def merge2(path):
         # Open gps csv file and make a csv reader object 
         with open(path +'/newlist.csv','w', newline='') as csvgps:
 
-            fieldnames = ['index','picmilli', 'gpsmilli',"lat","long","speed","Quality"]
+            fieldnames = ['index','Image milli', 'gps milli',"lat","long","speed","Quality"]
             writer = csv.DictWriter(csvgps, fieldnames=fieldnames)
             writer.writeheader()
             for i in range(len(picmilli)):
                 try:
-                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]],"Quality":qualityList[indexlist[i]]})
+                    writer.writerow({'index':i,"Image milli":picmilli[i],"gps milli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]],"Quality":qualityList[indexlist[i]]})
                 except IndexError:
-                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":"","lat":"","long":"","speed":"","Quality":""})
+                    writer.writerow({'index':i,"Image milli":picmilli[i],"gps milli":"","lat":"","long":"","speed":"","Quality":""})
             
 
     except Exception as e:
