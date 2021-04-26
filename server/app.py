@@ -1232,12 +1232,12 @@ async def startup():
     detected =len(camerasDiscovered)
     
     print("Cameras:"+ str(detected))
-    # for device in range(int(detected)):
-    #     camerasDetected.append(str(i))
-    #     cameras[i].init()
+    for device in range(int(detected)):
+        camerasDetected.append(str(i))
+        #cameras[i].init()
         
 
-    #     i=i+1
+        i=i+1
 
     
 
