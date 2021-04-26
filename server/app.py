@@ -1218,11 +1218,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 
                 
 
-    except WebSocketDisconnect as e:  # WebSocketDisconnect
+    except (WebSocketDisconnect,RuntimeError) as e:  # WebSocketDisconnect
 
         print("[WEBSOCKET] websocket disconnect")
 
-        #await manager.disconnect(websocket)
+        await manager.disconnect(websocket)
 
         
 
