@@ -29,6 +29,7 @@ class gpsHandler(Thread):
         self.tripName =""
         self.date = self.getDate()
         self.serial = None
+        self.init = False
 
     
     def run(self):
@@ -69,43 +70,43 @@ class gpsHandler(Thread):
                             while True:
                                 
                                 
-                                
-                                line = self.read.readline()
+                                if not self.init:
+                                    line = self.read.readline()
                                 #.decode('ascii', errors='replace')
                                 
 
-                                if not line=="":
-                                    
-                                    line = self.__trimLine(line)
-                                    #print(line)
-                                    try:
-
-                                        msg = pynmea2.parse(line)
-                                        #print(msg)
-                                    except:
-                                        pass
-                                    
-                                    
-                                     
-                                    message = self.createMessage(msg)
-                                    if message =="no_data":
-                                        pass
-                                    else:
-                                                                            
-                                        self.data = message
+                                    if not line=="":
                                         
+                                        line = self.__trimLine(line)
+                                        #print(line)
+                                        try:
+
+                                            msg = pynmea2.parse(line)
+                                            #print(msg)
+                                        except:
+                                            pass
+                                        
+                                        
+                                        
+                                        message = self.createMessage(msg)
+                                        if message =="no_data":
+                                            pass
+                                        else:
+                                                                                
+                                            self.data = message
+                                            
+                                        
+
+                                            if(self.logging and self.data['new'] ==True):
+                                                with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
                                     
 
-                                        if(self.logging and self.data['new'] ==True):
-                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
-                                
-
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","satelites"]
-                                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                                #writer.writeheader()
-                                                
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['millis']})
-                                                writer.writerow(row)
+                                                    fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","satelites"]
+                                                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                                    #writer.writeheader()
+                                                    
+                                                    row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['millis']})
+                                                    writer.writerow(row)
 
                                        
                                     
@@ -266,6 +267,7 @@ class gpsHandler(Thread):
         print(self.serial.read(num))
     
     def initGPS(self):
+        self.init =True
         self.send('SetNMEAOutput, Stream1+Stream2+Stream7+Stream8, none, none, off\r\n')
         self.send('SetGPIOFunctionality, GP1, Output, none, LevelLow\r\n')
         self.send('SetGPIOFunctionality, GP2, Output, none, LevelHigh\r\n')
@@ -316,6 +318,8 @@ class gpsHandler(Thread):
         self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
         self.send('SetNMEAOutput, Stream1, COM2, GGA+RMC, msec40\r\n')
         
+        time.sleep(1)
+        self.init =False
   
     def scan_ports(self):
 
