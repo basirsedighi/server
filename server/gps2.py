@@ -101,14 +101,17 @@ class gpsHandler(Thread):
                                     
 
                                         if(self.logging and self.data['new'] ==True):
-                                            with open(self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv",'a',newline='')as csvfile:
+                                            path= self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv"
+                                            write_header = not os.path.exists(filePath)
+                                            with open(path,'a',newline='')as csvfile:
                                 
 
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","gpsTime","lat","lon","satelites"]
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","time milli","lat","lon","satelites"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                                #writer.writeheader()
+                                                if write_header:
+                                                    writer.writeheader()
                                                 
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"gpsTime":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['millis']})
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"time milli":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['millis']})
                                                 writer.writerow(row)
 
                                        
