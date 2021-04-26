@@ -82,7 +82,7 @@ def merge2(path):
         timer.stop()
 
 
-        print(indexlist)
+        #print(indexlist)
         
         # Open gps csv file and make a csv reader object 
         with open(path +'/merged.csv','w', newline='') as csvgps:
