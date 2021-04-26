@@ -1047,7 +1047,7 @@ def resett():
 
 def initGPS():
     global gps
-    gps.initGPS()
+    gps.startInit()
 
     
     
