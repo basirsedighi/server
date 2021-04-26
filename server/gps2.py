@@ -321,8 +321,7 @@ class gpsHandler(Thread):
         self.send('\r\n')
         self.send('SSSSSSSSSS\r\n')
         self.send('setDataInOut, COM3, CMD, SBF+NMEA\r\n')
-        self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
-        self.send('SetNMEAOutput, Stream1, COM2, GGA+RMC, msec40\r\n')
+        self.send('SetNMEAOutput, Stream8, COM3, GGA+RMC, msec40\r\n')
         
   
     def scan_ports(self):
