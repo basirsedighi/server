@@ -21,6 +21,7 @@ def merge2(path):
     latList = []
     longList =[]
     speedList=[]
+    qualityList=[]
 
 
     timer = Timer("hallo")
@@ -48,6 +49,7 @@ def merge2(path):
                 latList.append(float(row[5]))
                 longList.append(float(row[6]))
                 speedList.append(float(row[2]))
+                qualityList.append(float(row[1]))
 
             
 
@@ -85,13 +87,14 @@ def merge2(path):
         # Open gps csv file and make a csv reader object 
         with open(path +'/newlist.csv','w', newline='') as csvgps:
 
-            fieldnames = ['index','picmilli', 'gpsmilli',"lat","long","speed"]
+            fieldnames = ['index','picmilli', 'gpsmilli',"lat","long","speed","Quality"]
             writer = csv.DictWriter(csvgps, fieldnames=fieldnames)
+            writer.writeheader()
             for i in range(len(picmilli)):
                 try:
-                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]]})
+                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]],"Quality":qualityList[indexlist[i]]})
                 except IndexError:
-                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":"","lat":"","long":"","speed":""})
+                    writer.writerow({'index':i,"picmilli":picmilli[i],"gpsmilli":"","lat":"","long":"","speed":"","Quality":""})
             
 
     except Exception as e:
@@ -107,3 +110,9 @@ def merge2(path):
 
 
 
+absolute_path = os.path.dirname(os.path.abspath(__file__))
+absolute_path = fixPath(absolute_path)
+    
+path = absolute_path+"/log/"+"2021-04-20/valid3"
+
+merge2(path)
