@@ -1056,7 +1056,10 @@ def initGPS():
 
     
     
-    
+def getImages():
+    global index1,index2,index3
+
+    return {"camera1":index1,"camera2":index2,"camera3":index3}
 
 
 def startfps():
@@ -1200,7 +1203,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event =="reset"):
                 startfps() 
                 resett()
-                await manager.broadcast(json.dumps({"event":"stopped","data":""}))
+
+                images = getImages()
+
+                await manager.broadcast(json.dumps({"event":"stopped","data":images}))
                 states = getStates()
                 await manager.broadcast(json.dumps({"event":"states","data":states}))
             
