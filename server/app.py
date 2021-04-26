@@ -849,7 +849,7 @@ async def initCameraC():
         else:
             
            if len(camerasDetected)>2:
-               print("camera 3 init")
+                print("camera 3 init")
                 camera_3.init()
             
         
