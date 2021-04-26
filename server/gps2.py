@@ -323,8 +323,7 @@ class gpsHandler(Thread):
         self.send('SSSSSSSSSS\r\n')
         self.send('setDataInOut, COM3, CMD, SBF+NMEA\r\n')
         self.send('setDataInOut, COM2, RTCMv3, SBF+NMEA\r\n')
-        self.send('SetNMEAOutput, Stream1, COM2, GGA, msec40\r\n')
-        self.send('SetNMEAOutput, Stream7, COM3, GSV+GSA, msec40\r\n')
+        self.send('SetNMEAOutput, Stream1, COM2, GGA, sec1\r\n')
         self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, msec40\r\n')
         
   
