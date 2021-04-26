@@ -747,6 +747,7 @@ async def initCameraA():
         else:
 
             if len(camerasDetected)>0:
+                print("camera 1 init")
                 camera_1.init()
 
         config_loaded = True
@@ -807,7 +808,7 @@ async def initCameraB():
         else:
 
             if len(camerasDetected)>1:
-
+                print("camera 2 init")
                 camera_2.init()
         
         
@@ -848,6 +849,7 @@ async def initCameraC():
         else:
             
            if len(camerasDetected)>2:
+               print("camera 3 init")
                 camera_3.init()
             
         
