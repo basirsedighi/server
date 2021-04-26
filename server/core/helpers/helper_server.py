@@ -3,6 +3,7 @@ import cv2
 import base64
 import os,string
 from os import path
+import os
 from datetime import datetime
 import math
 import uuid
@@ -29,7 +30,6 @@ class ConnectionManager:
             print(e)
 
     async def disconnect(self, websocket: WebSocket):
-        await websocket.close()
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -192,6 +192,8 @@ async def createImageFolder(tripName):
     path = os.path.dirname(os.path.abspath(__file__))
         
     path = fixPath(self.path)
+
+    print(path)
 
     date = getDate()
     
