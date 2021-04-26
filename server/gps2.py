@@ -102,7 +102,7 @@ class gpsHandler(Thread):
 
                                         if(self.logging and self.data['new'] ==True):
                                             path= self.path+"/log"+"/"+self.date +"/"+self.tripName+"/"+"gps"+".csv"
-                                            write_header = not os.path.exists(filePath)
+                                            write_header = not os.path.exists(path)
                                             with open(path,'a',newline='')as csvfile:
                                 
 
