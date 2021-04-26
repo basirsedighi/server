@@ -84,12 +84,12 @@ class ImageSave(Thread):
                             with open(path,'a',newline='')as csvfile:
                                 
 
-                                fieldnames = ['index', 'tripname', "camera","timestamp","date"]
+                                fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                 if write_header:
                                     writer.writeheader()
                                 
-                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":cameraStamp})
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
                                 writer.writerow(row)
 
                     except Exception as e:

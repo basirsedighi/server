@@ -49,7 +49,7 @@ def merge2(path):
                 latList.append(float(row[5]))
                 longList.append(float(row[6]))
                 speedList.append(float(row[2]))
-                qualityList.append(float(row[1]))
+                qualityList.append((row[1]))
 
             
 
