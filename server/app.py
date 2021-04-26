@@ -447,6 +447,7 @@ def startA():
         except Exception as e :
 
             error = str(e)
+            emergencyStop()
             pass
 
    
@@ -522,7 +523,8 @@ def startB():
             
         except Exception as e:
             error = str(e)
-            break
+            emergencyStop()
+            pass
 
           
 
@@ -599,7 +601,8 @@ def startC():
                 
             except Exception as e:
                 error = str(e)
-                break
+                emergencyStop()
+                pass
 
           
 
