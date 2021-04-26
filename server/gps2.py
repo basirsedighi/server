@@ -181,6 +181,7 @@ class gpsHandler(Thread):
         hdop = 5
         velocity = 0
         gpstime = ""
+        gpstimes = ""
         
 
         
