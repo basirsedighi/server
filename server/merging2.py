@@ -110,9 +110,9 @@ def merge2(path):
 
 
 
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-absolute_path = fixPath(absolute_path)
+# absolute_path = os.path.dirname(os.path.abspath(__file__))
+# absolute_path = fixPath(absolute_path)
     
-path = absolute_path+"/log/"+"2021-04-20/valid3"
+# path = absolute_path+"/log/"+"2021-04-20/valid3"
 
-merge2(path)
+# merge2(path)
