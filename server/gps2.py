@@ -184,7 +184,7 @@ class gpsHandler(Thread):
             if self.debug:
 
                 print("RMC received")
-                print(msg)
+                print(msg.timestamp)
            
             if msg.status =="A":
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
@@ -199,10 +199,7 @@ class gpsHandler(Thread):
             return self.message
         
 
-        if(msg.sentence_type=="ZDA"):
-
-            print(msg)
-      
+       
 
 
         if(msg.sentence_type=="GGA"):
