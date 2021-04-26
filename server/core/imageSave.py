@@ -78,11 +78,16 @@ class ImageSave(Thread):
                         except Exception:
                             pass
                         if camera ==1:
-                            with open(self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv",'a',newline='')as csvfile:
+
+                            path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
+                            write_header = not os.path.exists(filePath)
+                            with open(path,'a',newline='')as csvfile:
                                 
 
                                 fieldnames = ['index', 'tripname', "camera","timestamp","date"]
                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                if write_header:
+                                    writer.writeheader()
                                 
                                 row = ({'index':index,'tripname':self.tripName,"camera":camera,"timestamp":timestamp,"date":cameraStamp})
                                 writer.writerow(row)
