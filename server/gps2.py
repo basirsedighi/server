@@ -22,8 +22,8 @@ class gpsHandler(Thread):
     def __init__(self,debug):
         Thread.__init__(self)
         self.debug = debug
-        self.message  ={"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False}
-        self.data = {"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False}
+        self.message  ={"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,"pc":""}
+        self.data = {"quality":0,"satelites":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":"","new":False,"pc":""}
         self.logging = False
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.tripName =""
@@ -106,12 +106,12 @@ class gpsHandler(Thread):
                                             with open(path,'a',newline='')as csvfile:
                                 
 
-                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","time milli","lat","lon","satelites"]
+                                                fieldnames = ['tripname','quality', 'velocity', "timestamp","time milli","lat","lon","satelites","pc"]
                                                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                                                 if write_header:
                                                     writer.writeheader()
                                                 
-                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"time milli":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['satelites']})
+                                                row = ({'tripname':self.tripName,'quality':self.data['quality'],'velocity':self.data['velocity'],"timestamp":self.data['timestamp'],"time milli":self.data['gpsTime'],"lat":self.data['lat'],"lon":self.data['lon'],"satelites":self.data['satelites'],"pc":self.data["pc"]})
                                                 writer.writerow(row)
 
                                        
@@ -203,7 +203,7 @@ class gpsHandler(Thread):
                 gpstimes = self.convertDatetime(gpstime)
            
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(gpstime),"gpsTime":str(gpstimes),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True})
+            self.message.update({"velocity":str(velocity),"timestamp":str(gpstime),"gpsTime":str(gpstimes),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"pc":str(now)})
             return self.message
         
 
