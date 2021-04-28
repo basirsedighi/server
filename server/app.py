@@ -481,17 +481,16 @@ def startB():
         
 
         
-        # timer.start()    
+          
         try:
             image, status = camera_2.get_image()
 
         
 
-            #getTimeStamp()
+          
 
             if status == cvb.WaitStatus.Ok:
-                #timeStamp = int(time.time() * 1000)
-                #cameraStamp =image.raw_timestamp
+                
 
                 if capturing:
 
@@ -514,7 +513,7 @@ def startB():
                 test =test+1
             
 
-            # timer.stop()
+            
 
                 
             
@@ -618,22 +617,31 @@ def startC():
 
 
 async def abortStream():
+    """Stops all the streams
+
+    By setting the pulse hz to zero 
+    then the capturing times out
+
+
+"""
     global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3,isConfigured
     print("stopping stream")
+
     toggleGPSControl(False)
-    
-    
     isConfigured = False
     image_freq = 0
-
     stopStream1 =True
     stopStream2 =True
     stopStream3 =True
-    #abort = True
+    
    
 
 
 async def start_acquisition():
+    """ starts gps logging and turns on GPS control
+
+
+    """
     global abort,image_freq
     print("Starting stream")
     toggleGPSControl(True)
@@ -650,18 +658,21 @@ async def start_acquisition():
    
     
 def startPulse():
+    """
+    starts the image capturing
+    """
     global image_freq,started,gps,capturing
     
-    
-    
-    
+    toggleGPSControl(True)
+    gps.toggleLogging(True)
     started = True
     capturing = True
 
 
-    image_freq = 5
-
 def pause():
+    """Pauses the image capturing
+
+    """
     global gps,image_freq,capturing
     gps.toggleLogging(False)
     toggleGPSControl(False)
@@ -1067,9 +1078,6 @@ def startfps():
 
     toggleGPSControl(False)
     capturing = False
-
-
-
     image_freq = 5
 
 
@@ -1246,7 +1254,7 @@ async def startup():
     print("Cameras:"+ str(detected))
     for device in range(int(detected)):
         camerasDetected.append(str(i))
-        #cameras[i].init()
+        
         
 
         i=i+1
@@ -1269,10 +1277,8 @@ def shutdown_event():
     print("shutting down server")
 
     imagesave.raise_exception()
-    #imagesave2.raise_exception()
     gps.raise_exception()
     imagesave.join()
-    #imagesave2.join()
     gps.join()
     
 

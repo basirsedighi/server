@@ -22,6 +22,7 @@ def merge2(path):
     longList =[]
     speedList=[]
     qualityList=[]
+    picIndex =[]
 
 
     timer = Timer("hallo")
@@ -32,9 +33,11 @@ def merge2(path):
         # Open image csv file and make a csv reader object 
         with open(path +'/images.csv', newline='') as csvpic:
             picreader = csv.reader(csvpic, delimiter=',', quotechar='|')
+            next(picreader)
             for row in picreader:
                 #  make a list for each column in the csv file               
-                picmilli.append(float(row[3]))
+                picmilli.append(float(row[2]))
+                picIndex.append(int(row[0]))
                 
                 
                     
@@ -43,13 +46,21 @@ def merge2(path):
         # Open gps csv file and make a csv reader object 
         with open(path +'/gps.csv', newline='') as csvgps:
             gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+            next(gpsreader)
+            i =0
             for row in gpsreader:
                 #  make a list for each column in the csv file
-                gpsmilli.append(float(row[4]))
-                latList.append(float(row[5]))
-                longList.append(float(row[6]))
-                speedList.append(float(row[2]))
-                qualityList.append((row[1]))
+                try:
+                    gpsmilli.append(float(row[4]))
+                    latList.append(row[5])
+                    longList.append(row[6])
+                    speedList.append(row[2])
+                    qualityList.append((row[1]))
+                except Exception:
+                    pass
+                   
+
+                i+=1
 
             
 
@@ -82,8 +93,8 @@ def merge2(path):
         timer.stop()
 
 
-        #print(indexlist)
         
+        print("writing")
         # Open gps csv file and make a csv reader object 
         with open(path +'/merged.csv','w', newline='') as csvgps:
 
@@ -92,9 +103,9 @@ def merge2(path):
             writer.writeheader()
             for i in range(len(picmilli)):
                 try:
-                    writer.writerow({'index':i,"Image milli":picmilli[i],"gps milli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]],"Quality":qualityList[indexlist[i]]})
+                    writer.writerow({'index':picIndex[i],"Image milli":picmilli[i],"gps milli":gpsmilli[indexlist[i]],"lat":latList[indexlist[i]],"long":longList[indexlist[i]],"speed":speedList[indexlist[i]],"Quality":qualityList[indexlist[i]]})
                 except IndexError:
-                    writer.writerow({'index':i,"Image milli":picmilli[i],"gps milli":"","lat":"","long":"","speed":"","Quality":""})
+                    writer.writerow({'index':picIndex[i],"Image milli":picmilli[i],"gps milli":"","lat":"","long":"","speed":"","Quality":""})
             
 
     except Exception as e:
@@ -113,6 +124,6 @@ def merge2(path):
 # absolute_path = os.path.dirname(os.path.abspath(__file__))
 # absolute_path = fixPath(absolute_path)
     
-# path = absolute_path+"/log/"+"2021-04-20/valid3"
+# path = absolute_path+"/log/"+"2021-04-20/bachelorvol2.2.3utenpuse"
 
 # merge2(path)
