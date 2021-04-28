@@ -36,7 +36,7 @@ def merge2(path):
             next(picreader)
             for row in picreader:
                 #  make a list for each column in the csv file               
-                picmilli.append(float(row[2]))
+                picmilli.append(float(row[4]))
                 picIndex.append(int(row[0]))
                 
                 
