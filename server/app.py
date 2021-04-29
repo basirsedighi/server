@@ -189,7 +189,7 @@ def getgpscoordinates():
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     absolute_path = fixPath(absolute_path)
-    
+    print(absolute_path)
     path = absolute_path+"/log/"
 
     folders= os.listdir(path)
@@ -701,8 +701,9 @@ async def getStorage():
 
     total = payload['total']['free']
     if int(total)<10 and started:
-        #await abortStream()
-        pass
+        emergencyStop()
+        await manager.broadcast(json.dumps({"event":"storage","data":"empty"}))
+        
         
     
 
