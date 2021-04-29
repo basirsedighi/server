@@ -207,7 +207,7 @@ def getgpscoordinates():
                 path1 = path+folder+"/"+subFolder+"/" +'merged.csv'
                 print(path1)
                 skip = os.path.exists(path1)
-
+                print(skip)
                 if skip:
 
                     with open(path1, newline='') as csvgps:
