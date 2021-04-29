@@ -205,6 +205,7 @@ def getgpscoordinates():
                 longlitudelist =[]
                 
                 path1 = path+folder+"/"+subFolder+"/" +'merged.csv'
+                print(path1)
                 skip = os.path.exists(path1)
 
                 if skip:
