@@ -189,10 +189,11 @@ def getgpscoordinates():
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
     #absolute_path = fixPath(absolute_path)
-    print(absolute_path)
+    #print(absolute_path)
     path = absolute_path+"/log/"
 
     folders= os.listdir(path)
+    print(folders)
     try:
         for folder in folders:
             subFolders = os.listdir(absolute_path+"/log/"+folder)
