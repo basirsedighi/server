@@ -189,6 +189,7 @@ class gpsHandler(Thread):
 
         
         if(msg.sentence_type =="RMC"):
+            update = False
             if self.debug:
 
                 print("RMC received")
@@ -198,12 +199,12 @@ class gpsHandler(Thread):
                 velocity = self.__knotsToKmh(msg.spd_over_grnd)
                 velocity = self.__kmhToMs(velocity)
                 gpstime = msg.timestamp
-                
+                update =True
                 
                 gpstimes = self.convertDatetime(gpstime)
            
         
-            self.message.update({"velocity":str(velocity),"timestamp":str(gpstime),"gpsTime":str(gpstimes),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":True,"pc":str(now)})
+            self.message.update({"velocity":str(velocity),"timestamp":str(gpstime),"gpsTime":str(gpstimes),"lat":str(msg.latitude),"lon":str(msg.longitude),"new":update,"pc":str(now)})
             return self.message
         
 
