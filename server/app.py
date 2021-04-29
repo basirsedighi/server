@@ -204,7 +204,7 @@ def getgpscoordinates():
                 latitudelist = []
                 longlitudelist =[]
                 
-                path1 = path+folder+"/"+subFolder+"/" +'gps.csv'
+                path1 = path+folder+"/"+subFolder+"/" +'merged.csv'
                 print(path1)
                 skip = os.path.exists(path1)
                 print(skip)
