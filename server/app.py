@@ -204,7 +204,10 @@ def getgpscoordinates():
                 latitudelist = []
                 longlitudelist =[]
                 
-                try:
+                path = path+folder+"/"+subFolder+"/" +'merged.csv'
+                skip = not os.path.exists(path)
+
+                if not skip:
 
                     with open(path+folder+"/"+subFolder+"/" +'merged.csv', newline='') as csvgps:
                         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
@@ -218,12 +221,8 @@ def getgpscoordinates():
                         
                         
                         cordlist =list(zip(latitudelist,longlitudelist))
-                    
-                except Exception:
-                    pass
-                
-                tripnamelist.append(i[0])
-                mainlist.append(cordlist)
+                    tripnamelist.append(i[0])
+                    mainlist.append(cordlist)
     except Exception as e:
         print(e)
         
