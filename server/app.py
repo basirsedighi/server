@@ -209,7 +209,7 @@ def getgpscoordinates():
 
                 if skip:
 
-                    with open(path+folder+"/"+subFolder+"/" +'merged.csv', newline='') as csvgps:
+                    with open(path, newline='') as csvgps:
                         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
                         next(gpsreader)
                         i = next(gpsreader)
