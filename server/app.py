@@ -217,8 +217,8 @@ def getgpscoordinates():
                         for row in gpsreader:
                             #  make a list for each column in the csv file
                             
-                            latitudelist.append(row[5])
-                            longlitudelist.append(row[6])
+                            latitudelist.append(row[4])
+                            longlitudelist.append(row[5])
                         
                         
                         cordlist =list(zip(latitudelist,longlitudelist))
