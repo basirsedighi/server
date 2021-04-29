@@ -203,9 +203,11 @@ def getgpscoordinates():
                 print(subFolder)
                 latitudelist = []
                 longlitudelist =[]
-
+                
+                
                 with open(path+folder+"/"+subFolder+"/" +'gps.csv', newline='') as csvgps:
                     gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
+                    next(gpsreader)
                     i = next(gpsreader)
                     for row in gpsreader:
                         #  make a list for each column in the csv file
