@@ -222,7 +222,7 @@ def getgpscoordinates():
                         
                         
                         cordlist =list(zip(latitudelist,longlitudelist))
-                    tripnamelist.append(i[0])
+                    tripnamelist.append(subFolder)
                     mainlist.append(cordlist)
     except Exception as e:
         print(e)
