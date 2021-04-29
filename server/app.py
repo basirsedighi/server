@@ -204,12 +204,12 @@ def getgpscoordinates():
                 latitudelist = []
                 longlitudelist =[]
                 
-                path = path+folder+"/"+subFolder+"/" +'merged.csv'
-                skip = os.path.exists(path)
+                path1 = path+folder+"/"+subFolder+"/" +'merged.csv'
+                skip = os.path.exists(path1)
 
                 if skip:
 
-                    with open(path, newline='') as csvgps:
+                    with open(path1, newline='') as csvgps:
                         gpsreader = csv.reader(csvgps, delimiter=',', quotechar='|')
                         next(gpsreader)
                         i = next(gpsreader)
