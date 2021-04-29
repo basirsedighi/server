@@ -204,7 +204,7 @@ def getgpscoordinates():
                 latitudelist = []
                 longlitudelist =[]
                 
-                path1 = path+folder+"/"+subFolder+"/" +'merged.csv'
+                path1 = path+folder+"/"+subFolder+"/" +'gps.csv'
                 print(path1)
                 skip = os.path.exists(path1)
                 print(skip)
@@ -217,8 +217,8 @@ def getgpscoordinates():
                         for row in gpsreader:
                             #  make a list for each column in the csv file
                             
-                            latitudelist.append(row[3])
-                            longlitudelist.append(row[4])
+                            latitudelist.append(row[5])
+                            longlitudelist.append(row[6])
                         
                         
                         cordlist =list(zip(latitudelist,longlitudelist))
