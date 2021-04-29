@@ -188,7 +188,7 @@ def getgpscoordinates():
     tripnamelist =[]
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
-    absolute_path = fixPath(absolute_path)
+    #absolute_path = fixPath(absolute_path)
     print(absolute_path)
     path = absolute_path+"/log/"
 
