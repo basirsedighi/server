@@ -220,7 +220,8 @@ def getgpscoordinates():
                 tripnamelist.append(i[0])
                 mainlist.append(cordlist)
     except Exception as e:
-        pass
+        print(e)
+        
         
     return {"lists":mainlist,"names":tripnamelist}
 
