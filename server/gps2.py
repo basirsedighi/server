@@ -18,6 +18,14 @@ class GPS_QUALITY(enum.Enum):
    LOW = 1
    BAD = 0
 
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+
+class InitGPS(Error):
+    """Raised when initilizing start to break loop"""
+    pass
+
 class gpsHandler(Thread):
     def __init__(self,debug):
         Thread.__init__(self)
@@ -73,7 +81,7 @@ class gpsHandler(Thread):
                                 
                                 
                                 if self.init:
-                                    raise Exception("starting init")
+                                    raise InitGPS
                                 line = self.read.readline()
                                 #.decode('ascii', errors='replace')
                                 
@@ -135,9 +143,12 @@ class gpsHandler(Thread):
                         pass
                         sys.stderr.write('Ctrl-C pressed, exiting log of %s to %s\n' % (port, "jdksj"))
 
+                    except InitGPS:
+                        print("Initilizing the GPS")
+                        break
                 if self.debug: sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
                 self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":""}
-                time.sleep(5)
+                time.sleep(3)
         except KeyboardInterrupt:
             self.serial.close()
             self.read.close()
@@ -337,7 +348,7 @@ class gpsHandler(Thread):
             ports = ['COM%s' % (i + 1) for i in range(6)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
             # this excludes your current terminal "/dev/tty"
-            patterns = ('/dev/ttyUSB*')
+            patterns = ('/dev/tty[A-Za-z]*', '/dev/ttyUSB*')
             ports = [glob.glob(pattern) for pattern in patterns]
             ports = [item for sublist in ports for item in sublist]  # flatten
         elif sys.platform.startswith('darwin'):
