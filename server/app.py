@@ -1194,6 +1194,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 gps.setDebug(msg)
                 debug= msg
             
+            elif(event=="search"):
+
+                n =discoverCamerasLength()
+                message = json.dumps({"event":"search","data":n})
+                await manager.send_personal_message(message, websocket)
+                
+            
             elif(event == "guru"):
                 guruMode = msg
 
@@ -1242,9 +1249,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 async def startup():
     global camera_1,camera_2,camera_3,cameras,camerasDetected
     print("[startup] init cameras")
-    camerasDiscovered =  discoverCameras()
+    detected =  discoverCamerasLength()
     i =0
-    detected =len(camerasDiscovered)
+    
     
     print("Cameras:"+ str(detected))
     for device in range(int(detected)):
@@ -1282,7 +1289,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="info")
+    uvicorn.run(app, host="localhost", port=8000,log_level="info")
 
 
 if __name__ == "__main__":

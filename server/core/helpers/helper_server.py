@@ -10,6 +10,7 @@ import uuid
 from starlette.websockets import WebSocket, WebSocketDisconnect
 import time
 import shutil
+import sys
 
 
 
@@ -363,10 +364,17 @@ def discoverCameras():
 
 
 def discoverCamerasLength():
-
+    discovered =0
     discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
     
+    if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        discovered = len(discover)
+    
+    elif sys.platform.startswith('win'):
 
-    return len(discover)
+        discovered = int(len(discover)/2)
+
+
+    return discovered
 
 
