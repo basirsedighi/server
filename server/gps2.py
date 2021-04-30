@@ -39,6 +39,7 @@ class gpsHandler(Thread):
         self.serial = None
         self.init = False
         self.connected = False
+        self.initStarted = False
 
     
     def run(self):
@@ -289,13 +290,19 @@ class gpsHandler(Thread):
         #     print(self.gps.read(num).decode())
         # except:
         #     print(self.gps.read(num))
-        print(self.serial.read(num))
+        recieved = self.serial.read(num)
+        if self.debug:
+            print(recieved.decode('utf-8'))
+        
+        
+
     
 
     def startInit(self):
 
         self.init =True
     def initGPS(self):
+        self.initStarted =True
         self.send('SetNMEAOutput, Stream1+Stream2+Stream7+Stream8, none, none, off\r\n')
         self.send('SetGPIOFunctionality, GP1, Output, none, LevelLow\r\n')
         self.send('SetGPIOFunctionality, GP2, Output, none, LevelHigh\r\n')
@@ -347,6 +354,7 @@ class gpsHandler(Thread):
         self.send('SetNMEAOutput, Stream1, COM2, GGA, sec1\r\n')
         self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, msec100\r\n')
         
+        self.initStarted = False
   
     def scan_ports(self):
 
