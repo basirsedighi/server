@@ -38,6 +38,7 @@ class gpsHandler(Thread):
         self.date = self.getDate()
         self.serial = None
         self.init = False
+        self.connected = False
 
     
     def run(self):
@@ -76,7 +77,7 @@ class gpsHandler(Thread):
                             pynmea2.parse(ser.readline().decode('ascii', errors='replace'))
 
                           
-
+                            self.connected = True
                             while True:
                                 
                                 
@@ -149,6 +150,7 @@ class gpsHandler(Thread):
                 if self.debug: sys.stderr.write('Scanned all ports, waiting 5 seconds...\n')
                 self.data = {"quality":0,"velocity":0,"timestamp":"","gpsTime":"","lat":"","lon":""}
                 time.sleep(3)
+                self.connected = False
         except KeyboardInterrupt:
             self.serial.close()
             self.read.close()
@@ -180,6 +182,10 @@ class gpsHandler(Thread):
 
         return int(timestamp*1000)
 
+    
+    def isConnected(self):
+        return self.connected
+    
     def getTimeStamp(self):
 
         now = time.time()
