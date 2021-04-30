@@ -373,6 +373,11 @@ class gpsHandler(Thread):
 
 
 
+    def setClock(self,time):
+        
+        gpsutc = time.year+time.month+time.day+(time.second) + (time.microsecond)
+
+        os.system('sudo date -u –set="%s"' % gpsutc)
     
     def raise_exception(self):
         thread_id = self.get_id() 
