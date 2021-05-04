@@ -277,11 +277,11 @@ async def data(test):
 
 @app.get('/RaspFPS')
 async def fps():
-    global image_freq,start_Puls,gps_freq,gpsControl
+    global image_freq,start_Puls,gps_freq,gpsControl,started
 
     
 
-    if not gpsControl:
+    if not gpsControl and started :
         fps = image_freq
     
     else:
@@ -444,7 +444,7 @@ def startA():
 
    
     stopStream1 =False 
-    camera_1.stopStream()
+    #camera_1.stopStream()
 
     return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
     
@@ -522,7 +522,7 @@ def startB():
     
 
     stopStream2 =False
-    camera_2.stopStream()
+    #camera_2.stopStream()
     
 
     
@@ -599,7 +599,7 @@ def startC():
 
  
         stopStream3 =False
-        camera_3.stopStream()
+        #camera_3.stopStream()
     
 
     
@@ -618,7 +618,7 @@ async def abortStream():
 """
     global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3,isConfigured
     print("stopping stream")
-
+    started = False
     toggleGPSControl(False)
     isConfigured = False
     image_freq = 0
@@ -1049,6 +1049,7 @@ def resett():
     isConfigured= False
     started = False
     gps.toggleLogging(False)
+
     
   
 
@@ -1149,7 +1150,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 
                 startPulse()
             elif(event == 'stop'):
-                started = False
+                
                 await abortStream()
 
                 await manager.broadcast(json.dumps({"event": "stopping"}))
@@ -1158,11 +1159,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 
                 await initCameraA()
-                print("A")
+
                 await initCameraB()
-                print("B")
+                
                 await initCameraC()
-                print("C")
+                
                 
 
             elif(event == "stream"):
