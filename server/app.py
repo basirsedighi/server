@@ -188,7 +188,7 @@ def getgpscoordinates():
     tripnamelist =[]
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
-    #absolute_path = fixPath(absolute_path)
+    absolute_path = fixPathServer(absolute_path)
     #print(absolute_path)
     path = absolute_path+"/log/"
 
@@ -238,8 +238,8 @@ def log(data):
     
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
-    fixPath(absolute_path)
-    path = absolute_path+"/log/"+date+"/"+tempTrip
+    new = fixPathServer(absolute_path)
+    path = new+"/log/"+date+"/"+tempTrip
 
 # Open gps csv file and make a csv reader object 
     with open(path +'/log.csv','a', newline='') as csvgps:
@@ -312,7 +312,7 @@ def merge():
     
     date = getDate()
     absolute_path = os.path.dirname(os.path.abspath(__file__))
-    fixPath(absolute_path)
+    absolute_path= fixPathServer(absolute_path)
     path = absolute_path+"/log/"+date+"/"+tempTrip
 
     result = merge2(path)
@@ -323,7 +323,7 @@ def merge():
 
 
 def emergencyStop():
-    global abort,image_freq,stopStream1,stopStream2,stopStream3,capturing,isConfigured
+    global abort,image_freq,stopStream1,stopStream2,stopStream3,capturing,isConfigured,started
     toggleGPSControl(False)
     abort =True
     isConfigured = False
@@ -356,7 +356,7 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
-    camera_1.resetClock()
+    #camera_1.resetClock()
                       
     while True:
 
@@ -438,7 +438,7 @@ def startA():
 
         except Exception as e :
 
-            error = str(e)
+            print(e)
             emergencyStop()
             pass
 
@@ -888,15 +888,18 @@ async def initCameraC():
 
 
 async def validate(cam):
-    global camera_1, camera_2
+    global camera_1, camera_2,camera_3
     try:
         
         camera = None
         if cam == 'A':
             camera = camera_1
 
-        else:
+        elif cam =="B":
             camera = camera_2
+        
+        elif cam == "C":
+            camera = camera_3
     
         frame, status = camera.get_image()
         if status == cvb.WaitStatus.Ok:
@@ -1144,11 +1147,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 if drive_in_use =="failed":
                     await manager.broadcast(json.dumps({"event": "error","data":"no drives"}))
 
-                
-                imagesave.setDrive(drive_in_use)
-                #imagesave2.setDrive(drive_in_use)
-                await start_acquisition()
-                await manager.broadcast(json.dumps({"event": "starting"}))
+                else:
+                    imagesave.setDrive(drive_in_use)
+                    #imagesave2.setDrive(drive_in_use)
+                    await start_acquisition()
+                    await manager.broadcast(json.dumps({"event": "starting"}))
             
                 
                 
@@ -1239,6 +1242,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             
             elif (event =="emergency"):
                 emergencyStop()
+                states = getStates()
+
+                await manager.broadcast(json.dumps({"event":"states","data":states}))
             
             elif(event=="log"):
                 log(msg)
@@ -1306,7 +1312,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="localhost", port=8000,log_level="info")
+    uvicorn.run(app, host="localhost", port=8000,log_level="debug")
 
 
 if __name__ == "__main__":

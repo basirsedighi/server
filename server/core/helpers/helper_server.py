@@ -49,7 +49,7 @@ def cvbImage_b64(frame):
 
     image_np = cvb.as_array(frame, copy=False)
     image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-    image_np = cv2.resize(image_np, (1280, 720))
+    image_np = cv2.resize(image_np, (640, 480))
     _, frame = cv2.imencode('.jpg', image_np)
     im_bytes = frame.tobytes()
     im_b64 = base64.b64encode(im_bytes)
@@ -315,8 +315,10 @@ def fixPath(path):
     test = path.split("\\")
     if len(test)>1:
 
-        
+        test.pop()
+        test.pop()
         newPath = '/'.join(test)
+
         return newPath
     else:
 
@@ -326,6 +328,23 @@ def fixPath(path):
         path = '/'.join(path)
         
         return path
+
+def fixPathServer(path):
+
+    test = path.split("\\")
+    if len(test)>1:
+
+        
+        newPath = '/'.join(test)
+
+        return newPath
+    else:
+
+        path = path.split("/")
+        path = '/'.join(path)
+        
+        return path
+
 
 
 def getDate():
