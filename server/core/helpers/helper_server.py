@@ -11,6 +11,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 import time
 import shutil
 import sys
+import getpass
 
 
 
@@ -68,25 +69,38 @@ def getTimeStamp():
 
 def checkStorageAllDrives():
     available_drives = []
-
-
-    # for d in string.ascii_uppercase: # Iterating through the english alphabet    
-    #     path = '%s:' % d    
-    #     if os.path.exists(path): # checks if path exists
-    #         available_drives.append(path)  #  append the path from a drive to a list
-
     nested_storage= {'drives':{} }
-    try:
-        directory_contents = os.listdir("/media/rekkverk")
+    
+   
+    if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        
+        username = getpass.getuser()
+
+        path = "/media/"+username
+        directory_contents = os.listdir(path)
+
         for item in directory_contents:
-            available_drives.append("/media/rekkverk/"+str(item))
+            available_drives.append(path+"/"+str(item))
             
+        
+    
+    elif sys.platform.startswith('win'):
+        for d in string.ascii_uppercase: # Iterating through the english alphabet   
+            path = '%s:' % d    
+            if os.path.exists(path): # checks if path exists
+                available_drives.append(path)  #  append the path from a drive to a list
+
+
+        
+   
+    try:
+      
             
             
         
 
 
-        nested_storage= {'drives':{} } #  Initializing a dictionary
+        
 
         number= 1 # Variable for 
         for i in available_drives:  #  Iterating through all drives

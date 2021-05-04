@@ -30,27 +30,23 @@ class Camera:
 
     def init(self):
 
-        try:
-            print("open device")
-
-            self.device = cvb.DeviceFactory.open_port(os.path.join(
-                cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
-
-
-            self.device_node_map = self.device.node_maps["Device"]
-            self.clock = self.device_node_map['timestampControlReset']  
-
-            # self.device_node_map.load_settings(file_name=self.config_path)
-
-            self.stream = self.device.stream
-            
-            self.stream.start()
         
-        except Exception as e:
-            print(e)
+        print("open device")
+
+        self.device = cvb.DeviceFactory.open_port(os.path.join(
+            cvb.install_path(), "drivers", "GenICam.vin"), port=self.port)
+
+
+        self.device_node_map = self.device.node_maps["Device"]
+        self.clock = self.device_node_map['timestampControlReset']  
+
+        # self.device_node_map.load_settings(file_name=self.config_path)
+
+        self.stream = self.device.stream
         
-        finally:
-            print("hello")
+        self.stream.start()
+    
+      
     
 
 

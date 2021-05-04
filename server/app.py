@@ -749,13 +749,17 @@ async def initCameraA():
                 
                 camera_1.start_stream()
         
+        elif len(camerasDetected)>0:
+
+           
+            print("camera 1 init")
+            camera_1.init()
+        
         else:
 
-            if len(camerasDetected)>0:
-                print("camera 1 init")
-                camera_1.init()
+            status ="failed"
 
-        config_loaded = True
+       
 
     except Exception as e:
         print(e)
@@ -810,11 +814,14 @@ async def initCameraB():
 
                 camera_2.start_stream()
         
-        else:
+        elif len(camerasDetected)>1:
 
-            if len(camerasDetected)>1:
-                print("camera 2 init")
-                camera_2.init()
+             
+            print("camera 2 init")
+            camera_2.init()
+        
+        else:
+            status ="failed"
         
         
     
@@ -851,12 +858,15 @@ async def initCameraC():
 
                 camera_3.start_stream()
         
+        elif len(camerasDetected)>2:
+            
+           
+            print("camera 3 init")
+            camera_3.init()
+
         else:
-            
-           if len(camerasDetected)>2:
-                print("camera 3 init")
-                camera_3.init()
-            
+            status ="failed"
+        
         
         
     
@@ -1084,7 +1094,7 @@ def getStates():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug
+    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -1194,7 +1204,17 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             elif(event=="search"):
 
                 n =discoverCamerasLength()
-                message = json.dumps({"event":"search","data":n})
+                i =0
+    
+    
+                print("Cameras:"+ str(n))
+                for device in range(int(n)):
+                    camerasDetected.append(str(i))
+                    
+                    
+
+                    i=i+1
+                message = json.dumps({"event":"search","data":len(camerasDetected)})
                 await manager.send_personal_message(message, websocket)
                 
             
