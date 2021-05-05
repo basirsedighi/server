@@ -254,7 +254,7 @@ def estimateStorageTime(storages,fps):
     total = 0
     
     bilder_pr_sek = 20
-    bilde_size = 9  # Mb
+    bilde_size = 6  # Mb
     
     for storage in storages['drives']:
         
