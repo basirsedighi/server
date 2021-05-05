@@ -18,7 +18,7 @@ class CameraStream():
         self.lastBufferImage = None
         self.bufferImage = None
         self.bufferImage_f = 100
-        self.running = True
+        self.running = False
         self.port = camera.getPort()
         self.image_name = 0
         self.list_of_images = []
@@ -87,7 +87,7 @@ class CameraStream():
                     pass
                
 
-        self.camera.abortStream()
+        self.camera.stopStream()
         print("stopped")
 
         return "stopped"
