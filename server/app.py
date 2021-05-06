@@ -62,12 +62,13 @@ camera_1 = Camera(0)
 camera_2 = Camera(1)
 camera_3 = Camera(2)
 
+
+
 index1 =0
 index2 =0
 index3 =0
 
 
-cameras =[camera_1,camera_2,camera_3]
 camerasDetected =[]
 tempTrip =""
 
@@ -76,12 +77,20 @@ isConfigured =False
 stopStream1 = False
 stopStream2 = False
 stopStream3 = False
-
+capturing =False
 gps = gpsHandler(debug)
 imageQueue = queue.Queue(maxsize=0)
-imageQueue2 = queue.Queue(maxsize=0)
-imagesave2=ImageSave(imageQueue2,"saving thread")
+stream0 = CameraStream(camera_1, imageQueue,1,capturing)
+stream1 = CameraStream(camera_2, imageQueue,2,capturing)
+stream2 = CameraStream(camera_3, imageQueue,3,capturing)
+
+stream0.start()
+stream1.start()
+#stream2.start()
+
 imagesave = ImageSave(imageQueue,"saving thread")
+imagesave.daemon = True
+imagesave.start()
 config_loaded = False
 
 #temp images to show user
@@ -89,15 +98,15 @@ temp_img_1 = None
 temp_img_2 =None
 temp_img_3 =None
 
-capturing =False
+
 guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-imagesave.daemon = True
-imagesave2.daemon = True
+
+
 #imagesave2.start()
-imagesave.start()
+
 gpsData ={}
 gps.daemon = True
 gps.start()
@@ -616,15 +625,18 @@ async def abortStream():
 
 
 """
-    global gps,start_Puls,image_freq,gpsControl,stopStream1,stopStream2,stopStream3,isConfigured
+    global gps,start_Puls,image_freq,gpsControl,stream0,stream1,stopStream3,isConfigured
     print("stopping stream")
     started = False
     toggleGPSControl(False)
+    image_freq =0
     isConfigured = False
-    image_freq = 0
-    stopStream1 =True
-    stopStream2 =True
-    stopStream3 =True
+    stream0.stopstream()
+    stream1.stopstream()
+    stream0.stopCapturing()
+    stream1.stopCapturing()
+
+    
     
    
 
@@ -634,10 +646,18 @@ async def start_acquisition():
 
 
     """
-    global abort,image_freq
+    global abort,image_freq,stream0,stream1,stream2
     print("Starting stream")
-    toggleGPSControl(True)
+    image_freq =0
+    toggleGPSControl(False)
+    
+    stream0.resetIndex()
+    stream1.resetIndex()
+    stream2.resetIndex()
     gps.toggleLogging(True)
+  
+    
+    
     abort=False
     
     
@@ -651,12 +671,14 @@ def startPulse():
     """
     starts the image capturing
     """
-    global image_freq,started,gps,capturing
-    
+    global image_freq,started,gps,capturing,stream0,stream1
+
     toggleGPSControl(True)
     gps.toggleLogging(True)
+    capturing= True
     started = True
-    capturing = True
+    
+    
 
 
 def pause():
@@ -666,8 +688,9 @@ def pause():
     global gps,image_freq,capturing
     gps.toggleLogging(False)
     toggleGPSControl(False)
-    capturing = False
     image_freq =0
+    capturing = False
+    
 
 
 @app.post('/changeimagefreq/')
@@ -734,7 +757,7 @@ def storageLeft(storages):
 
 
 async def initCameraA():
-    global camera_1, abort,cameras,camerasDetected
+    global stream0, abort,cameras,camerasDetected
     if abort:
         abort = False
     status = "ok"
@@ -743,17 +766,19 @@ async def initCameraA():
     try:
         #camera_1.init()
     
-        if camera_1.getDevice() is not None:
+        if stream0.getDevice() is not None:
 
-            if not camera_1.isRunning():
+            if not stream0.isRunning():
                 
-                camera_1.start_stream()
+                stream0.start_stream()
         
         elif len(camerasDetected)>0:
 
            
             print("camera 1 init")
-            camera_1.init()
+            stream0.init()
+            stream0.setInit()
+            
         
         else:
 
@@ -803,22 +828,23 @@ async def loadConfig():
  
 
 async def initCameraB():
-    global camera_2,cameras,camerasDetected
+    global stream1,cameras,camerasDetected
     status = "ok"
    
 
     try:
         #camera_2.init()
-        if camera_2.getDevice() is not None: 
-            if not camera_2.isRunning():
+        if stream1.getDevice() is not None: 
+            if not stream1.isRunning():
 
-                camera_2.start_stream()
+                stream1.start_stream()
         
         elif len(camerasDetected)>1:
 
              
             print("camera 2 init")
-            camera_2.init()
+            stream1.init()
+            stream1.setInit()
         
         else:
             status ="failed"
@@ -839,7 +865,7 @@ def index_in_list(a_list, index):
         return test
 
 async def initCameraC():
-    global camera_3,config_loaded,camerasDetected
+    global stream2,config_loaded,camerasDetected
     status = "ok"
     
     
@@ -850,19 +876,20 @@ async def initCameraC():
 
         
         #camera_3.init()
-        if camera_3.getDevice() is not None:
+        if stream2.getDevice() is not None:
             
             
 
-            if not camera_3.isRunning():
+            if not stream2.isRunning():
 
-                camera_3.start_stream()
+                stream2.start_stream()
         
         elif len(camerasDetected)>2:
             
            
             print("camera 3 init")
-            camera_3.init()
+            stream2.init()
+            stream2.setInit()
 
         else:
             status ="failed"
@@ -1140,10 +1167,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 isConfigured = True
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
-                #imagesave2.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
-                print(drive_in_use)
                 if drive_in_use =="failed":
                     await manager.broadcast(json.dumps({"event": "error","data":"no drives"}))
 
@@ -1286,8 +1311,8 @@ async def startup():
 
     
 
-    if cameras ==0:
-        print("Just :" +str(cameras)+"--cameras was connected")
+    if detected ==0:
+        print("Just :" +str(detected)+"--cameras was connected")
         raise Exception("CONNECT ALL CAMERAS")
        
     
@@ -1312,7 +1337,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="debug")
+    uvicorn.run(app, host="localhost", port=8000,log_level="debug")
 
 
 if __name__ == "__main__":

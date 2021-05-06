@@ -77,7 +77,9 @@ class ImageSave(Thread):
                             "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(timestamp)+'.bmp')
                         except Exception:
                             pass
-                        if camera ==1:
+                        
+                        if int(camera) ==1:
+                            print("hei")
 
                             path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
                             write_header = not os.path.exists(path)
