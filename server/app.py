@@ -444,7 +444,7 @@ def startA():
 
    
     stopStream1 =False 
-    #camera_1.stopStream()
+    camera_1.stopStream()
 
     return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
     
@@ -522,7 +522,7 @@ def startB():
     
 
     stopStream2 =False
-    #camera_2.stopStream()
+    camera_2.stopStream()
     
 
     
@@ -599,7 +599,7 @@ def startC():
 
  
         stopStream3 =False
-        #camera_3.stopStream()
+        camera_3.stopStream()
     
 
     
