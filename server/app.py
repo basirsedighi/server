@@ -281,10 +281,10 @@ async def fps():
 
     
 
-    if not gpsControl and started :
+    if not gpsControl :
         fps = image_freq
     
-    else:
+    elif gpsControl  and started:
 
         
         fps = gps_freq
