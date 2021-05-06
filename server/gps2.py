@@ -292,7 +292,10 @@ class gpsHandler(Thread):
         #     print(self.gps.read(num))
         recieved = self.serial.read(num)
         if self.debug:
-            print(recieved.decode('utf-8'))
+            try:
+                print(recieved.decode('utf-8'))
+            except Exception:
+                pass
         
         
 
