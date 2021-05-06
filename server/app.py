@@ -279,7 +279,7 @@ async def data(test):
 async def fps():
     global image_freq,start_Puls,gps_freq,gpsControl,started
 
-    
+    fps = image_freq
 
     if not gpsControl :
         fps = image_freq
