@@ -636,9 +636,9 @@ async def start_acquisition():
     """
     global abort,image_freq,gps
     print("Starting stream")
-    toggleGPSControl(True)
     gps.toggleLogging(True)
     abort=False
+    image_freq =0
     
     
     
