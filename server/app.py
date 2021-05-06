@@ -356,6 +356,11 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
+   
+    prev_frame_time = 0
+  
+
+    new_frame_time = 0
     #camera_1.resetClock()
                       
     while True:
@@ -370,14 +375,13 @@ def startA():
             
             image, status = camera_1.get_image()
 
-           
+            new_frame_time = time.time()
 
             
 
             if status == cvb.WaitStatus.Ok:
                 
                 
-                    
                 
                 cameraStamp = int(image.raw_timestamp/1000)
                 
@@ -411,7 +415,7 @@ def startA():
                 
                 
                     
-            
+                
                 
             
             elif status == cvb.WaitStatus.Abort:
@@ -428,7 +432,9 @@ def startA():
                 test = test+1
             
                
-            # timer.stop()
+            fps = 1/(new_frame_time-prev_frame_time)
+            prev_frame_time = new_frame_time
+            print(int(fps))
 
                 
             
@@ -477,11 +483,14 @@ def startB():
         try:
             image, status = camera_2.get_image()
 
-        
+            new_frame_time = time.time()
 
           
 
             if status == cvb.WaitStatus.Ok:
+                fps = 1/(new_frame_time-prev_frame_time)
+                prev_frame_time = new_frame_time
+                print(int(fps))
                 
 
                 if capturing:
@@ -509,7 +518,9 @@ def startB():
 
                 
             
-            
+            fps = 1/(new_frame_time-prev_frame_time)
+            prev_frame_time = new_frame_time
+            print(int(fps))
 
             
         except Exception as e:
@@ -639,7 +650,7 @@ async def start_acquisition():
     toggleGPSControl(True)
     gps.toggleLogging(True)
     abort=False
-    
+    image_freq =0
     
     
    
