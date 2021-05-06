@@ -80,8 +80,11 @@ stopStream3 = False
 gps = gpsHandler(debug)
 imageQueue = queue.Queue(maxsize=0)
 imageQueue2 = queue.Queue(maxsize=0)
-imagesave2=ImageSave(imageQueue2,"saving thread")
+imageQueue3 = queue.Queue(maxsize=0)
+
 imagesave = ImageSave(imageQueue,"saving thread")
+imagesave2=ImageSave(imageQueue2,"saving thread")
+imagesave3 = ImageSave(imageQueue3,"saving thread")
 config_loaded = False
 
 #temp images to show user
@@ -94,10 +97,12 @@ guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-imagesave.daemon = True
-imagesave2.daemon = True
-#imagesave2.start()
+
+
 imagesave.start()
+imagesave2.start()
+imagesave3.start()
+
 gpsData ={}
 gps.daemon = True
 gps.start()
@@ -455,7 +460,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
+    global camera_2, isRunning, imageQueue2, abort,stopStream2,capturing,index2
     
     timer = Timer("stream2")
     
@@ -488,7 +493,7 @@ def startB():
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
 
-                    imageQueue.put(data)
+                    imageQueue2.put(data)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -533,7 +538,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
+    global camera_3, isRunning, imageQueue3, abort,stopStream3,capturing,camerasDetected,index3
     
 
     error ="no error"
@@ -565,7 +570,7 @@ def startC():
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
 
-                        imageQueue.put(data)
+                        imageQueue3.put(data)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
@@ -717,7 +722,7 @@ async def getStorage():
 # estimate hows
 
 def storageLeft(storages):
-    global drive_in_use,imagesave,imagesave2,storageLeft_in_use
+    global drive_in_use,imagesave,imagesave2,imagesave3,storageLeft_in_use
 
     drives = storages['drives']
 
@@ -728,7 +733,8 @@ def storageLeft(storages):
 
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
-            #imagesave2.setStorageLeft(int(drive['free']))
+            imagesave2.setStorageLeft(int(drive['free']))
+            imagesave3.setStorageLeft(int(drive['free']))
             
    
 
@@ -1097,7 +1103,7 @@ def getStates():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
+    global started,config_loaded,imagesave,isConfigured,imagesave2,imagesave3,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -1140,7 +1146,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 isConfigured = True
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
-                #imagesave2.setTripName(str(msg))
+                imagesave2.setTripName(str(msg))
+                imagesave3.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 print(drive_in_use)
@@ -1149,7 +1156,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 else:
                     imagesave.setDrive(drive_in_use)
-                    #imagesave2.setDrive(drive_in_use)
+                    imagesave2.setDrive(drive_in_use)
+                    imagesave3.setDrive(drive_in_use)
+
                     await start_acquisition()
                     await manager.broadcast(json.dumps({"event": "starting"}))
             
@@ -1297,13 +1306,17 @@ async def startup():
 
 @app.on_event("shutdown")
 def shutdown_event(): 
-    global imagesave,imagesave2 ,closeServer,gps
+    global imagesave,imagesave2,imagesave3 ,closeServer,gps
 
     print("shutting down server")
 
     imagesave.raise_exception()
+    imagesave2.raise_exception()
+    imagesave3.raise_exception()
     gps.raise_exception()
     imagesave.join()
+    imagesave2.join()
+    imagesave3.join()
     gps.join()
     
 
