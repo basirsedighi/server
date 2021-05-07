@@ -75,7 +75,7 @@ class ImageSave(Thread):
                         
                         try:
                             image.save(self.drive+"/"+
-                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
+                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
                         except Exception:
                             pass
                         if camera ==1:
