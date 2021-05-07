@@ -80,8 +80,8 @@ stopStream3 = False
 
 gps = gpsHandler(debug)
 imageQueue = queue.Queue(maxsize=0)
-imageQueue2 = queue.Queue(maxsize=0)
-imageQueue3 = queue.Queue(maxsize=0)
+# imageQueue2 = queue.Queue(maxsize=0)
+# imageQueue3 = queue.Queue(maxsize=0)
 
 imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
@@ -98,8 +98,8 @@ guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-imagesave3.start()
-imagesave2.start()
+# imagesave3.start()
+# imagesave2.start()
 imagesave.start()
 gpsData ={}
 gps.daemon = True
@@ -496,7 +496,7 @@ def startB():
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
                     
-                    imageQueue2.put(data,False)
+                    imageQueue.put(data,False)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -578,7 +578,7 @@ def startC():
                     
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        imageQueue3.put(data,False)
+                        imageQueue.put(data,False)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
