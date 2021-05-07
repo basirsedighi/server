@@ -534,6 +534,7 @@ def startB():
     print("not ok: "+str(test))
     imagesave.saveImages()
     imageQueue.join()
+    print("saving complete")
     stopStream2 =False
     camera_2.stopStream()
     
