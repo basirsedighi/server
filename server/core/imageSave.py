@@ -24,7 +24,7 @@ class ImageSave(Thread):
         self.path = os.path.dirname(os.path.abspath(__file__))
         
         self.path = self.fixPath(self.path)
-        self.saving = False
+        self.saving = True
         self.date = self.getDate()
         self.drive = 'C:'
         self.storageLeft = 50
@@ -60,7 +60,7 @@ class ImageSave(Thread):
                     pass
                 elif self.saving:
 
-                    data = self.queue.get()
+                    data = self.queue.get(False)
                     image = data['image']
                     camera = data['camera']
                     index = data['index']
