@@ -96,7 +96,7 @@ guruMode = False
 
 imagesave.daemon = True
 imagesave2.daemon = True
-#imagesave2.start()
+imagesave2.start()
 imagesave.start()
 gpsData ={}
 gps.daemon = True
@@ -534,7 +534,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
+    global camera_3, isRunning, imageQueue2, abort,stopStream3,capturing,camerasDetected,index3
     
 
     error ="no error"
@@ -567,7 +567,7 @@ def startC():
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
 
-                        imageQueue.put(data)
+                        imageQueue2.put(data)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
@@ -732,7 +732,7 @@ def storageLeft(storages):
 
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
-            #imagesave2.setStorageLeft(int(drive['free']))
+            imagesave2.setStorageLeft(int(drive['free']))
             
    
 
@@ -1144,7 +1144,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 isConfigured = True
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
-                #imagesave2.setTripName(str(msg))
+                imagesave2.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 print(drive_in_use)
@@ -1153,7 +1153,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 else:
                     imagesave.setDrive(drive_in_use)
-                    #imagesave2.setDrive(drive_in_use)
+                    imagesave2.setDrive(drive_in_use)
                     await start_acquisition()
                     await manager.broadcast(json.dumps({"event": "starting"}))
             
