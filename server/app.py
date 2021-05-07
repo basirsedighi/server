@@ -404,6 +404,7 @@ def startA():
                         
                 
                         data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        data = json.dumps(data)
                         imageQueue.put(data)
                         index1 = index1 +1
                     
@@ -494,7 +495,7 @@ def startB():
                 if capturing:
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
-
+                    data = json.dumps(data)
                     imageQueue2.put(data)
                     index2 = index2 +1
             
@@ -576,7 +577,7 @@ def startC():
                     
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-
+                        data = json.dumps(data)
                         imageQueue3.put(data)
                         index3 = index3 +1
                 
