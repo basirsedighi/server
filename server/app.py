@@ -660,7 +660,7 @@ def startPulse():
     gps.toggleLogging(True)
     started = True
     capturing = True
-    image_freq = 5
+    image_freq = 15
 
 
 def pause():
