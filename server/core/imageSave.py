@@ -102,7 +102,8 @@ class ImageSave(Process):
                         
                         
                     finally:
-                        self.queue.task_done()
+                        #self.queue.task_done()
+                        pass
 
                     
         except Exception as e:
