@@ -55,8 +55,7 @@ class ImageSave(Thread()):
         try:
             while True:
 
-                if not self.isRunning:
-                    break
+                
                 if not saving:
                     
                     pass
