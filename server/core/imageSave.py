@@ -1,4 +1,5 @@
 from threading import Thread
+import queue
 from datetime import datetime
 from core.timer import Timer
 import os
@@ -61,38 +62,38 @@ class ImageSave(Process):
 
                     data = self.queue.recv()
                     print(data)
-                    # image = data['image']
-                    # camera = data['camera']
-                    # index = data['index']
-                    # timestamp = data['timeStamp']
-                    # cameraStamp =data['cameraStamp']
+                    image = data['image']
+                    camera = data['camera']
+                    index = data['index']
+                    timestamp = data['timeStamp']
+                    cameraStamp =data['cameraStamp']
 
                     
-                    # try:
+                    try:
 
-                    #     if self.storageLeft < 5:
-                    #        newDrive = most_free_space()
-                    #        self.drive = newDrive['name']
+                        if self.storageLeft < 5:
+                           newDrive = most_free_space()
+                           self.drive = newDrive['name']
                         
-                    #     try:
-                    #         image.save(self.drive+"/"+
-                    #         "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
-                    #     except Exception:
-                    #         pass
-                    #     if camera ==1:
+                        try:
+                            image.save(self.drive+"/"+
+                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
+                        except Exception:
+                            pass
+                        if camera ==1:
 
-                    #         path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
-                    #         write_header = not os.path.exists(path)
-                    #         with open(path,'a',newline='')as csvfile:
+                            path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
+                            write_header = not os.path.exists(path)
+                            with open(path,'a',newline='')as csvfile:
                                 
 
-                    #             fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
-                    #             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    #             if write_header:
-                    #                 writer.writeheader()
+                                fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
+                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                if write_header:
+                                    writer.writeheader()
                                 
-                    #             row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
-                    #             writer.writerow(row)
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
+                                writer.writerow(row)
 
                     except Exception as e:
 
@@ -101,7 +102,7 @@ class ImageSave(Process):
                         
                         
                     finally:
-                        self.queue.task_done()
+                        pass
 
                     
         except Exception as e:
