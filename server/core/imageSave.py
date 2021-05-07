@@ -9,6 +9,7 @@ from datetime import datetime
 import cvb
 import ctypes
 import csv
+import sys
 import json
 from core.helpers.helper_server import most_free_space
 
@@ -100,9 +101,10 @@ class ImageSave(Thread):
                                 writer.writerow(row)
 
                     except Exception as e:
+                        sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
 
 
-                        print("[SAVING THREAD  ERROR]"% (type(e).__name__, e))
+                     
                         
                         
                     finally:
@@ -111,7 +113,7 @@ class ImageSave(Thread):
 
                     
         except Exception as e:
-            print("[saving thread]:  "+e)
+            sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
             pass
            
 
