@@ -67,7 +67,7 @@ class ImageSave(Thread):
 
                     elif len(self.imageArray)>0:
                         data = self.imageArray.pop()
-                        print(data)
+                        #print(data)
                         image = data['image']
                         camera = data['camera']
                         index = data['index']
