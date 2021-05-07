@@ -65,51 +65,52 @@ class ImageSave(Thread):
                     if len(self.imageArray)==0:
                         self.saving =False
 
-                    data = self.imageArray.pop()
-                    print(data)
-                    image = data['image']
-                    camera = data['camera']
-                    index = data['index']
-                    timestamp = data['timeStamp']
-                    cameraStamp =data['cameraStamp']
+                    elif len(self.imageArray)>0:
+                        data = self.imageArray.pop()
+                        print(data)
+                        image = data['image']
+                        camera = data['camera']
+                        index = data['index']
+                        timestamp = data['timeStamp']
+                        cameraStamp =data['cameraStamp']
 
                     
-                    try:
-
-                        if self.storageLeft < 5:
-                           newDrive = most_free_space()
-                           self.drive = newDrive['name']
-                        
                         try:
-                            image.save(self.drive+"/"+
-                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
-                        except Exception:
-                            pass
-                        if camera ==1:
 
-                            path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
-                            write_header = not os.path.exists(path)
-                            with open(path,'a',newline='')as csvfile:
-                                
+                            if self.storageLeft < 5:
+                                newDrive = most_free_space()
+                                self.drive = newDrive['name']
+                            
+                            try:
+                                image.save(self.drive+"/"+
+                                "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
+                            except Exception:
+                                pass
+                            if camera ==1:
 
-                                fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
-                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                if write_header:
-                                    writer.writeheader()
-                                
-                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
-                                writer.writerow(row)
+                                path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
+                                write_header = not os.path.exists(path)
+                                with open(path,'a',newline='')as csvfile:
+                                    
 
-                    except Exception as e:
-                        sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
+                                    fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
+                                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                    if write_header:
+                                        writer.writeheader()
+                                    
+                                    row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
+                                    writer.writerow(row)
+
+                        except Exception as e:
+                            sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
 
 
                      
                         
                         
-                    finally:
-                        #self.queue.task_done()
-                        pass
+                        finally:
+                            #self.queue.task_done()
+                            pass
 
                     
         except Exception as e:
