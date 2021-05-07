@@ -58,7 +58,7 @@ class ImageSave(Thread):
                 if self.queue.empty():
                     
                     pass
-                else:
+                elif self.saving:
 
                     data = self.queue.get()
                     image = data['image']
