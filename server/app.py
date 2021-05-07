@@ -524,7 +524,7 @@ def startB():
             fps.update()
             
         except Exception as e:
-            error = str(e)
+            print(e)
             emergencyStop()
             pass
 
@@ -607,7 +607,7 @@ def startC():
                 fps.update()
                 
             except Exception as e:
-                error = str(e)
+                print(e)
                 emergencyStop()
                 pass
 
