@@ -462,7 +462,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
+    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2,imagesave
     
     timer = Timer("stream2")
     
@@ -545,7 +545,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue2, abort,stopStream3,capturing,camerasDetected,index3
+    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
     
 
     error ="no error"
