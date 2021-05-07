@@ -347,7 +347,7 @@ def startA():
     timer =Timer("stream1")
 
     global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
-    index1 = -1
+    index1 = 0
     test  =0
     
     print("started camera 1")
@@ -408,7 +408,7 @@ def startA():
                         imageQueue.put(data)
                         index1 = index1 +1
                     
-                    if index1 ==-1:   
+                    if index1 ==0:   
                         starttime = timeStamp
                         firstCameraStamp = cameraStamp
                         index1 = index1 +1
