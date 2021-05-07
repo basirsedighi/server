@@ -446,7 +446,7 @@ def startA():
 
     fps.stop()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-    print(test)
+    print("not OK:"+str(test))
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -527,7 +527,7 @@ def startB():
     
     fps.stop()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-    print(test)
+    print("not ok: "+str(test))
     stopStream2 =False
     camera_2.stopStream()
     
@@ -609,7 +609,7 @@ def startC():
 
         fps.stop()
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-        print(test)
+        print("not OK:  "+str(test))
         stopStream3 =False
         camera_3.stopStream()
     
