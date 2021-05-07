@@ -62,6 +62,7 @@ class ImageSave(Process):
                 else:
 
                     data = self.imageArray.pop()
+                    print(data)
                     image = data['image']
                     camera = data['camera']
                     index = data['index']
