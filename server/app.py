@@ -445,8 +445,8 @@ def startA():
             pass
 
     fps.stop()
-    print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+    print(test)
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -526,8 +526,8 @@ def startB():
 
     
     fps.stop()
-    print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+    print(test)
     stopStream2 =False
     camera_2.stopStream()
     
@@ -608,8 +608,8 @@ def startC():
           
 
         fps.stop()
-        print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+        print(test)
         stopStream3 =False
         camera_3.stopStream()
     
