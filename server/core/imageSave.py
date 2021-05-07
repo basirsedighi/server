@@ -3,12 +3,13 @@ import queue
 from datetime import datetime
 from core.timer import Timer
 import os
-from multiprocessing import Process 
+from multiprocessing import Process,Queue
 from os import path
 from datetime import datetime
 import cvb
 import ctypes
 import csv
+import json
 from core.helpers.helper_server import most_free_space
 
 
@@ -60,7 +61,7 @@ class ImageSave(Process):
                 else:
 
                     data = self.queue.get()
-
+                    data = json.loads(data)
                     image = data['image']
                     camera = data['camera']
                     index = data['index']
