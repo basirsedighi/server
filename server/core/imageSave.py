@@ -101,7 +101,7 @@ class ImageSave(Thread):
                         
                     finally:
                         self.queue.task_done()
-                        pass
+                        
 
                     
         except Exception as e:
