@@ -482,11 +482,12 @@ def startB():
           
 
             if status == cvb.WaitStatus.Ok:
+                cameraStamp = int(image.raw_timestamp/1000)
                 
 
                 if capturing:
 
-                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
+                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
 
                     imageQueue.put(data)
                     index2 = index2 +1
@@ -560,10 +561,11 @@ def startC():
                 
 
                 if status == cvb.WaitStatus.Ok:
-                    #timeStamp = int(time.time() * 1000)
+                    
+                    cameraStamp = int(image.raw_timestamp/1000)
                     
                     if capturing:
-                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
+                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
 
                         imageQueue.put(data)
                         index3 = index3 +1
