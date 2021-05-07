@@ -100,7 +100,7 @@ class ImageSave(Thread):
                         
                         
                     finally:
-                        #self.queue.task_done()
+                        self.queue.task_done()
                         pass
 
                     
