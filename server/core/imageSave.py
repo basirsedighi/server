@@ -114,7 +114,7 @@ class ImageSave(Thread):
                     
         except Exception as e:
             sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
-            pass
+            
            
 
         return "Stopped"
