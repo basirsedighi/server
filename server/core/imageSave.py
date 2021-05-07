@@ -57,7 +57,7 @@ class ImageSave(Thread):
             while True:
 
                 print("hello")
-                if not saving:
+                if not self.saving:
                     
                     pass
                 else:
