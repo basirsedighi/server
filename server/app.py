@@ -83,7 +83,7 @@ imageQueue = Queue(maxsize=0)
 imageQueue2 = Queue(maxsize=0)
 imageQueue3 = Queue(maxsize=0)
 
-imagesave3=ImageSave(imageQueue2,"saving thread")
+imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
@@ -733,7 +733,7 @@ async def getStorage():
 # estimate hows
 
 def storageLeft(storages):
-    global drive_in_use,imagesave,imagesave2,storageLeft_in_use
+    global drive_in_use,imagesave,imagesave2,imagesave3,storageLeft_in_use
 
     drives = storages['drives']
 
@@ -745,6 +745,7 @@ def storageLeft(storages):
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
             imagesave2.setStorageLeft(int(drive['free']))
+            imagesave3.setStorageLeft(int(drive['free']))
             
    
 
@@ -1113,7 +1114,7 @@ def getStates():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
+    global started,config_loaded,imagesave,isConfigured,imagesave2,imagesave3,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -1157,6 +1158,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
                 imagesave2.setTripName(str(msg))
+                imagesave3.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 print(drive_in_use)
@@ -1166,6 +1168,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 else:
                     imagesave.setDrive(drive_in_use)
                     imagesave2.setDrive(drive_in_use)
+                    imagesave3.setDrive(drive_in_use)
                     await start_acquisition()
                     await manager.broadcast(json.dumps({"event": "starting"}))
             
