@@ -28,6 +28,7 @@ import math
 import cvb
 import uvicorn
 import csv
+from core.FPS import FPS
 
 from core.models import models
 import time
@@ -357,7 +358,7 @@ def startA():
     lastCameraStamp =0
     firstCameraStamp =0
     #camera_1.resetClock()
-                      
+    fps = FPS().start()           
     while True:
 
         if abort:
@@ -430,7 +431,8 @@ def startA():
                
             # timer.stop()
 
-                
+            
+            fps.update()
             
             
             
@@ -442,7 +444,9 @@ def startA():
             emergencyStop()
             pass
 
-   
+    fps.stop()
+    print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -464,7 +468,7 @@ def startB():
     test =0
     print("started camera 2") 
     print(time.time()*1000) 
-    
+    fps = FPS().start()
     
     while True:
         if abort:
@@ -511,7 +515,7 @@ def startB():
                 
             
             
-
+            fps.update()
             
         except Exception as e:
             error = str(e)
@@ -521,7 +525,9 @@ def startB():
           
 
     
-
+    fps.stop()
+    print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     stopStream2 =False
     camera_2.stopStream()
     
@@ -542,7 +548,9 @@ def startC():
     index3 = 0
     test =0
     print("started camera 3") 
-    print(time.time()*1000) 
+    print(time.time()*1000)
+
+    fps = FPS().start()
     
     if len(camerasDetected) >2:
         while True:
@@ -590,7 +598,7 @@ def startC():
                     
                 
                 
-
+                fps.update()
                 
             except Exception as e:
                 error = str(e)
@@ -599,7 +607,9 @@ def startC():
 
           
 
- 
+        fps.stop()
+        print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+        print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         stopStream3 =False
         camera_3.stopStream()
     
