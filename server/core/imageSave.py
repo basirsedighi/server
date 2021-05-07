@@ -3,7 +3,7 @@ import queue
 from datetime import datetime
 from core.timer import Timer
 import os
-from multiprocessing import Process,Queue
+from multiprocessing import Process
 from os import path
 from datetime import datetime
 import cvb
