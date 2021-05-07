@@ -451,6 +451,7 @@ def startA():
     fps.stop()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not OK:"+str(test))
+    print(len(imageArray))
     imagesave.setImageArray(imageArray)
     stopStream1 =False 
     camera_1.stopStream()

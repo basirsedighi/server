@@ -29,6 +29,7 @@ class ImageSave(Process):
         self.drive = 'C:'
         self.storageLeft = 50
         self.imageArray =[]
+        self.saving = False
 
 
     def fixPath(self,path):
@@ -56,10 +57,13 @@ class ImageSave(Process):
 
                 if not self.isRunning:
                     break
-                if len(self.imageArray) ==0:
+                if not saving:
                     
                     pass
                 else:
+
+                    if len(self.imageArray)==0:
+                        self.saving =False
 
                     data = self.imageArray.pop()
                     print(data)
@@ -135,6 +139,7 @@ class ImageSave(Process):
 
     def setImageArray(self,array):
         self.imageArray = array
+        self.saving = True
 
 
 
