@@ -79,9 +79,9 @@ stopStream2 = False
 stopStream3 = False
 
 gps = gpsHandler(debug)
-imageQueue = Queue(maxsize=0)
-imageQueue2 = Queue(maxsize=0)
-imageQueue3 = Queue(maxsize=0)
+imageQueue = queue.Queue(maxsize=0)
+imageQueue2 = queue.Queue(maxsize=0)
+imageQueue3 = queue.Queue(maxsize=0)
 
 imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
@@ -404,8 +404,7 @@ def startA():
                         
                 
                         data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        data = json.dumps(data)
-                        imageQueue.put(data)
+                        imageQueue.put_nowait(data)
                         index1 = index1 +1
                     
                     if index1 ==0:   
@@ -495,8 +494,8 @@ def startB():
                 if capturing:
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
-                    data = json.dumps(data)
-                    imageQueue2.put(data)
+                    
+                    imageQueue2.put_nowait(data)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -577,8 +576,7 @@ def startC():
                     
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        data = json.dumps(data)
-                        imageQueue3.put(data)
+                        imageQueue3.put_nowait(data)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :

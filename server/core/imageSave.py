@@ -61,7 +61,6 @@ class ImageSave(Process):
                 else:
 
                     data = self.queue.get()
-                    data = json.loads(data)
                     image = data['image']
                     camera = data['camera']
                     index = data['index']
