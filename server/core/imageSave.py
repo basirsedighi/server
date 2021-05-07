@@ -14,15 +14,14 @@ from core.helpers.helper_server import most_free_space
 
 
 class ImageSave(Thread):
-    def __init__(self, queue,name):
+    def __init__(self, imageQueue,name):
         Thread.__init__(self)
         self.daemon = True
         self.tripName = "first"
-        self.queue = queue
+        self.queue = imageQueue
         self.isRunning = False
         self.name = name
         self.path = os.path.dirname(os.path.abspath(__file__))
-        
         self.path = self.fixPath(self.path)
         self.saving = False
         self.date = self.getDate()
@@ -53,12 +52,11 @@ class ImageSave(Thread):
         try:
             while True:
 
-                if not self.isRunning:
-                    break
+                
                 if self.queue.empty():
                     self.saving = False
                     
-                    pass
+                    
                 elif self.saving:
 
                     data = self.queue.get()
