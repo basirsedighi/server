@@ -13,9 +13,9 @@ import json
 from core.helpers.helper_server import most_free_space
 
 
-class ImageSave(Process):
+class ImageSave(Thread):
     def __init__(self, queue,name):
-        Process.__init__(self)
+        Thread.__init__(self)
         self.daemon = True
         self.tripName = "first"
         self.queue = queue
