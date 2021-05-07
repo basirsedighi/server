@@ -532,6 +532,7 @@ def startB():
     #imageQueue2.join()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not ok: "+str(test))
+    imagesave.saveImages()
     stopStream2 =False
     camera_2.stopStream()
     

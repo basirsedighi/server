@@ -19,7 +19,7 @@ class ImageSave(Thread):
         self.daemon = True
         self.tripName = "first"
         self.queue = queue
-        self.isRunning = True
+        self.isRunning = False
         self.name = name
         self.path = os.path.dirname(os.path.abspath(__file__))
         
@@ -56,11 +56,12 @@ class ImageSave(Thread):
                 if not self.isRunning:
                     break
                 if self.queue.empty():
+                    self.saving = False
                     
                     pass
                 elif self.saving:
 
-                    data = self.queue.get(False)
+                    data = self.queue.get()
                     image = data['image']
                     camera = data['camera']
                     index = data['index']
@@ -132,7 +133,8 @@ class ImageSave(Thread):
         
 
 
-
+    def saveImages():
+        self.saving = True
 
     def getTimeStamp(self,now):
 
