@@ -49,8 +49,7 @@ from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
 from core.merging import merge
 from merging2 import merge2
-# camera = Camera()
-# camera.start_stream()
+
 manager = ConnectionManager()
 image_freq = 20
 gps_freq =0
@@ -78,9 +77,9 @@ stopStream2 = False
 stopStream3 = False
 
 gps = gpsHandler(debug)
-imageQueue = queue.Queue(maxsize=0)
-imageQueue2 = queue.Queue(maxsize=0)
-imagesave2=ImageSave(imageQueue2,"saving thread")
+imageQueue = Queue(maxsize=0)
+
+#imagesave2=ImageSave(imageQueue2,"saving thread")
 imagesave = ImageSave(imageQueue,"saving thread")
 config_loaded = False
 
@@ -93,9 +92,6 @@ capturing =False
 guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
-
-imagesave.daemon = True
-imagesave2.daemon = True
 #imagesave2.start()
 imagesave.start()
 gpsData ={}

@@ -1,4 +1,5 @@
 from threading import Thread
+from multiprocessing import Process
 import queue
 from datetime import datetime
 from core.timer import Timer
@@ -11,9 +12,10 @@ import csv
 from core.helpers.helper_server import most_free_space
 
 
-class ImageSave(Thread):
+class ImageSave(Process):
     def __init__(self, queue,name):
-        Thread.__init__(self)
+        Process.__init__(self)
+        self.daemon = True
         self.tripName = "first"
         self.queue = queue
         self.isRunning = True
