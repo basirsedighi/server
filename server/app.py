@@ -403,7 +403,7 @@ def startA():
                         
                         
                 
-                        data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        data = {"image": image.copy(), "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
                         imageQueue.put(data)
                         index1 = index1 +1
                     
@@ -494,7 +494,7 @@ def startB():
 
                 if capturing:
 
-                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
+                    data = {"image": image.copy(), "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
                     
                     imageQueue.put(data)
                     index2 = index2 +1
@@ -578,7 +578,7 @@ def startC():
                     cameraStamp = int(image.raw_timestamp/1000)
                     
                     if capturing:
-                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
+                        data = {"image": image.copy(), "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
                         imageQueue.put(data)
                         index3 = index3 +1
                 
