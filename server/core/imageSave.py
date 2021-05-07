@@ -9,14 +9,13 @@ from datetime import datetime
 import cvb
 import ctypes
 import csv
-import sys
 import json
 from core.helpers.helper_server import most_free_space
 
 
-class ImageSave(Process):
+class ImageSave(Thread):
     def __init__(self, queue,name):
-        Process.__init__(self)
+        Thread.__init__(self)
         self.daemon = True
         self.tripName = "first"
         self.queue = queue
@@ -29,8 +28,6 @@ class ImageSave(Process):
         self.date = self.getDate()
         self.drive = 'C:'
         self.storageLeft = 50
-        self.imageArray =[]
-        self.saving = False
 
 
     def fixPath(self,path):
@@ -56,66 +53,60 @@ class ImageSave(Process):
         try:
             while True:
 
-                
-                if not self.saving:
+                if not self.isRunning:
+                    break
+                if self.queue.empty():
                     
                     pass
                 else:
 
-                    if len(self.imageArray)==0:
-                        self.saving =False
-
-                    elif len(self.imageArray)>0:
-                        data = self.imageArray.pop()
-                        #print(data)
-                        image = data['image']
-                        camera = data['camera']
-                        index = data['index']
-                        timestamp = data['timeStamp']
-                        cameraStamp =data['cameraStamp']
+                    data = self.queue.get()
+                    image = data['image']
+                    camera = data['camera']
+                    index = data['index']
+                    timestamp = data['timeStamp']
+                    cameraStamp =data['cameraStamp']
 
                     
+                    try:
+
+                        if self.storageLeft < 5:
+                           newDrive = most_free_space()
+                           self.drive = newDrive['name']
+                        
                         try:
-
-                            if self.storageLeft < 5:
-                                newDrive = most_free_space()
-                                self.drive = newDrive['name']
-                            
-                            try:
-                                image.save(self.drive+"/"+
-                                "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
-                            except Exception:
-                                pass
-                            if camera ==1:
-
-                                path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
-                                write_header = not os.path.exists(path)
-                                with open(path,'a',newline='')as csvfile:
-                                    
-
-                                    fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
-                                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                                    if write_header:
-                                        writer.writeheader()
-                                    
-                                    row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
-                                    writer.writerow(row)
-
-                        except Exception as e:
-                            sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
-
-
-                     
-                        
-                        
-                        finally:
-                            #self.queue.task_done()
+                            image.save(self.drive+"/"+
+                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+"_"+str(cameraStamp)+'.bmp')
+                        except Exception:
                             pass
+                        if camera ==1:
+
+                            path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
+                            write_header = not os.path.exists(path)
+                            with open(path,'a',newline='')as csvfile:
+                                
+
+                                fieldnames = ['index', 'tripname', "camera","pc_time","camera_time"]
+                                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                                if write_header:
+                                    writer.writeheader()
+                                
+                                row = ({'index':index,'tripname':self.tripName,"camera":camera,"pc_time":timestamp,"camera_time":cameraStamp})
+                                writer.writerow(row)
+
+                    except Exception as e:
+
+
+                        print("[SAVING THREAD  ERROR]"% (type(e).__name__, e))
+                        
+                        
+                    finally:
+                        self.queue.task_done()
 
                     
         except Exception as e:
-            sys.stderr.write('imagesaving %s: %s\n' % (type(e).__name__, e))
-            
+            print("[saving thread]:  "+e)
+            pass
            
 
         return "Stopped"
@@ -139,9 +130,6 @@ class ImageSave(Process):
         self.storageLeft = storage
         
 
-    def setImageArray(self,array):
-        self.imageArray = array
-        self.saving = True
 
 
 

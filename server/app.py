@@ -81,7 +81,7 @@ stopStream3 = False
 gps = gpsHandler(debug)
 imageQueue = Queue(maxsize=0)
 imageQueue2 = Queue(maxsize=0)
-imageQueue3 = Queue(maxsize=0)
+imageQueue3 = queue.Queue(maxsize=0)
 
 imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
@@ -346,7 +346,7 @@ def startA():
 
     timer =Timer("stream1")
 
-    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1,imagesave
+    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
     index1 = 0
     test  =0
     
@@ -359,7 +359,6 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
-    imageArray =[]
     #camera_1.resetClock()
     fps = FPS().start()           
     while True:
@@ -405,8 +404,7 @@ def startA():
                         
                 
                         data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        #imageQueue.put(data,False)
-                        imageArray.append(data)
+                        imageQueue.put(data,False)
                         index1 = index1 +1
                     
                     if index1 ==0:   
@@ -451,8 +449,6 @@ def startA():
     fps.stop()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not OK:"+str(test))
-    print(len(imageArray))
-    imagesave.setImageArray(imageArray)
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -465,7 +461,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2,imagesave2
+    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
     
     timer = Timer("stream2")
     
@@ -475,7 +471,6 @@ def startB():
     print("started camera 2") 
     print(time.time()*1000) 
     fps = FPS().start()
-    imageArray = []
     
     while True:
         if abort:
@@ -500,8 +495,7 @@ def startB():
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
                     
-                    #imageQueue2.put(data,False)
-                    imageArray.append(data)
+                    imageQueue2.put(data,False)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -536,7 +530,6 @@ def startB():
     fps.stop()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not ok: "+str(test))
-    imagesave2.setImageArray(imageArray)
     stopStream2 =False
     camera_2.stopStream()
     
@@ -549,7 +542,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue2, abort,stopStream3,capturing,camerasDetected,index3,imagesave3
+    global camera_3, isRunning, imageQueue2, abort,stopStream3,capturing,camerasDetected,index3
     
 
     error ="no error"
@@ -558,7 +551,7 @@ def startC():
     test =0
     print("started camera 3") 
     print(time.time()*1000)
-    imageArray = []
+
     fps = FPS().start()
     
     if len(camerasDetected) >2:
@@ -583,8 +576,7 @@ def startC():
                     
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        #imageQueue3.put(data,False)
-                        imageArray.append(data)
+                        imageQueue3.put(data,False)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
@@ -619,7 +611,6 @@ def startC():
         fps.stop()
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         print("not OK:  "+str(test))
-        imagesave3.setImageArray(imageArray)
         stopStream3 =False
         camera_3.stopStream()
     
@@ -1341,8 +1332,6 @@ def main(arg):
    
 
     uvicorn.run(app, host="10.0.222.1", port=8000,log_level="debug")
-
-    
 
 
 if __name__ == "__main__":
