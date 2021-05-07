@@ -43,7 +43,7 @@ from gps2 import gpsHandler
 import os
 from os import path
 from datetime import datetime
-from multiprocessing import Process,Queue,Pool
+from multiprocessing import Process,Queue,Pool,Pipe
 from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
@@ -79,13 +79,16 @@ stopStream2 = False
 stopStream3 = False
 
 gps = gpsHandler(debug)
+parent_conn, child_conn = Pipe()
+parent_conn1, child_conn3 = Pipe()
+parent_conn2, child_conn2 = Pipe()
 imageQueue = Queue(maxsize=0)
 imageQueue2 = Queue(maxsize=0)
 imageQueue3 = Queue(maxsize=0)
 
-imagesave3=ImageSave(imageQueue3,"saving thread")
-imagesave2=ImageSave(imageQueue2,"saving thread")
-imagesave = ImageSave(imageQueue,"saving thread")
+imagesave3=ImageSave(child_conn3,"saving thread")
+imagesave2=ImageSave(child_conn2,"saving thread")
+imagesave = ImageSave(child_conn,"saving thread")
 config_loaded = False
 
 #temp images to show user
@@ -404,7 +407,7 @@ def startA():
                         
                 
                         data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        imageQueue.put(data,False)
+                        parent_conn.send(data)
                         index1 = index1 +1
                     
                     if index1 ==0:   
@@ -495,7 +498,7 @@ def startB():
 
                     data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
                     
-                    imageQueue2.put(data,False)
+                    parent_conn1.send(data)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -576,7 +579,7 @@ def startC():
                     
                     if capturing:
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        imageQueue3.put(data,False)
+                        parent_conn2.send(data)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :

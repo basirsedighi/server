@@ -55,12 +55,12 @@ class ImageSave(Process):
 
                 if not self.isRunning:
                     break
-                if self.queue.empty():
+                # if self.queue.empty():
                     
-                    pass
-                else:
+                #     pass
+                # else:
 
-                    data = self.queue.get()
+                    data = self.queue.recv()
                     print(data)
                     image = data['image']
                     camera = data['camera']
