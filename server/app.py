@@ -447,6 +447,7 @@ def startA():
             pass
 
     fps.stop()
+    #imageQueue.join()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not OK:"+str(test))
     stopStream1 =False 
@@ -528,6 +529,7 @@ def startB():
 
     
     fps.stop()
+    #imageQueue2.join()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not ok: "+str(test))
     stopStream2 =False
@@ -611,6 +613,7 @@ def startC():
         fps.stop()
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         print("not OK:  "+str(test))
+        #imageQueue3.join()
         stopStream3 =False
         camera_3.stopStream()
     
