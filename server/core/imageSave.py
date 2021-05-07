@@ -133,7 +133,7 @@ class ImageSave(Thread):
         
 
 
-    def saveImages():
+    def saveImages(self):
         self.saving = True
 
     def getTimeStamp(self,now):
