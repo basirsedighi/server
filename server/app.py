@@ -340,7 +340,7 @@ def emergencyStop():
     
 
 @app.get('/start1')
-def startA():
+async def startA():
 
     timer =Timer("stream1")
 
@@ -457,7 +457,7 @@ def startA():
 
 
 @app.get('/start2')
-def startB():
+async def startB():
 
     global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
     
@@ -538,7 +538,7 @@ def startB():
     # start bildetaking
 
 @app.get('/start3')
-def startC():
+async def startC():
 
     global camera_3, isRunning, imageQueue2, abort,stopStream3,capturing,camerasDetected,index3
     
