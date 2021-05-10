@@ -50,7 +50,7 @@ from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
 #from core.merging import merge
 from merging2 import merge2
-from core.multiStreamHandler import MyMultiStreamHandler
+from core.singleStreamHandler import MyStreamHandler
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -355,10 +355,10 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0 
-    streamList = [camera_1.stream,camera_2.stream,camera_3.stream]         
+          
     
 
-    with MyMultiStreamHandler(streamList) as handler:
+    with MyStreamHandler(camera_1.stream) as handler:
 
         handler.run()
         time.sleep(10)

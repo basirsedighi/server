@@ -44,7 +44,7 @@ class Camera:
 
         self.stream = self.device.stream
         
-        self.stream.start()
+        #self.stream.start()
     
       
     
