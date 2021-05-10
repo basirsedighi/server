@@ -85,7 +85,7 @@ imageQueue3 = queue.Queue(maxsize=0)
 
 imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
-imagesave = ImageSave(imageQueue,"saving thread")
+imagesave =ImageSave(imageQueue,"saving thread")
 config_loaded = False
 
 #temp images to show user
