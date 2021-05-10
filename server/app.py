@@ -50,6 +50,7 @@ from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
 from core.merging import merge
 from merging2 import merge2
+from core.multiStreamHandler import MyMultiStreamHandler
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
@@ -344,7 +345,7 @@ def emergencyStop():
 @app.get('/start1')
 def startA():
 
-    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
+    global camera_1,camera_2,camera_3 ,imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
     index1 = 0
     print("started camera 1")
     print(time.time()*1000)
@@ -353,65 +354,28 @@ def startA():
     error = "no ERROR"
     cameraStamp =3
     lastCameraStamp =0
-    firstCameraStamp =0          
-    while True:
-
-        if abort:
-            break
-
-        try:
-            
-            image, status = camera_1.get_image()
-
-            if status == cvb.WaitStatus.Ok:
-                
-                cameraStamp = int(image.raw_timestamp/1000)
-                
-                timeStamp = int(time.time() * 1000)
-
-               
-                if capturing:
-                    
-                    if index1 >=0:
-                        newstamp =  starttime+ (cameraStamp-firstCameraStamp)
-                        
-                        
-                
-                        data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        imageQueue.put(data)
-                        index1 = index1 +1
-                    
-                    if index1 ==0:   
-                        starttime = timeStamp
-                        firstCameraStamp = cameraStamp
-                        index1 = index1 +1
-                
-                
-            elif status == cvb.WaitStatus.Abort:
-                print("stream 1 abort")
-                break
-
-            elif status == cvb.WaitStatus.Timeout and stopStream1:
-                print("stream 1 timeout")
-                break
-            elif status == cvb.WaitStatus.Timeout:
-                print("timed out waiting for images")
-
-            
-            
-            
-        except Exception as e :
-
-            error = str(e)
-            emergencyStop()
-            pass
-
-    stopStream1 =False 
-    camera_1.stopStream()
-
-    return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
+    firstCameraStamp =0 
+    streamList = [camera_1.stream,camera_2.stream,camera_3.stream]         
     
 
+    with MyMultiStreamHandler(streamList) as handler:
+
+        handler.run()
+        time.sleep(10)
+        handler.finish()
+
+        
+
+
+
+
+
+
+
+
+       
+
+    return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
 
 
 
