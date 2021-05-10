@@ -304,6 +304,8 @@ class gpsHandler(Thread):
     def startInit(self):
 
         self.init =True
+
+        
     def initGPS(self):
         self.initStarted =True
         self.send('SetNMEAOutput, Stream1+Stream2+Stream7+Stream8, none, none, off\r\n')
@@ -358,7 +360,10 @@ class gpsHandler(Thread):
         self.send('SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, msec100\r\n')
         
         self.initStarted = False
-  
+    
+
+
+    #https://fishandwhistle.net/post/2016/using-pyserial-pynmea2-and-raspberry-pi-to-log-nmea-output/
     def scan_ports(self):
 
         if sys.platform.startswith('win'):

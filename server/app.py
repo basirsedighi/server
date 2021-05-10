@@ -344,59 +344,33 @@ def emergencyStop():
 @app.get('/start1')
 def startA():
 
-    timer =Timer("stream1")
-
     global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
     index1 = 0
-    test  =0
-    
     print("started camera 1")
     print(time.time()*1000)
     starttime = 0
     newstamp =0
-    clockReset = False
     error = "no ERROR"
     cameraStamp =3
     lastCameraStamp =0
-    firstCameraStamp =0
-    #camera_1.resetClock()
-    fps = FPS().start()           
+    firstCameraStamp =0          
     while True:
 
         if abort:
             break
 
-       
-
-        
         try:
             
             image, status = camera_1.get_image()
 
-           
-
-            
-
             if status == cvb.WaitStatus.Ok:
                 
-                
-                    
-                
                 cameraStamp = int(image.raw_timestamp/1000)
-                
-                
                 
                 timeStamp = int(time.time() * 1000)
 
                
-
-
-
-
                 if capturing:
-                    
-                   
-
                     
                     if index1 >=0:
                         newstamp =  starttime+ (cameraStamp-firstCameraStamp)
@@ -413,10 +387,6 @@ def startA():
                         index1 = index1 +1
                 
                 
-                    
-            
-                
-            
             elif status == cvb.WaitStatus.Abort:
                 print("stream 1 abort")
                 break
@@ -427,29 +397,15 @@ def startA():
             elif status == cvb.WaitStatus.Timeout:
                 print("timed out waiting for images")
 
-            else:
-                test = test+1
-            
-               
-            # timer.stop()
-
-            
-            fps.update()
             
             
             
-            
-
         except Exception as e :
 
-            print(e)
+            error = str(e)
             emergencyStop()
             pass
 
-    fps.stop()
-    #imageQueue.join()
-    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-    print("not OK:"+str(test))
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -1143,7 +1099,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 
                
                     
-                    #print(len( await discoverCameras()))
+                   
                     await initCameraA()
                     print("A")
                     await initCameraB()
@@ -1337,7 +1293,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="debug")
+    uvicorn.run(app, host="localhost", port=8000,log_level="debug")
 
 
 if __name__ == "__main__":
