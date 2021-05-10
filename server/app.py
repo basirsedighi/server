@@ -80,9 +80,9 @@ stopStream2 = False
 stopStream3 = False
 
 gps = gpsHandler(debug)
-imageQueue = queue.Queue(maxsize=0)
-imageQueue2 = queue.Queue(maxsize=0)
-imageQueue3 = queue.Queue(maxsize=0)
+imageQueue = Queue(maxsize=0)
+imageQueue2 = Queue(maxsize=0)
+imageQueue3 = Queue(maxsize=0)
 
 imagesave3=ImageSave(imageQueue3,"saving thread")
 imagesave2=ImageSave(imageQueue2,"saving thread")
@@ -99,8 +99,8 @@ guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-# imagesave3.start()
-# imagesave2.start()
+imagesave3.start()
+imagesave2.start()
 imagesave.start()
 gpsData ={}
 gps.daemon = True
@@ -341,11 +341,10 @@ def emergencyStop():
     #abort = True
 
     
-
 @app.get('/start1')
 def startA():
 
-    global camera_1,camera_2,camera_3 ,imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
+    global camera_1, imagesave, imageQueue, abort,stopStream1,gps,capturing,index1
     index1 = 0
     print("started camera 1")
     print(time.time()*1000)
@@ -354,35 +353,71 @@ def startA():
     error = "no ERROR"
     cameraStamp =3
     lastCameraStamp =0
-    firstCameraStamp =0 
-          
+    firstCameraStamp =0          
+    while True:
+
+        if abort:
+            break
+
+        try:
+            
+            image, status = camera_1.get_image()
+
+            if status == cvb.WaitStatus.Ok:
+                
+                cameraStamp = int(image.raw_timestamp/1000)
+                
+                timeStamp = int(time.time() * 1000)
+
+               
+                if capturing:
+                    
+                    if index1 >=0:
+                        newstamp =  starttime+ (cameraStamp-firstCameraStamp)
+                        
+                        
+                        imageArray = cvb.as_array(image)
+                        data = {"image": imageArray, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        imageQueue.put(data)
+                        index1 = index1 +1
+                    
+                    if index1 ==0:   
+                        starttime = timeStamp
+                        firstCameraStamp = cameraStamp
+                        index1 = index1 +1
+                
+                
+            elif status == cvb.WaitStatus.Abort:
+                print("stream 1 abort")
+                break
+
+            elif status == cvb.WaitStatus.Timeout and stopStream1:
+                print("stream 1 timeout")
+                break
+            elif status == cvb.WaitStatus.Timeout:
+                print("timed out waiting for images")
+
+            
+            
+            
+        except Exception as e :
+
+            error = str(e)
+            emergencyStop()
+            pass
     
 
-    with cvb.DeviceFactory.open(os.path.join(cvb.install_path(), "drivers", "GenICam.vin"),port=0) as device:
-        with MyStreamHandler(device.stream) as handler:
-            handler.run()
-            time.sleep(10)
-            handler.finish()
-
-        
-
-
-
-
-
-
-
-
-       
+    imageQueue.join()
+    stopStream1 =False 
+    camera_1.stopStream()
 
     return {"message": "stream 1 has stopped","images_ok":str(index1),"images":str(test),"error":error}
-
 
 
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2,imagesave
+    global camera_2, isRunning, imageQueue2, abort,stopStream2,capturing,index2,imagesave2
     
     timer = Timer("stream2")
     
@@ -413,10 +448,10 @@ def startB():
                 
 
                 if capturing:
-
-                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
+                    imageArray = cvb.as_array(image)
+                    data = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
                     
-                    imageQueue.put(data)
+                    imageQueue2.put(data)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -452,8 +487,8 @@ def startB():
     #imageQueue2.join()
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not ok: "+str(test))
-    imagesave.saveImages()
-    imageQueue.join()
+    # imagesave.saveImages()
+    imageQueue2.join()
     print("saving complete")
     stopStream2 =False
     camera_2.stopStream()
@@ -467,7 +502,7 @@ def startB():
 @app.get('/start3')
 def startC():
 
-    global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
+    global camera_3, isRunning, imageQueue3, abort,stopStream3,capturing,camerasDetected,index3,imagesave3
     
 
     error ="no error"
@@ -500,8 +535,9 @@ def startC():
                     cameraStamp = int(image.raw_timestamp/1000)
                     
                     if capturing:
+                        imageArray = cvb.as_array(image)
                         data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        imageQueue.put(data)
+                        imageQueue3.put(data)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
@@ -536,7 +572,7 @@ def startC():
         fps.stop()
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         print("not OK:  "+str(test))
-        #imageQueue3.join()
+        imageQueue3.join()
         stopStream3 =False
         camera_3.stopStream()
     
