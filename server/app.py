@@ -28,7 +28,6 @@ import math
 import cvb
 import uvicorn
 import csv
-from core.FPS import FPS
 
 from core.models import models
 import time
@@ -37,22 +36,25 @@ from manager import ConnectionManager
 from io import BytesIO
 from core.timer import Timer
 from core.imageSave import ImageSave
-import queue
+from multiprocessing import Manager
 from gps import Gps
 from gps2 import gpsHandler
 import os
 from os import path
 from datetime import datetime
-from multiprocessing import Process,Queue,Pool
+from multiprocessing import Process,Queue,Pool, Pipe
 from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
 from core.models.models import GpsData ,freq
 from core.merging import merge
 from merging2 import merge2
+
+
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
+QueueManager = Manager()
 image_freq = 20
 gps_freq =0
 debug = False
@@ -79,13 +81,16 @@ stopStream2 = False
 stopStream3 = False
 
 gps = gpsHandler(debug)
-imageQueue = queue.Queue(maxsize=0)
-imageQueue2 = queue.Queue(maxsize=0)
-imageQueue3 = queue.Queue(maxsize=0)
-
-imagesave3=ImageSave(imageQueue3,"saving thread")
-imagesave2=ImageSave(imageQueue2,"saving thread")
-imagesave = ImageSave(imageQueue,"saving thread")
+#imageQueue = QQueue(size_bucket_list=120, maxsize=100)
+camera_1_Connection1,camera_1_Connection2  = Pipe(duplex=True)
+camera_2_Connection1,camera_2_Connection2  = Pipe(duplex=True)
+camera_3_Connection1,camera_3_Connection2  = Pipe(duplex=True)
+data1=None
+data2=None
+data3=None
+imagesave3 = ImageSave(camera_1_Connection2,"saving thread3")
+imagesave2=ImageSave(camera_2_Connection2,"saving thread2")
+imagesave = ImageSave(camera_3_Connection2,"saving thread")
 config_loaded = False
 
 #temp images to show user
@@ -98,8 +103,11 @@ guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-# imagesave3.start()
-# imagesave2.start()
+imagesave3.daemon = True
+imagesave.daemon = True
+imagesave2.daemon = True
+imagesave3.start()
+imagesave2.start()
 imagesave.start()
 gpsData ={}
 gps.daemon = True
@@ -359,8 +367,9 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
+    
     #camera_1.resetClock()
-    fps = FPS().start()           
+                      
     while True:
 
         if abort:
@@ -398,13 +407,14 @@ def startA():
                    
 
                     
-                    if index1 >=0:
+                    if index1 >0:
                         newstamp =  starttime+ (cameraStamp-firstCameraStamp)
                         
                         
-                
-                        data = {"image": image, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        imageQueue.put(data)
+                        imageArray = cvb.as_array(image)
+                        data = {"image": imageArray, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
+                        print('sending')
+                        camera_1_Connection1.send(data)
                         index1 = index1 +1
                     
                     if index1 ==0:   
@@ -433,8 +443,7 @@ def startA():
                
             # timer.stop()
 
-            
-            fps.update()
+                
             
             
             
@@ -446,10 +455,7 @@ def startA():
             emergencyStop()
             pass
 
-    fps.stop()
-    #imageQueue.join()
-    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-    print("not OK:"+str(test))
+   
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -462,7 +468,7 @@ def startA():
 @app.get('/start2')
 def startB():
 
-    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2,imagesave
+    global camera_2, isRunning, imageQueue, abort,stopStream2,capturing,index2
     
     timer = Timer("stream2")
     
@@ -471,7 +477,8 @@ def startB():
     test =0
     print("started camera 2") 
     print(time.time()*1000) 
-    fps = FPS().start()
+    
+    
     
     while True:
         if abort:
@@ -489,14 +496,14 @@ def startB():
           
 
             if status == cvb.WaitStatus.Ok:
-                cameraStamp = int(image.raw_timestamp/1000)
                 
 
                 if capturing:
+                    imageArray = cvb.as_array(image)
+                    data2 = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
 
-                    data = {"image": image, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":cameraStamp}
+                    camera_2_Connection1.send(data2)
                     
-                    imageQueue.put(data)
                     index2 = index2 +1
             
             elif status == cvb.WaitStatus.Abort:
@@ -518,7 +525,7 @@ def startB():
                 
             
             
-            fps.update()
+
             
         except Exception as e:
             error = str(e)
@@ -528,13 +535,7 @@ def startB():
           
 
     
-    fps.stop()
-    #imageQueue2.join()
-    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-    print("not ok: "+str(test))
-    imagesave.saveImages()
-    imageQueue.join()
-    print("saving complete")
+
     stopStream2 =False
     camera_2.stopStream()
     
@@ -546,7 +547,7 @@ def startB():
 
 @app.get('/start3')
 def startC():
-
+    
     global camera_3, isRunning, imageQueue, abort,stopStream3,capturing,camerasDetected,index3
     
 
@@ -555,9 +556,7 @@ def startC():
     index3 = 0
     test =0
     print("started camera 3") 
-    print(time.time()*1000)
-
-    fps = FPS().start()
+    print(time.time()*1000) 
     
     if len(camerasDetected) >2:
         while True:
@@ -576,12 +575,14 @@ def startC():
                 
 
                 if status == cvb.WaitStatus.Ok:
-                    
-                    cameraStamp = int(image.raw_timestamp/1000)
+                    #timeStamp = int(time.time() * 1000)
                     
                     if capturing:
-                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
-                        imageQueue.put(data)
+                        imageArray = cvb.as_array(image)
+                        data3 = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
+
+                        
+                        camera_3_Connection1.send(data3)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
@@ -604,7 +605,7 @@ def startC():
                     
                 
                 
-                fps.update()
+
                 
             except Exception as e:
                 error = str(e)
@@ -613,10 +614,7 @@ def startC():
 
           
 
-        fps.stop()
-        print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-        print("not OK:  "+str(test))
-        #imageQueue3.join()
+ 
         stopStream3 =False
         camera_3.stopStream()
     
@@ -677,7 +675,7 @@ def startPulse():
     gps.toggleLogging(True)
     started = True
     capturing = True
-    image_freq = 10
+    image_freq = 5
 
 
 def pause():
@@ -738,7 +736,7 @@ async def getStorage():
 # estimate hows
 
 def storageLeft(storages):
-    global drive_in_use,imagesave,imagesave2,imagesave3,storageLeft_in_use
+    global drive_in_use,imagesave,imagesave2,storageLeft_in_use
 
     drives = storages['drives']
 
@@ -749,8 +747,7 @@ def storageLeft(storages):
 
             storageLeft_in_use = int(drive['free'])
             imagesave.setStorageLeft(int(drive['free']))
-            imagesave2.setStorageLeft(int(drive['free']))
-            imagesave3.setStorageLeft(int(drive['free']))
+            #imagesave2.setStorageLeft(int(drive['free']))
             
    
 
@@ -1119,7 +1116,7 @@ def getStates():
 
 @app.websocket("/stream/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    global started,config_loaded,imagesave,isConfigured,imagesave2,imagesave3,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
+    global started,config_loaded,imagesave,isConfigured,imagesave2,gps,drive_in_use,gpsControl,valider1,valider2,tempTrip,cameras,guruMode,debug,camerasDetected
     await manager.connect(websocket)
     await websocket.send_text(json.dumps({"event": "connected", "data": "connected to server"}))
     try:
@@ -1162,8 +1159,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
                 isConfigured = True
                 tempTrip = str(msg)
                 imagesave.setTripName(str(msg))
-                imagesave2.setTripName(str(msg))
-                imagesave3.setTripName(str(msg))
+                #imagesave2.setTripName(str(msg))
                 gps.setTripName(str(msg))
                 drive_in_use = await createImageFolder(msg)
                 print(drive_in_use)
@@ -1172,8 +1168,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
                 else:
                     imagesave.setDrive(drive_in_use)
-                    imagesave2.setDrive(drive_in_use)
-                    imagesave3.setDrive(drive_in_use)
+                    #imagesave2.setDrive(drive_in_use)
                     await start_acquisition()
                     await manager.broadcast(json.dumps({"event": "starting"}))
             
@@ -1303,7 +1298,6 @@ async def startup():
     print("Cameras:"+ str(detected))
     for device in range(int(detected)):
         camerasDetected.append(str(i))
-        cameras[i].init()
         
         
 
@@ -1337,7 +1331,7 @@ def shutdown_event():
 def main(arg):
    
 
-    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="debug")
+    uvicorn.run(app, host="10.0.222.1", port=8000,log_level="error")
 
 
 if __name__ == "__main__":

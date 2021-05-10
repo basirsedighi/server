@@ -1,0 +1,51 @@
+SetNMEAOutput, Stream1+Stream2+Stream7+Stream8, none, none, off
+SetGPIOFunctionality, GP1, Output, none, LevelLow
+SetGPIOFunctionality, GP2, Output, none, LevelHigh
+SetGPIOFunctionality, GP3, Output, none, LevelHigh
+setDataInOut, COM1,DC1,DC2
+setDataInOut, COM3,DC2,DC1
+#PSPO,1
+SSSSSSSSSS
+setDataInOut, COM1, CMD, SBF+NMEA
+SSSSSSSSSS
+SetSBFOutput,Stream1+Stream2+Stream3+Stream4+Stream5,none,none,off
+setPVTMode, Rover, all
+sem,+PVT,10
+setDataInOut, COM1, CMD, SBF
+setGeoidUndulation, auto
+setSmoothingInterval,all,100,1
+setRAIMLevels,on,-4,-4,-3
+setPVTMode, Rover, all
+setFixReliability, RTK, 0.2, 4.40
+setDiffCorrUsage,,,auto,0
+setDataInOut, COM2, RTCMv3, SBF+NMEA
+setDataInOut, COM2,DC1,DC2
+setDataInOut, COM3,DC2,DC1
++++
+AT
++++
+AT
++++
+ATE1
+AT+MGEER=2
+AT+CMEE=2
+AT+CBST?
+AT+CPIN?
+AT+CSQ
+AT+MIPCALL?
+AT+MIPCALL=1,"telenor","",""
+AT+MIPOPEN?
+AT+MIPODM=1,1200,"159.162.103.14",2101,0
+GET /CPOSHREF HTTP/1.0
+User-Agent: NTRIP Altus
+Authorization: Basic NTgwMDAwNzEzNTMzOkdKRVJERTEzMDU=
+Accept: */*
+Connection: close
+
+
+SSSSSSSSSS
+setDataInOut, COM3, CMD, SBF+NMEA
+setDataInOut, COM2, RTCMv3, SBF+NMEA
+SetNMEAOutput, Stream1, COM2, GGA, sec1
+SetNMEAOutput, Stream7, COM3, GSV+GSA, sec1
+SetNMEAOutput, Stream8, COM3, GGA+VTG+RMC, sec1

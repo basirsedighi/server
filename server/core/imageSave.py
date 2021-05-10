@@ -11,22 +11,30 @@ import ctypes
 import csv
 import json
 from core.helpers.helper_server import most_free_space
+import cv2
 
 
-class ImageSave(Thread):
+class ImageSave(Process):
     def __init__(self, imageQueue,name):
-        Thread.__init__(self)
+        Process.__init__(self)
+        self.args = imageQueue
         self.daemon = True
-        self.tripName = "first"
-        self.queue = imageQueue
+        self.tripName = "BASIR4"
+        print(self.args)
         self.isRunning = False
         self.name = name
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.path = self.fixPath(self.path)
         self.saving = False
         self.date = self.getDate()
-        self.drive = 'C:'
+        self.drive = '/media/rekkverk/T7'
         self.storageLeft = 50
+        self.data = None
+        
+
+        self.queue = self.args
+
+    
 
 
     def fixPath(self,path):
@@ -51,34 +59,61 @@ class ImageSave(Thread):
 
         try:
             while True:
+                
+                try:
+                    if self.args.poll(3):
+                        data = self.args.recv()
+                    else:
+                        print (f"No data available after {3} seconds...")
+                        continue
+                    
+                except Exception as e:
+                    print(e)
+                    
+
+                try : 
+                    if data:
+                        self.saving = True
+
+                    else:
+                        self.saving =False
+                    #print('True')
+                except Exception as e:
+                    print(e)
+                    self.saving = False
+
 
                 
-                if self.queue.empty():
-                    self.saving = False
+                
+                
+                if self.saving:
+                    #print(self.data)
                     
-                    
-                elif self.saving:
-
-                    data = self.queue.get()
+                    #data = self.dataList
                     image = data['image']
                     camera = data['camera']
-                    index = data['index']
-                    timestamp = data['timeStamp']
-                    cameraStamp =data['cameraStamp']
+                    index =  data['index']
+                    timestamp =  data['timeStamp']
+                    cameraStamp = data['cameraStamp']
 
                     
                     try:
 
                         if self.storageLeft < 5:
-                           newDrive = most_free_space()
-                           self.drive = newDrive['name']
+                            newDrive = most_free_space()
+                            self.drive = newDrive['name']
                         
                         try:
-                            image.save(self.drive+"/"+
-                            "bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp')
-                        except Exception:
+                            #ArrayImage = cvb.as_array(image, copy=False)
+                            path = self.drive+"/"+"bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp'
+                            
+                            #print(str(index))
+                            cv2.imwrite(path,image)
+                            #image.save
+                        except Exception as e:
+                            print(e)
                             pass
-                        if camera ==1:
+                        if False:
 
                             path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
                             write_header = not os.path.exists(path)
@@ -99,13 +134,13 @@ class ImageSave(Thread):
                         print("[SAVING THREAD  ERROR]"% (type(e).__name__, e))
                         
                         
-                    finally:
-                        self.queue.task_done()
-                        
+                    # finally:
+                    #     self.queue.task_done()
+                            
 
                     
         except Exception as e:
-            print("[saving thread]:  "+e)
+            print(e)
             pass
            
 
