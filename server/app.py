@@ -358,11 +358,11 @@ def startA():
           
     
 
-    with MyStreamHandler(camera_1.stream) as handler:
-
-        handler.run()
-        time.sleep(10)
-        handler.finish()
+    with cvb.DeviceFactory.open(os.path.join(cvb.install_path(), "drivers", "GenICam.vin"),port=0) as device:
+        with MyStreamHandler(device.stream) as handler:
+            handler.run()
+            time.sleep(10)
+            handler.finish()
 
         
 
