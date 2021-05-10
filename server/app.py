@@ -413,7 +413,7 @@ def startA():
                         
                         imageArray = cvb.as_array(image)
                         data = {"image": imageArray, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
-                        print('sending')
+                        #print('sending')
                         camera_1_Connection1.send(data)
                         index1 = index1 +1
                     
@@ -502,7 +502,7 @@ def startB():
                     imageArray = cvb.as_array(image)
                     data2 = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
 
-                    camera_2_Connection1.send(data2)
+                    #camera_2_Connection1.send(data2)
                     
                     index2 = index2 +1
             
@@ -582,7 +582,7 @@ def startC():
                         data3 = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
 
                         
-                        camera_3_Connection1.send(data3)
+                        #camera_3_Connection1.send(data3)
                         index3 = index3 +1
                 
                 elif status == cvb.WaitStatus.Abort :
