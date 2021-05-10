@@ -12,7 +12,12 @@ import csv
 import json
 from core.helpers.helper_server import most_free_space
 import cv2
+from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
 
+def SaveImagesListToFolder(List):
+        print(List[0])
+        cv2.imwrite(List[0],List[1])
 
 class ImageSave(Process):
     def __init__(self, imageQueue,name):
@@ -27,14 +32,16 @@ class ImageSave(Process):
         self.path = self.fixPath(self.path)
         self.saving = False
         self.date = self.getDate()
-        self.drive = '/media/rekkverk/T7'
+        self.drive = '/media/rekkverk/b073e905-9aee-4b54-bee7-c86cf0d6dde6'
+
         self.storageLeft = 50
         self.data = None
         
 
         self.queue = self.args
 
-    
+
+
 
 
     def fixPath(self,path):
@@ -54,7 +61,7 @@ class ImageSave(Process):
                 return path
     def run(self):
                
-        
+        ImageList = []
         date = self.getDate()
 
         try:
@@ -64,7 +71,7 @@ class ImageSave(Process):
                     if self.args.poll(3):
                         data = self.args.recv()
                     else:
-                        print (f"No data available after {3} seconds...")
+                        #print (f"No data available after {3} seconds...")
                         continue
                     
                 except Exception as e:
@@ -105,10 +112,18 @@ class ImageSave(Process):
                         
                         try:
                             #ArrayImage = cvb.as_array(image, copy=False)
-                            path = self.drive+"/"+"bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.bmp'
-                            
+                            path = self.drive+"/"+"bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpg'
+                            ImageList.append([path,image])
+                            if len(ImageList)%128==0:
+                                with ThreadPoolExecutor() as executors:
+                                    executors.map(SaveImagesListToFolder, ImageList)
+                                
+                                ImageList=[]
+
                             #print(str(index))
-                            cv2.imwrite(path,image)
+
+                            
+                            
                             #image.save
                         except Exception as e:
                             print(e)
