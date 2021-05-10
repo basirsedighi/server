@@ -13,9 +13,9 @@ import json
 from core.helpers.helper_server import most_free_space
 
 
-class ImageSave(Thread):
+class ImageSave(Process):
     def __init__(self, imageQueue,name):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.daemon = True
         self.tripName = "first"
         self.queue = imageQueue
@@ -54,10 +54,10 @@ class ImageSave(Thread):
 
                 
                 if self.queue.empty():
-                    self.saving = False
+                    pass
                     
                     
-                elif self.saving:
+                else:
 
                     data = self.queue.get()
                     image = data['image']
