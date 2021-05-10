@@ -536,7 +536,7 @@ def startC():
                     
                     if capturing:
                         imageArray = cvb.as_array(image)
-                        data = {"image": image, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
+                        data = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":cameraStamp}
                         imageQueue3.put(data)
                         index3 = index3 +1
                 
