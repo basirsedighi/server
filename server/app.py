@@ -407,7 +407,7 @@ def startA():
             pass
     
 
-    imageQueue.join()
+    #imageQueue.join()
     stopStream1 =False 
     camera_1.stopStream()
 
@@ -488,7 +488,7 @@ def startB():
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     print("not ok: "+str(test))
     # imagesave.saveImages()
-    imageQueue2.join()
+    #imageQueue2.join()
     print("saving complete")
     stopStream2 =False
     camera_2.stopStream()
@@ -572,7 +572,7 @@ def startC():
         fps.stop()
         print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         print("not OK:  "+str(test))
-        imageQueue3.join()
+        #imageQueue3.join()
         stopStream3 =False
         camera_3.stopStream()
     
