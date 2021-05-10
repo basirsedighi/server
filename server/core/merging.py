@@ -339,8 +339,8 @@ def getaccelerationlist(gpsspeedlist, gpstimelist):
         accelerationlist.append(acceleration)
     return accelerationlist
         
-
-
+def shiftcord(timedifflist, coordiantelist, gpsmillismodified, gpsmillis)
+    shiftedcoord = []
 #   modifies coordinates based on time difference between picture taken and coordinate read,
 #   speed, and constant acceleration
 #   return list of modified coordinates
@@ -407,6 +407,7 @@ def makecleanlist(valuelist, keeplist):
     return newlist
 
 def makevelocitylist(cordinates, gpsmillis):
+    #finn riktig meter i sekund
     calculatedvelocity = []
     for n in range(len(cordinates)-1):
         speed = (cordinates[n]-cordinates[n+1])/(gpsmillis[n+1]-gpsmillis[n])
