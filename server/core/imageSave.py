@@ -13,7 +13,7 @@ import json
 from core.helpers.helper_server import most_free_space
 
 
-class ImageSave(Process()):
+class ImageSave(Process):
     def __init__(self, imageQueue,name):
         Process.__init__(self)
         self.daemon = True
