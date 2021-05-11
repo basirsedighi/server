@@ -399,7 +399,6 @@ def discoverCameras():
 def discoverCamerasLength():
     discovered =0
     discover = cvb.DeviceFactory.discover_from_root(cvb.DiscoverFlags.IgnoreVins)
-    
     if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
         discovered = len(discover)
     

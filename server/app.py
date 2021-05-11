@@ -1,4 +1,5 @@
 #!/home/rekkverk/server/server/venv/bin/python3
+import queue
 import numpy as np
 import sys
 from typing import List
@@ -42,7 +43,8 @@ from gps2 import gpsHandler
 import os
 from os import path
 from datetime import datetime
-from multiprocessing import Process,Queue,Pool, Pipe
+from multiprocessing import Process,Pool
+from quick_queue import QQueue
 from pydantic import BaseModel
 from core.helpers.helper_server import *
 from core.helpers.helper_server import ConnectionManager
@@ -54,7 +56,7 @@ from merging2 import merge2
 # camera = Camera()
 # camera.start_stream()
 manager = ConnectionManager()
-QueueManager = Manager()
+#QueueManager = Manager()
 image_freq = 20
 gps_freq =0
 debug = False
@@ -82,16 +84,20 @@ stopStream3 = False
 
 gps = gpsHandler(debug)
 #imageQueue = QQueue(size_bucket_list=120, maxsize=100)
-camera_1_Connection1,camera_1_Connection2  = Pipe(duplex=True)
-camera_2_Connection1,camera_2_Connection2  = Pipe(duplex=True)
-camera_3_Connection1,camera_3_Connection2  = Pipe(duplex=True)
-data1=None
-data2=None
-data3=None
-imagesave3 = ImageSave(camera_1_Connection2,"saving thread3")
-imagesave2=ImageSave(camera_2_Connection2,"saving thread2")
-imagesave = ImageSave(camera_3_Connection2,"saving thread")
+# camera_1_Connection1,camera_1_Connection2  = Pipe(duplex=True)
+# camera_2_Connection1,camera_2_Connection2  = Pipe(duplex=True)
+# camera_3_Connection1,camera_3_Connection2  = Pipe(duplex=True)
+queue1 = Manager().Queue()
+queue2 = Manager().Queue()
+queue3 = Manager().Queue()
+
+imagesave = ImageSave(queue1,"saving thread")
+imagesave2 = ImageSave(queue2,"saving thread2")
+imagesave3 = ImageSave(queue3,"saving thread3")
+
 config_loaded = False
+
+# imagesave.pipe1.send()
 
 #temp images to show user
 temp_img_1 = None
@@ -186,6 +192,7 @@ async def getData():
 
 
     gps_status = gps.getData()
+    
 
     gps_freq = float(gps_status['velocity'])
    
@@ -347,7 +354,7 @@ def emergencyStop():
     stopStream3 =True
     #abort = True
 
-    
+
 
 @app.get('/start1')
 def startA():
@@ -367,7 +374,7 @@ def startA():
     cameraStamp =3
     lastCameraStamp =0
     firstCameraStamp =0
-    
+    dataList=[]
     #camera_1.resetClock()
                       
     while True:
@@ -414,7 +421,17 @@ def startA():
                         imageArray = cvb.as_array(image)
                         data = {"image": imageArray, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
                         #print('sending')
-                        camera_1_Connection1.send(data)
+                        #dataList.append(data)
+                        queue1.put(data)
+                        # if index1%2==0:
+                        #     #print(camera_1_Connection1.recv())
+                        #     #print(f'before send {dataList}')
+                        #     start = time.time()
+                            
+                            # camera_1_Connection1.send(dataList)
+                            # end = time.time()
+                            # print(f'sending images took {end-start}s')
+                            
                         index1 = index1 +1
                     
                     if index1 ==0:   
@@ -500,9 +517,10 @@ def startB():
 
                 if capturing:
                     imageArray = cvb.as_array(image)
-                    data2 = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
-
+                    data = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
+                    queue1.put(data)
                     #camera_2_Connection1.send(data2)
+
                     
                     index2 = index2 +1
             
@@ -579,8 +597,8 @@ def startC():
                     
                     if capturing:
                         imageArray = cvb.as_array(image)
-                        data3 = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
-
+                        data = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
+                        queue1.put(data)
                         
                         #camera_3_Connection1.send(data3)
                         index3 = index3 +1

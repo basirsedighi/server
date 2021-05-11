@@ -1,9 +1,12 @@
 from threading import Thread
 import queue
 from datetime import datetime
+
+import quick_queue
+from quick_queue.quick_queue import QQueue
 from core.timer import Timer
 import os
-from multiprocessing import Process
+from multiprocessing import Process, Pipe, Queue
 from os import path
 from datetime import datetime
 import cvb
@@ -13,11 +16,45 @@ import json
 from core.helpers.helper_server import most_free_space
 import cv2
 from PIL import Image
+import concurrent
 from concurrent.futures import ThreadPoolExecutor
+import time
+import sys
+
 
 def SaveImagesListToFolder(List):
-        print(List[0])
-        cv2.imwrite(List[0],List[1])
+         # #print(self.data)
+        try:
+            
+            data = List
+            date = "2021-05-10"
+            drive = '/media/rekkverk/b073e905-9aee-4b54-bee7-c86cf0d6dde6'
+            image = data['image']
+            camera = data['camera']
+            index =  data['index']
+            timestamp =  data['timeStamp']
+            cameraStamp = data['cameraStamp']
+            path = os.path.join(drive,'bilder',date,'BASIR4',f'kamera{camera}',str(index)+'.jpg')
+            #print(path)
+            cv2.imwrite(path,image)
+        except Exception as e:
+            print(f'Thread dead because of {sys.exc_info()[0]}{sys.exc_info()[1]}')
+
+
+def pickFromQueue(queue):
+    frame = queue.get()
+    return frame
+
+def pickMoreFromQueue(queue):
+    idx = 0
+    frames = []
+
+    while not idx == 4:
+        frames.append(queue.get())
+        idx += 1
+
+    return frames
+
 
 class ImageSave(Process):
     def __init__(self, imageQueue,name):
@@ -38,7 +75,7 @@ class ImageSave(Process):
         self.data = None
         
 
-        self.queue = self.args
+       
 
 
 
@@ -60,7 +97,7 @@ class ImageSave(Process):
                 
                 return path
     def run(self):
-               
+        dataList = None
         ImageList = []
         date = self.getDate()
 
@@ -68,18 +105,55 @@ class ImageSave(Process):
             while True:
                 
                 try:
-                    if self.args.poll(3):
-                        data = self.args.recv()
-                    else:
-                        #print (f"No data available after {3} seconds...")
-                        continue
+                    
+                    
+                    
+                    #datalist = [self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get(),self.args.get()]
+                    if not self.args.empty():
+                        
+                        # datalist  = [self.args.poll for _ in range(24)]
+                        dataList = []
+                        maxworkers = 32
+                        
+                        with ThreadPoolExecutor(max_workers=maxworkers) as executors:
+                                
+                               futures = {executors.submit(pickMoreFromQueue, self.args): frame for frame in range(maxworkers)}
+                               for future in concurrent.futures.as_completed(futures):
+                                   startThread = time.time()
+                                   #url = futures[future]
+                                   try:
+                                        data = future.result()
+                                        #print(data)
+                                        dataList = [*dataList, *data]
+                                        endThread = time.time()
+                                        print(f'Getting 128 images took {-startThread+endThread}')
+                                        #dataList.append(*data)
+                                   except Exception as exc:
+                                        print('%r generated an exception: %s' % (exc))
+                                   else:
+                                        pass
+                                        #print('%r page is %d bytes' % (url, len(data)))
+
+                        
+                        
+                        if self.args.full():
+                            print('imfull')
+                        
+                        
+                                          
+                        
+                except Exception as e:
+                    print(f'Cant get from bucket because {e}')    
+                
+                        
                     
                 except Exception as e:
                     print(e)
                     
 
                 try : 
-                    if data:
+                    #print(datalist)
+                    if dataList:
                         self.saving = True
 
                     else:
@@ -94,40 +168,48 @@ class ImageSave(Process):
                 
                 
                 if self.saving:
-                    #print(self.data)
-                    
-                    #data = self.dataList
-                    image = data['image']
-                    camera = data['camera']
-                    index =  data['index']
-                    timestamp =  data['timeStamp']
-                    cameraStamp = data['cameraStamp']
-
-                    
-                    try:
-
-                        if self.storageLeft < 5:
-                            newDrive = most_free_space()
-                            self.drive = newDrive['name']
+                    try :
+                        start = time.time()
+                        print(f'Lenght of Datalist {len(dataList)}')
+                        with ThreadPoolExecutor(max_workers=32) as executors:
+                                 executors.map(SaveImagesListToFolder, dataList)
                         
-                        try:
-                            #ArrayImage = cvb.as_array(image, copy=False)
-                            path = self.drive+"/"+"bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpg'
-                            ImageList.append([path,image])
-                            if len(ImageList)%128==0:
-                                with ThreadPoolExecutor() as executors:
-                                    executors.map(SaveImagesListToFolder, ImageList)
+                    
+                        end = time.time()
+                        print(f'saving 128 images took {end-start}s ')
+                    # #print(self.data)
+                    
+                    # #data = self.dataList
+                    # image = data['image']
+                    # camera = data['camera']
+                    # index =  data['index']
+                    # timestamp =  data['timeStamp']
+                    # cameraStamp = data['cameraStamp']
+
+                    
+                    # try:
+
+                    #     if self.storageLeft < 5:
+                    #         newDrive = most_free_space()
+                    #         self.drive = newDrive['name']
+                        
+                    #     try:
+                    #         #ArrayImage = cvb.as_array(image, copy=False)
+                    #         path = self.drive+"/"+"bilder/"+str(date)+"/"+str(self.tripName)+"/kamera"+str(camera)+"/"+str(index)+'.jpg'
+                    #         ImageList.append([path,image])
+                    #         if len(ImageList)%128==0:
                                 
-                                ImageList=[]
+                                
+                                # ImageList=[]
 
                             #print(str(index))
 
                             
                             
-                            #image.save
-                        except Exception as e:
-                            print(e)
-                            pass
+                        #     #image.save
+                        # except Exception as e:
+                        #     print(e)
+                            # pass
                         if False:
 
                             path = self.path+"/log"+"/"+self.date+"/"+self.tripName+"/"+"images"+".csv"
@@ -160,6 +242,9 @@ class ImageSave(Process):
            
 
         return "Stopped"
+
+    def new_method(self):
+        return True
 
     def stop(self):
 
