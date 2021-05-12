@@ -104,6 +104,9 @@ class ImageSave(Process):
         try:
             while True:
                 
+                if self.args.full():
+                    print("Queue Full")
+
                 try:
                     
                     
@@ -126,7 +129,7 @@ class ImageSave(Process):
                                         #print(data)
                                         dataList = [*dataList, *data]
                                         endThread = time.time()
-                                        print(f'Getting 128 images took {-startThread+endThread}')
+                                        print(f'Getting 4 images took {-startThread+endThread}')
                                         #dataList.append(*data)
                                    except Exception as exc:
                                         print('%r generated an exception: %s' % (exc))

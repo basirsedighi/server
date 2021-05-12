@@ -109,7 +109,7 @@ guruMode = False
 
 #g = Gps('C:/Users/norby/Desktop')
 
-imagesave3.daemon = True
+#imagesave3.daemon = True
 imagesave.daemon = True
 imagesave2.daemon = True
 imagesave3.start()
@@ -419,10 +419,13 @@ def startA():
                         
                         
                         imageArray = cvb.as_array(image)
+                        
+                        
+                        #RGBImage = cv2.cvtColor(imageArray, cv2.COLOR_RGB2BGR)
                         data = {"image": imageArray, "camera": 1, "index": index1,"timeStamp":timeStamp,"cameraStamp":newstamp}
                         #print('sending')
                         #dataList.append(data)
-                        queue1.put(data)
+                        queue1.put_nowait(data)
                         # if index1%2==0:
                         #     #print(camera_1_Connection1.recv())
                         #     #print(f'before send {dataList}')
@@ -517,8 +520,9 @@ def startB():
 
                 if capturing:
                     imageArray = cvb.as_array(image)
+                    #RGBImage = cv2.cvtColor(imageArray, cv2.COLOR_RGB2BGR)
                     data = {"image": imageArray, "camera": 2, "index": index2,"timeStamp":"","cameraStamp":""}
-                    queue1.put(data)
+                    queue2.put_nowait(data)
                     #camera_2_Connection1.send(data2)
 
                     
@@ -597,8 +601,9 @@ def startC():
                     
                     if capturing:
                         imageArray = cvb.as_array(image)
+                        #RGBImage = cv2.cvtColor(imageArray, cv2.COLOR_RGB2BGR)
                         data = {"image": imageArray, "camera": 3, "index": index3,"timeStamp":"","cameraStamp":""}
-                        queue1.put(data)
+                        queue3.put_nowait(data)
                         
                         #camera_3_Connection1.send(data3)
                         index3 = index3 +1
